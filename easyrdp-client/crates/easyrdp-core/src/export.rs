@@ -6,6 +6,11 @@ use crate::profile::{GatewayAuth, Redirect, Resolution, SessionProfile};
 pub fn export_to_string(p: &SessionProfile) -> String {
     let mut lines: Vec<String> = Vec::new();
 
+    // 会话名（EasyRDP 扩展键；mstsc 导入会忽略未知键）
+    if !p.name.is_empty() {
+        lines.push(format!("name:s:{}", p.name));
+    }
+
     // full address 与端口
     if p.port == 3389 {
         lines.push(format!("full address:s:{}", p.host));

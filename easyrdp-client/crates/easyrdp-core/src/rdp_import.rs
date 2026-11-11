@@ -37,18 +37,44 @@ pub fn read_lines(path: &Path) -> Result<Vec<String>, ImportError> {
         .collect())
 }
 
-/// 解码字节：优先按 UTF-16LE 严格解码（mstsc 导出默认），失败则按 UTF-8。
+/// 解码字节：按 BOM / NUL 字节探测 UTF-16LE，否则按 UTF-8，最后回退 UTF-16LE 严格解码。
 fn decode(raw: &[u8]) -> Result<String, ImportError> {
-    // UTF-16LE 要求偶数字节长度
-    if raw.len() % 2 == 0 {
-        let (cow, _, had_errors) = UTF_16LE.decode(raw);
-        if !had_errors {
-            return Ok(cow.into_owned());
+    // 1) 显式 BOM：FF FE = UTF-16LE；EF BB BF = UTF-8
+    if raw.len() >= 2 && raw[0] == 0xFF && raw[1] == 0xFE {
+        return decode_le_strict(&raw[2..]);
+    }
+    if raw.len() >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF {
+        if let Ok(s) = String::from_utf8(raw[3..].to_vec()) {
+            return Ok(s);
         }
     }
-    match String::from_utf8(raw.to_vec()) {
-        Ok(s) => Ok(s),
-        Err(_) => Err(ImportError::BadEncoding),
+    // 2) 含 NUL 字节是 UTF-16 文本的典型特征（ASCII 文本不含 NUL）
+    let utf16_likely = raw.len() % 2 == 0 && raw.chunks(2).any(|p| p[1] == 0);
+    if utf16_likely {
+        if let Ok(s) = decode_le_strict(raw) {
+            return Ok(s);
+        }
+    }
+    // 3) 先按 UTF-8（mstsc 亦可导出 UTF-8）
+    if let Ok(s) = String::from_utf8(raw.to_vec()) {
+        return Ok(s);
+    }
+    // 4) 回退：UTF-16LE 严格解码
+    if raw.len() % 2 == 0 {
+        if let Ok(s) = decode_le_strict(raw) {
+            return Ok(s);
+        }
+    }
+    Err(ImportError::BadEncoding)
+}
+
+/// 严格 UTF-16LE 解码（无 BOM 处理，任何非法单元即失败）。
+fn decode_le_strict(raw: &[u8]) -> Result<String, ImportError> {
+    let (cow, _, had_errors) = UTF_16LE.decode(raw);
+    if had_errors {
+        Err(ImportError::BadEncoding)
+    } else {
+        Ok(cow.into_owned())
     }
 }
 
@@ -63,6 +89,8 @@ pub fn parse_line(line: &str) -> Option<(String, String)> {
 /// 把 .rdp 行列表解析为 SessionProfile。
 pub fn parse_lines(lines: &[String]) -> SessionProfile {
     let mut p = SessionProfile::default();
+    // screen mode id 是否出现过：出现则尊重其分辨率语义，desktopwidth/height 仅作补充
+    let mut screen_mode_seen = false;
 
     for line in lines {
         let Some((key, value)) = parse_line(line) else {
@@ -92,6 +120,7 @@ pub fn parse_lines(lines: &[String]) -> SessionProfile {
             }
             "screen mode id" => {
                 // i:1 = 全屏, i:2 = 窗口
+                screen_mode_seen = true;
                 p.resolution = match value.trim() {
                     "1" => Resolution::Fullscreen,
                     _ => Resolution::FitWindow,
@@ -99,14 +128,18 @@ pub fn parse_lines(lines: &[String]) -> SessionProfile {
             }
             "desktopwidth" => {
                 if let Ok(w) = value.parse::<u32>() {
-                    p.resolution = Resolution::Custom { w, h: 0 };
+                    if !screen_mode_seen {
+                        p.resolution = Resolution::Custom { w, h: 0 };
+                    }
                 }
             }
             "desktopheight" => {
                 if let Ok(h) = value.parse::<u32>() {
-                    match p.resolution {
-                        Resolution::Custom { w, .. } => p.resolution = Resolution::Custom { w, h },
-                        _ => p.resolution = Resolution::Custom { w: 0, h },
+                    if !screen_mode_seen {
+                        match p.resolution {
+                            Resolution::Custom { w, .. } => p.resolution = Resolution::Custom { w, h },
+                            _ => p.resolution = Resolution::Custom { w: 0, h },
+                        }
                     }
                 }
             }
@@ -115,6 +148,7 @@ pub fn parse_lines(lines: &[String]) -> SessionProfile {
                     p.color_depth = bpp;
                 }
             }
+            "name" => p.name = value, // EasyRDP 扩展键；mstsc 的未知键行为不受影响
             "username" => p.username = value,
             "redirectclipboard" => p.redirect.clipboard = value.trim() == "1",
             "redirectprinters" => p.redirect.printers = value.trim() == "1",
@@ -158,12 +192,19 @@ mod tests {
     use std::io::Write;
 
     fn utf16le_bytes(s: &str) -> Vec<u8> {
-        let (cow, _, _) = UTF_16LE.encode(s);
-        cow.into_owned()
+        // 手动构造 UTF-16LE 字节（std 标准行为，不依赖第三方 encode 语义）
+        s.encode_utf16().flat_map(|u| u.to_le_bytes()).collect()
     }
 
     fn write_temp(name: &str, bytes: &[u8]) -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join("easyrdp-tests");
+        // 优先 cargo OUT_DIR；不可用时回退到包内 test-tmp（避免依赖全局 %TEMP% 权限）
+        let dir = std::env::var("OUT_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| {
+                let p = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test-tmp");
+                std::fs::create_dir_all(&p).unwrap();
+                p
+            });
         std::fs::create_dir_all(&dir).unwrap();
         let p = dir.join(name);
         let mut f = std::fs::File::create(&p).unwrap();

@@ -1,0 +1,3 @@
+easyrdp-client/crates/*/test-tmp/
+easyrdp-client/dist/
+easyrdp-client/target/
