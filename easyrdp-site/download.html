@@ -31,7 +31,7 @@
         <a href="changelog.html">更新日志</a>
         <a href="faq.html">FAQ</a>
         <a href="security.html">安全</a>
-        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub ↗</a>
       </nav>
     </div>
   </header>
@@ -39,7 +39,7 @@
   <section class="page-header">
     <div class="container">
       <h1>下载 EasyRDP</h1>
-      <p>当前版本 <strong data-version>v0.1.0-alpha</strong>（2026-11-11 发布）。下载后请务必完成 SHA256 校验。</p>
+      <p class="section-desc">当前版本 <strong data-version>v0.1.0-alpha</strong>（2026-11-11 发布）为<strong>源码预览版</strong>：桌面安装包正在接入 CI 自动构建。当前可通过下方源码包获取并自行构建，构建方法见 <a href="contributing.html">参与贡献</a>。</p>
     </div>
   </section>
 
@@ -55,22 +55,29 @@
               <td>🪟 Windows</td>
               <td><code>EasyRDP-0.1.0-alpha-windows-x64.zip</code></td>
               <td>x86_64</td>
-              <td>解压即用，需 WebView2 Runtime（Win10/11 通常已内置）</td>
-              <td><a class="btn btn-primary btn-sm" href="#">下载</a></td>
+              <td>解压即用，需 WebView2 Runtime（Win10/11 通常已内置）· <strong>CI 接入后提供</strong></td>
+              <td><a class="btn btn-sm" href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">发布页</a></td>
             </tr>
             <tr>
               <td>🍎 macOS</td>
               <td><code>EasyRDP-0.1.0-alpha-macos.dmg</code></td>
               <td>arm64 / x86_64（Universal）</td>
-              <td>挂载 dmg 后拖入 Applications</td>
-              <td><a class="btn btn-primary btn-sm" href="#">下载</a></td>
+              <td>挂载 dmg 后拖入 Applications · <strong>CI 接入后提供</strong></td>
+              <td><a class="btn btn-sm" href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">发布页</a></td>
             </tr>
             <tr>
               <td>🐧 Linux</td>
               <td><code>EasyRDP-0.1.0-alpha-linux.AppImage</code></td>
               <td>x86_64</td>
-              <td>chmod +x 后直接运行</td>
-              <td><a class="btn btn-primary btn-sm" href="#">下载</a></td>
+              <td>chmod +x 后直接运行 · <strong>CI 接入后提供</strong></td>
+              <td><a class="btn btn-sm" href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">发布页</a></td>
+            </tr>
+            <tr>
+              <td>📦 源码包</td>
+              <td><code>EasyRDP-0.1.0-alpha-source.tar.gz</code></td>
+              <td>全平台</td>
+              <td>完整源码（客户端 + 网关 + 官网），当前推荐获取方式</td>
+              <td><a class="btn btn-primary btn-sm" href="downloads/EasyRDP-src-0.1.0-alpha.tar.gz">本站下载</a></td>
             </tr>
           </tbody>
         </table>
@@ -105,15 +112,17 @@ shasum -a 256 EasyRDP-0.1.0-alpha-macos.dmg   <span class="cm"># macOS</span></p
           <div class="icon">🐙</div>
           <h3>GitHub</h3>
           <p>主仓库与 Release 发布渠道：</p>
-          <p style="margin-top:10px;"><a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">github.com/easyrdp/easyrdp ↗</a></p>
-          <pre style="margin-top:12px;">git clone https://github.com/easyrdp/easyrdp.git</pre>
+          <p style="margin-top:10px;"><a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">github.com/EasySSHCN/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">v0.1.0-alpha Release（源码包 + SHA256SUMS）↗</a></p>
+          <pre style="margin-top:12px;">git clone https://github.com/EasySSHCN/EasyRDP.git</pre>
         </div>
         <div class="card">
           <div class="icon">🇨🇳</div>
           <h3>Gitee</h3>
           <p>国内镜像，访问更稳定：</p>
-          <p style="margin-top:10px;"><a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">gitee.com/easyrdp/easyrdp ↗</a></p>
-          <pre style="margin-top:12px;">git clone https://gitee.com/easyrdp/easyrdp.git</pre>
+          <p style="margin-top:10px;"><a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">gitee.com/easyssh/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://gitee.com/easyssh/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">v0.1.0-alpha 发行版（源码包附件）↗</a></p>
+          <pre style="margin-top:12px;">git clone https://gitee.com/easyssh/EasyRDP.git</pre>
         </div>
         <div class="card">
           <div class="icon">🔨</div>
@@ -152,8 +161,8 @@ cargo tauri build</pre>
         </div>
         <div class="footer-col">
           <h4>资源</h4>
-          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
-          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
           <a href="docs.html">JSON Profile 规范</a>
           <a href="faq.html">常见问题</a>
           <a href="security.html">安全策略</a>
@@ -161,8 +170,8 @@ cargo tauri build</pre>
         <div class="footer-col">
           <h4>社区</h4>
           <a href="contributing.html">参与贡献</a>
-          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
-          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
           <a href="license.html">MIT 协议</a>
         </div>
       </div>
