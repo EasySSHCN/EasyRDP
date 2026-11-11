@@ -53,10 +53,17 @@
           <tbody>
             <tr>
               <td>🪟 Windows</td>
-              <td><code>EasyRDP-0.1.0-alpha-windows-x64.zip</code></td>
+              <td><code>EasyRDP-0.1.0-alpha-portable.exe</code></td>
               <td>x86_64</td>
-              <td>解压即用，需 WebView2 Runtime（Win10/11 通常已内置）· <strong>CI 接入后提供</strong></td>
-              <td><a class="btn btn-sm" href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.1.0-alpha" target="_blank" rel="noopener">发布页</a></td>
+              <td>单文件绿色版，双击即用，需 WebView2 Runtime（Win10/11 通常已内置）</td>
+              <td><a class="btn btn-primary btn-sm" href="downloads/EasyRDP-0.1.0-alpha-portable.exe">本站下载</a></td>
+            </tr>
+            <tr>
+              <td>🪟 Windows</td>
+              <td><code>EasyRDP-0.1.0-alpha-win32-x64-portable.zip</code></td>
+              <td>x86_64</td>
+              <td>解压即用绿色压缩包（含 EasyRDP.exe 与便携说明）</td>
+              <td><a class="btn btn-primary btn-sm" href="downloads/EasyRDP-0.1.0-alpha-win32-x64-portable.zip">本站下载</a></td>
             </tr>
             <tr>
               <td>🍎 macOS</td>
@@ -93,10 +100,10 @@
       <h2 class="section-title">SHA256 校验说明</h2>
       <p class="section-desc">发布列表会附带 <code>SHA256SUMS.txt</code>。下载后请计算本地文件的 SHA256 并与发布值比对，一致方可使用。</p>
       <h3 style="margin-bottom:10px;">Windows（PowerShell）</h3>
-      <pre>Get-FileHash .\EasyRDP-0.1.0-alpha-windows-x64.zip -Algorithm SHA256</pre>
+      <pre>Get-FileHash .\EasyRDP-0.1.0-alpha-win32-x64-portable.zip -Algorithm SHA256</pre>
       <h3 style="margin-bottom:10px;">macOS / Linux</h3>
-      <pre>sha256sum EasyRDP-0.1.0-alpha-linux.AppImage
-shasum -a 256 EasyRDP-0.1.0-alpha-macos.dmg   <span class="cm"># macOS</span></pre>
+      <pre>sha256sum EasyRDP-0.1.0-alpha-portable.exe
+shasum -a 256 EasyRDP-0.1.0-alpha-source.tar.gz   <span class="cm"># macOS</span></pre>
       <div class="callout">
         校验值不一致时请勿运行安装包：可能传输不完整或文件被篡改。请重新下载或到 GitHub Releases 反馈。
       </div>
