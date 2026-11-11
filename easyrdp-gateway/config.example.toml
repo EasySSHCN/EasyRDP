@@ -1,0 +1,24 @@
+# EasyRDP 云网关示例配置
+# 复制为 config.toml 后按环境修改；敏感项（JWT secret、证书私钥）务必走密钥管理，不要提交仓库。
+
+[server]
+# 网关本体监听地址（建议仅绑定内网/回环，由 Nginx 反代终止 TLS 后转发到 8443）
+listen_addr = "0.0.0.0:8443"
+
+[auth]
+# JWT 签名密钥：生产环境请使用 >= 64 字节随机值（如 openssl rand -base64 64）
+jwt_secret = "CHANGE_ME_PLACEHOLDER_DO_NOT_USE_IN_PRODUCTION"
+# 短期 token 有效期（秒），默认 10 分钟，对齐 RD Gateway GatewayEncryptedAuthCookie 的短期语义
+token_ttl_seconds = 600
+# OIDC IdP 配置占位（真实接入后用于校验 code 换 token）
+oidc_issuer = "https://sso.example.com/realms/easyrdp"
+oidc_client_id = "easyrdp-gateway"
+
+[tls]
+# TLS 证书与私钥路径占位（若由 Nginx 终止 TLS，网关本身可留空）
+cert_path = "/etc/easyrdp/tls/server.crt"
+key_path = "/etc/easyrdp/tls/server.key"
+
+[audit]
+# 内存环形缓冲容量
+ring_capacity = 4096

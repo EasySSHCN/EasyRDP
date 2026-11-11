@@ -1,0 +1,12 @@
+[package]
+name = "easyrdp-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP core: session profile model, .rdp import/export"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+encoding_rs.workspace = true

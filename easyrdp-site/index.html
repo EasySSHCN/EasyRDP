@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EasyRDP — 跨平台开源远程桌面客户端</title>
+  <meta name="description" content="EasyRDP 是一款 100% 开源（MIT）的跨平台远程桌面客户端，基于 Rust + Tauri 2 + FreeRDP，支持 Windows / macOS / Linux。">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b82f6'/%3E%3Crect x='5' y='7' width='22' height='14' rx='2' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 15l6-4M16 15l-4-2' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M12 25h8' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- ===== 顶部导航 ===== -->
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html" aria-label="EasyRDP 首页">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0-alpha</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="container">
+      <h1>跨平台开源远程桌面客户端<br><span class="accent">EasyRDP</span></h1>
+      <p class="subtitle">
+        基于 Rust + Tauri 2 + FreeRDP 协议栈打造，100% 开源（MIT 协议），覆盖 Windows / macOS / Linux。
+        卡片式连接管理、标签页多会话、配置即代码 —— 让远程桌面既好用又可控。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="download.html">⬇ 下载 <span data-version>v0.1.0-alpha</span></a>
+        <a class="btn btn-outline" href="features.html">功能一览</a>
+        <a class="btn btn-outline" href="docs.html">快速开始</a>
+      </div>
+      <div class="hero-meta">
+        当前版本 <code data-version>v0.1.0-alpha</code> · MIT License · Rust + Tauri 2 + FreeRDP · 支持 .rdp 文件导入
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 功能总览（6 卡片） ===== -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">核心功能</h2>
+      <p class="section-desc">从个人远程办公到企业批量接入，EasyRDP 用一套开源客户端覆盖完整场景。</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="icon">🗂</div>
+          <h3>连接中心</h3>
+          <p>卡片式连接管理，一眼看清所有主机；标签页承载多会话并行；<code>Ctrl+K</code> 全局搜索，键盘党极速直达。</p>
+        </div>
+        <div class="card">
+          <div class="icon">📄</div>
+          <h3>配置即代码</h3>
+          <p>连接配置以 JSON Profile 描述，可版本化、可审查；兼容导入 mstsc 的 <code>.rdp</code> 文件，也支持一键导出。</p>
+        </div>
+        <div class="card">
+          <div class="icon">🖥</div>
+          <h3>远程会话</h3>
+          <p>基于 FreeRDP 协议栈，支持 RDP 8+ 压缩、多显示器、剪贴板与驱动器重定向，画面清晰流畅。</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛡</div>
+          <h3>企业网关接入 <span class="badge badge-blue">路线图</span></h3>
+          <p>规划自有云网关：443 端口 TLS 隧道 + 预认证 + OTP 二次验证，穿透复杂网络环境。</p>
+        </div>
+        <div class="card">
+          <div class="icon">🏢</div>
+          <h3>管理控制台 <span class="badge badge-blue">路线图</span></h3>
+          <p>规划 SSO/OIDC + MFA、设备重定向策略矩阵、会话水印 / 录制 / 审计，满足企业合规要求。</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔒</div>
+          <h3>安全基线</h3>
+          <p>TLS 1.2+ 加密传输；凭据经 DPAPI / Keychain / libsecret 加密存储；编译期启用 CFG / ASLR 缓解。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 三步开始 ===== -->
+  <section class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">三步开始</h2>
+      <p class="section-desc">无需复杂配置，下载、运行、连接，一分钟进入你的远程桌面。</p>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>下载安装包</h3>
+          <p>前往<a href="download.html">下载页</a>，选择 Windows zip / macOS dmg / Linux AppImage，并用 SHA256 校验文件完整性。</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>运行 EasyRDP</h3>
+          <p>解压或挂载后直接运行，无需额外安装依赖。首次启动可在"新建连接"中录入主机，或直接导入 <code>.rdp</code> 文件。</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>连接远程主机</h3>
+          <p>双击连接卡片进入会话；<code>Ctrl+K</code> 搜索快速切换，标签页之间自由切换多个远程会话。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 开源声明 ===== -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">100% 开源</h2>
+      <p class="section-desc">
+        EasyRDP 基于 <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">MIT 协议</a>开源，
+        技术栈为 Rust + Tauri 2 + FreeRDP 协议栈 + WebView2，无闭源组件、无遥测后门。
+        欢迎在 GitHub / Gitee 提交 Issue 与 PR，共同打造更开放的企业级远程桌面体验。
+      </p>
+      <div class="hero-cta" style="margin-top: 30px;">
+        <a class="btn btn-outline" href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库 ↗</a>
+        <a class="btn btn-outline" href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像 ↗</a>
+        <a class="btn btn-outline" href="contributing.html">参与贡献</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

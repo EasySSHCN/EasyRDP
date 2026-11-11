@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安全策略 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 安全策略：漏洞报告渠道（security@easyrdp.cn）、支持版本、安全基线与安全公告。">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0-alpha</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>安全策略</h1>
+      <p>我们高度重视 EasyRDP 及其用户的安全。发现漏洞请通过本页渠道私密报告，切勿公开披露。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:820px;">
+
+      <h2 style="font-size:1.4rem;margin-bottom:14px;">🔒 漏洞报告</h2>
+      <p style="color:var(--text-dim);">
+        如发现安全漏洞（凭据泄露、协议实现缺陷、内存安全、供应链风险等），请发送邮件至：
+      </p>
+      <p style="margin:14px 0;"><code style="font-size:1rem;padding:6px 14px;">security@easyrdp.cn</code> <span style="color:var(--text-dim);font-size:.88rem;">（占位邮箱，正式启用前以仓库 SECURITY.md 为准）</span></p>
+      <p style="color:var(--text-dim);">报告请尽量包含：</p>
+      <ul style="color:var(--text-dim);padding-left:20px;margin-bottom:20px;">
+        <li>漏洞类型与影响评估（可否远程利用、影响版本）</li>
+        <li>详细复现步骤或 PoC</li>
+        <li>相关平台（Windows / macOS / Linux）与版本号</li>
+      </ul>
+      <div class="callout">
+        <strong>响应承诺</strong>：我们将在 3 个工作日内确认收到报告，并在 30 天内给出评估与修复计划。
+        修复发布前，请勿公开披露细节。我们会在安全公告中致谢报告者（可要求匿名）。
+      </div>
+
+      <h2 style="font-size:1.4rem;margin:40px 0 14px;">🛡 安全基线</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>领域</th><th>措施</th></tr></thead>
+          <tbody>
+            <tr><td>传输加密</td><td>强制 TLS 1.2+，禁用弱加密套件；优先 NLA 网络级认证</td></tr>
+            <tr><td>凭据存储</td><td>Windows DPAPI / macOS Keychain / Linux libsecret，Profile 不落明文</td></tr>
+            <tr><td>编译期缓解</td><td>启用 CFG（控制流防护）、ASLR（地址空间随机化）、DEP</td></tr>
+            <tr><td>数据收集</td><td>无遥测、无埋点，网络行为仅为 RDP 会话本身</td></tr>
+            <tr><td>供应链</td><td>发布物附带 SHA256 校验文件；依赖锁定与 CI 可重复构建</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 style="font-size:1.4rem;margin:40px 0 14px;">📣 支持版本与安全公告</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>版本</th><th>状态</th><th>安全修复</th></tr></thead>
+          <tbody>
+            <tr><td><span data-version>v0.1.0-alpha</span></td><td><span class="badge badge-blue">开发中</span></td><td>仅修复高危问题，随下个版本发布</td></tr>
+            <tr><td>更早版本</td><td><span class="badge badge-gray">不支持</span></td><td>请升级至最新版</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-warn">
+        alpha 阶段请勿将 EasyRDP 用于生产环境关键凭据场景。安全公告将通过 GitHub Security Advisories 与本站发布。
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

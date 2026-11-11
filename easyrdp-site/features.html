@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>功能介绍 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 功能域详解：连接中心、.rdp 兼容、远程会话、云网关、管理控制台与配置即代码，附 MVP / V1 / V2 路线图。">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0-alpha</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>功能介绍</h1>
+      <p>六大功能域覆盖个人与企业的远程桌面全场景：F1–F3 已在 <span data-version>v0.1.0-alpha</span> 落地，F4–F6 列入路线图。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <div class="card" style="margin-bottom:22px;">
+        <div class="icon">🗂</div>
+        <h3>F1 · 连接中心</h3>
+        <p>
+          连接中心是 EasyRDP 的主界面：所有远程主机以<strong>卡片</strong>形式呈现，支持按名称 / 标签 / 最近使用排序与分组；
+          每个远程会话运行在独立<strong>标签页</strong>中，多会话并行不互相干扰；
+          全局搜索 <code>Ctrl+K</code> 让你在上百台主机中瞬时定位目标连接，支持模糊匹配主机名、备注与标签。
+        </p>
+        <ul>
+          <li>卡片式连接管理：分组、收藏、置顶</li>
+          <li>标签页多会话：并行会话 + 快速切换</li>
+          <li>Ctrl+K 全局搜索：主机名 / 备注 / 标签模糊匹配</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom:22px;">
+        <div class="icon">📄</div>
+        <h3>F2 · 新建连接与 .rdp 兼容</h3>
+        <p>
+          新建连接向导覆盖主机、端口、凭据、分辨率与重定向选项；同时完整兼容 mstsc 生成的
+          <code>.rdp</code> 文件——拖入即导入，字段自动映射为 EasyRDP 的 JSON Profile，
+          也可以把现有连接导出为 <code>.rdp</code> 交还给 Windows 自带客户端使用，零迁移成本。
+        </p>
+        <ul>
+          <li>新建连接向导：主机 / 端口 / 认证 / 重定向一步到位</li>
+          <li>导入 mstsc <code>.rdp</code> 文件（full address、username、redirect* 等字段）</li>
+          <li>导出标准 <code>.rdp</code>，与系统远程桌面双向互通</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom:22px;">
+        <div class="icon">🖥</div>
+        <h3>F3 · 远程会话</h3>
+        <p>
+          会话层基于 FreeRDP 协议栈：支持 RDP 8+ 远程压缩、自适应分辨率与多显示器、
+          剪贴板 / 驱动器 / 打印机重定向。连接断开后可快速重连恢复会话，网络抖动时自动降级画质保流畅。
+        </p>
+        <ul>
+          <li>多显示器与自适应分辨率</li>
+          <li>剪贴板 / 驱动器 / 打印机重定向开关</li>
+          <li>断线自动重连与画质自适应</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom:22px;">
+        <div class="icon">🛡</div>
+        <h3>F4 · 网关接入 <span class="badge badge-blue">路线图 · V1</span></h3>
+        <p>
+          面向复杂企业网络的<strong>自有云网关</strong>：客户端仅出站访问网关 443 端口，
+          内部通过 TLS 隧道转发 RDP 流量；接入需先通过预认证，再叠加 OTP 动态口令二次验证，
+          无需暴露任何内网主机的 3389 端口。
+        </p>
+        <ul>
+          <li>443 端口 TLS 隧道（复用 HTTPS 通道）</li>
+          <li>预认证 + OTP 二次验证</li>
+          <li>网关侧主机映射与最小权限访问</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom:22px;">
+        <div class="icon">🏢</div>
+        <h3>F5 · 管理控制台 <span class="badge badge-blue">路线图 · V2</span></h3>
+        <p>
+          企业管理员控制台：对接 SSO / OIDC 完成统一身份认证与 MFA 强制策略；
+          以<strong>策略矩阵</strong>细粒度管控设备重定向（剪贴板 / 驱动器 / USB / 打印机）；
+          支持会话水印、按需录制与完整审计日志，满足等保与内控合规要求。
+        </p>
+        <ul>
+          <li>SSO / OIDC + MFA 统一认证</li>
+          <li>设备重定向策略矩阵（按用户 / 主机 / 时段）</li>
+          <li>会话水印、录制与审计日志</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="icon">🧩</div>
+        <h3>F6 · 配置即代码</h3>
+        <p>
+          每条连接即一份 <strong>JSON Profile</strong>，可纳入 Git 管理与代码评审；
+          团队可共用 Profile 模板批量下发；兼容导入 mstsc <code>.rdp</code>，也可导出回 <code>.rdp</code>，
+          实现传统工具与基础设施即代码（IaC）工作流的无缝衔接。
+        </p>
+        <ul>
+          <li>JSON Profile：字段化、可版本化、可模板化</li>
+          <li><code>.rdp</code> 双向兼容导入 / 导出</li>
+          <li>CLI 支持：<code>linkdesk connect</code> / <code>linkdesk import</code></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Roadmap ===== -->
+  <section class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">版本路线图</h2>
+      <p class="section-desc">以功能域（F1–F6）为轴推进，MVP 聚焦核心可用，V1 补齐企业网关，V2 完成管理控制台。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>功能域</th><th>MVP（v0.1.0-alpha）</th><th>V1</th><th>V2</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>F1 连接中心</td><td><span class="badge badge-green">✅ 已落地</span> 卡片 / 标签页 / Ctrl+K</td><td>收藏与分组增强</td><td>会话快照预览</td></tr>
+            <tr><td>F2 新建连接与 .rdp 兼容</td><td><span class="badge badge-green">✅ 已落地</span> 向导 + 导入导出</td><td>批量导入与去重</td><td>团队模板库</td></tr>
+            <tr><td>F3 远程会话</td><td><span class="badge badge-green">✅ 已落地</span> 基础会话 + 重定向</td><td>多显示器优化</td><td>GPU 编码</td></tr>
+            <tr><td>F4 网关接入</td><td><span class="badge badge-gray">—</span></td><td><span class="badge badge-blue">规划中</span> 443 TLS 隧道 + OTP</td><td>网关高可用</td></tr>
+            <tr><td>F5 管理控制台</td><td><span class="badge badge-gray">—</span></td><td><span class="badge badge-gray">—</span></td><td><span class="badge badge-blue">规划中</span> SSO/OIDC + 策略矩阵 + 审计</td></tr>
+            <tr><td>F6 配置即代码</td><td><span class="badge badge-green">✅ 已落地</span> JSON Profile + CLI</td><td>Schema 校验</td><td>Git 同步</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        路线图为规划性内容，可能随社区反馈调整。欢迎在 GitHub Issues 中对优先级提出建议。
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

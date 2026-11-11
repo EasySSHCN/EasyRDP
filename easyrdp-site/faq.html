@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>常见问题 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 常见问题：签名警告、.rdp 导入、FreeRDP 依赖、网关部署、水印策略等。">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0-alpha</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>常见问题</h1>
+      <p>整理了安装、兼容、网关与安全策略等高频问题。未覆盖的问题请到 GitHub Issues 反馈。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:820px;">
+
+      <details class="faq-item" open>
+        <summary>首次运行 Windows 提示"未知发布者 / SmartScreen 拦截"，安全吗？</summary>
+        <div class="faq-body">
+          <p>
+            v0.1.0-alpha 安装包尚未购买代码签名证书，因此 Windows SmartScreen 与 macOS Gatekeeper 会给出警告。
+            请先按<a href="download.html">下载页</a>说明完成 <strong>SHA256 校验</strong>，确认一致后再选择"仍要运行"。
+            正式版将提供签名安装包与自动更新通道。
+          </p>
+          <p>macOS 如提示"已损坏"，请在终端执行：<code>xattr -cr /Applications/EasyRDP.app</code>。</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>如何导入 mstsc 的 .rdp 文件？</summary>
+        <div class="faq-body">
+          <p>两种方式：① 将 <code>.rdp</code> 文件直接拖入连接中心窗口；② 命令行执行 <code>linkdesk import office.rdp</code>。
+          字段自动映射（full address → host:port，redirectclipboard → 剪贴板开关等），详见<a href="docs.html#rdp-import">文档</a>。
+          注意：<code>.rdp</code> 中加密的密码块无法跨机迁移，导入后需重新输入并保存到系统凭据库。</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>EasyRDP 依赖 FreeRDP 吗？我需要单独安装吗？</summary>
+        <div class="faq-body">
+          <p>
+            需要 FreeRDP，但<strong>无需单独安装</strong>：EasyRDP 将 FreeRDP 协议栈以静态链接 / 随包分发方式内置，
+            开箱即用。FreeRDP 本身以 Apache-2.0 协议开源，EasyRDP 对其的修改同样公开于源码仓库。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>云网关（443 TLS 隧道）如何部署？现在能用吗？</summary>
+        <div class="faq-body">
+          <p>
+            网关属于 <strong>V1 路线图</strong>，v0.1.0-alpha 暂不包含。规划形态：网关以独立服务部署在企业 DMZ 或自有云上，
+            客户端仅出站连接网关 443 端口（TLS 隧道复用 HTTPS 通道），接入需预认证 + OTP 二次验证，
+            内网主机 3389 端口零暴露。届时将提供 Helm / Docker 部署方案与配置文档。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>会话水印 / 录制 / 审计策略如何开启？</summary>
+        <div class="faq-body">
+          <p>
+            这些能力属于管理控制台（V2 路线图）：管理员在控制台以策略矩阵按用户 / 主机 / 时段下发
+            水印（用户名 + 时间戳）、按需录制与审计日志策略，客户端会话启动时自动拉取并强制执行，终端用户不可关闭。
+            v0.1.0-alpha 阶段可在 JSON Profile 中手动为单条连接启用简单水印（测试用途）。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>密码存在哪里？会不会泄露明文？</summary>
+        <div class="faq-body">
+          <p>
+            勾选"记住凭据"后，密码存入操作系统级凭据库：Windows 使用 DPAPI、macOS 使用 Keychain、Linux 使用 libsecret，
+            Profile JSON 中仅保留条目引用，<strong>不落明文</strong>。传输层强制 TLS 1.2+，并使用 NLA（网络级身份验证）优先。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>支持连接哪些版本的 Windows / 远程主机？</summary>
+        <div class="faq-body">
+          <p>
+            支持开启了远程桌面的 Windows 7 SP1 及以上（推荐 Win10/11）、Windows Server 2008 R2 及以上；
+            同时兼容支持 RDP 协议的第三方实现（如 xrdp、Windows 365 Cloud PC）。macOS / Linux 主机需运行兼容 RDP 的服务端。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>连接很卡 / 花屏怎么办？</summary>
+        <div class="faq-body">
+          <p>
+            依次排查：① 检查带宽，建议 ≥ 5 Mbps；② 在连接设置中调低色深（16 位）或分辨率；
+            ③ 确认主机端已启用 RDP 8+ 远程压缩；④ 关闭不使用的驱动器 / 打印机重定向可显著提升首连速度；
+            ⑤ 若仍异常，请到 GitHub Issues 提交 FreeRDP 日志（设置中可开启调试输出）。
+          </p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

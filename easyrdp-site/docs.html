@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使用文档 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 使用文档：快速开始、JSON Profile 示例、.rdp 导入说明与 CLI（linkdesk）用法。">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0-alpha</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container doc-layout">
+    <aside class="doc-toc">
+      <h4>本页目录</h4>
+      <a href="#quickstart">快速开始</a>
+      <a href="#json-profile">JSON Profile</a>
+      <a href="#rdp-import">.rdp 导入</a>
+      <a href="#cli">CLI 用法</a>
+    </aside>
+
+    <article class="doc-content">
+      <h2 id="quickstart">快速开始</h2>
+      <p>
+        1. 从<a href="download.html">下载页</a>获取对应平台的安装包，并按说明完成 <strong>SHA256 校验</strong>。<br>
+        2. Windows 解压 zip 直接运行；macOS 挂载 dmg 拖入应用程序；Linux 对 AppImage 执行 <code>chmod +x</code> 后运行。<br>
+        3. 启动后点击「新建连接」，填写主机、端口（默认 <code>3389</code>）与认证信息，保存后双击卡片即可进入会话。<br>
+        4. 使用 <code>Ctrl+K</code> 呼出全局搜索，在多台主机间极速切换。
+      </p>
+      <div class="callout">
+        Windows 需 WebView2 Runtime（Win10/11 通常已内置）；如缺失，运行时会提示自动安装。
+      </div>
+
+      <h2 id="json-profile">JSON Profile</h2>
+      <p>
+        每条连接对应一份 JSON Profile，存放于用户配置目录，可纳入 Git 管理。核心字段如下：
+      </p>
+      <pre>{
+  <span class="cm">// 连接名（唯一标识，Ctrl+K 搜索依据）</span>
+  "name": "office-win11",
+  "host": "192.168.1.100",
+  "port": 3389,
+
+  <span class="cm">// 认证方式："password" | "nla" | "gateway-otp"（网关路线图）</span>
+  "auth": {
+    "type": "password",
+    "username": "administrator",
+    "store": "os-keychain"   <span class="cm">// 凭据存入系统凭据库，不落明文</span>
+  },
+
+  <span class="cm">// 重定向开关</span>
+  "redirection": {
+    "clipboard": true,
+    "drive":   true,
+    "printer": false,
+    "usb":     false,
+    "audio":   true
+  },
+
+  <span class="cm">// 可选：会话外观</span>
+  "session": {
+    "resolution": "1920x1080",
+    "multiMonitor": false,
+    "colorDepth": 32
+  },
+
+  <span class="cm">// 可选：网关接入（V1 路线图字段，预留）</span>
+  "gateway": null
+}</pre>
+      <div class="callout">
+        Profile 中<strong>永远不存储明文密码</strong>：<code>auth.store</code> 指向系统凭据库（DPAPI / Keychain / libsecret）的条目引用。
+      </div>
+
+      <h2 id="rdp-import">.rdp 导入说明</h2>
+      <p>
+        EasyRDP 兼容 mstsc 生成的标准 <code>.rdp</code> 文件。导入方式有两种：
+      </p>
+      <ul>
+        <li><strong>图形界面</strong>：将 <code>.rdp</code> 文件拖入连接中心窗口，或在「新建连接」中选择「导入 .rdp 文件」。</li>
+        <li><strong>命令行</strong>：<code>linkdesk import office.rdp</code>（见下文 CLI）。</li>
+      </ul>
+      <p>支持的字段映射（节选）：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>.rdp 字段</th><th>JSON Profile 字段</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>full address:s</code></td><td><code>host</code> + <code>port</code></td><td>host:port 自动拆分，缺省端口 3389</td></tr>
+            <tr><td><code>username:s</code></td><td><code>auth.username</code></td><td>用户名；密码不随 .rdp 迁移</td></tr>
+            <tr><td><code>desktopwidth / desktopheight</code></td><td><code>session.resolution</code></td><td>初始分辨率</td></tr>
+            <tr><td><code>redirectclipboard:i</code></td><td><code>redirection.clipboard</code></td><td>剪贴板重定向</td></tr>
+            <tr><td><code>drivestoredirect:s</code></td><td><code>redirection.drive</code></td><td>驱动器重定向</td></tr>
+            <tr><td><code>redirectprinters:i</code></td><td><code>redirection.printer</code></td><td>打印机重定向</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-warn">
+        .rdp 文件中的 <code>password 51:b:</code> 加密块仅在 Windows 本机有效，EasyRDP 导入时<strong>不会导入密码</strong>，需在连接时重新输入或保存到系统凭据库。
+      </div>
+
+      <h2 id="cli">CLI 用法</h2>
+      <p>EasyRDP 附带命令行工具 <code>linkdesk</code>，方便脚本化与 CI 场景：</p>
+      <pre><span class="cm"># 连接：按 Profile 名或 host 连接</span>
+linkdesk connect office-win11
+linkdesk connect 192.168.1.100 --port 3389 -u administrator
+
+<span class="cm"># 导入：将 mstsc .rdp 文件导入为 JSON Profile</span>
+linkdesk import office.rdp
+linkdesk import ./*.rdp --overwrite
+
+<span class="cm"># 其他常用命令</span>
+linkdesk list            <span class="cm"># 列出全部 Profile</span>
+linkdesk export office-win11 -o office-win11.rdp   <span class="cm"># 导出 .rdp</span>
+linkdesk --version       <span class="cm"># 查看版本</span></pre>
+      <div class="callout">
+        CLI 在无桌面环境下仅提供 Profile 管理能力；建立图形会话仍需本地 GUI 环境（依赖 WebView 组件）。
+      </div>
+    </article>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/easyrdp/easyrdp" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyrdp/easyrdp" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/easyrdp/easyrdp/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/easyrdp/easyrdp/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

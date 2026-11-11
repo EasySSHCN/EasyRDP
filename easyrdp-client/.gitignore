@@ -1,0 +1,25 @@
+# Rust / Cargo
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Node / 前端
+node_modules/
+dist/
+
+# Tauri 构建产物
+src-tauri/target/
+src-tauri/gen/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志与临时文件
+*.log
+tmp/

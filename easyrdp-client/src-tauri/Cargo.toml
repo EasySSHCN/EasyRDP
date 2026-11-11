@@ -1,0 +1,20 @@
+[package]
+name = "easyrdp-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP Tauri 2 application shell"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+easyrdp-core = { path = "../crates/easyrdp-core" }
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = [] }
+
+[lib]
+name = "easyrdp_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]

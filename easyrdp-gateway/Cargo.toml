@@ -1,0 +1,31 @@
+[package]
+name = "easyrdp-gateway"
+version = "0.1.0"
+edition = "2021"
+description = "EasyRDP 云网关：443 TLS 隧道 + 预认证 + 审计（骨架）"
+license = "Apache-2.0"
+
+[dependencies]
+# Web 框架与运行时
+axum = { version = "0.7", features = ["ws", "macros"] }
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5", features = ["trace"] }
+
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# 认证
+jsonwebtoken = "9"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# 日志 / 审计
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 配置
+toml = "0.8"
+
+[dev-dependencies]
+# 供测试使用（与主依赖一致即可）
