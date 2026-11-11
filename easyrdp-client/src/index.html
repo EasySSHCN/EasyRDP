@@ -2,27 +2,78 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=.1" />
   <title>EasyRDP</title>
   <link rel="stylesheet" href="ui/style.css" />
 </head>
 <body>
-  <header>
-    <h1>EasyRDP <span class="tag">MVP</span></h1>
-    <p class="subtitle">跨平台远程桌面客户端 · Tauri 2 + FreeRDP</p>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+        <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+        <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>EasyRDP</span>
+      <span class="tag">v0.1.0-alpha</span>
+    </div>
+    <button id="btn-import" class="btn ghost" title="导入 mstsc 导出的 .rdp 文件">导入 .rdp</button>
   </header>
 
-  <main>
-    <section class="card">
-      <h2>导入 .rdp 配置</h2>
-      <div class="row">
-        <input id="rdp-path" type="text" placeholder="mstsc 导出的 .rdp 文件绝对路径" />
-        <button id="btn-import">导入</button>
-        <button id="btn-list">列出配置</button>
+  <div class="layout">
+    <!-- 左侧：已保存连接 -->
+    <aside class="sidebar">
+      <div class="side-head">已保存连接 <span id="conn-count" class="count">0</span></div>
+      <div id="conn-list" class="conn-list"></div>
+      <div id="conn-empty" class="empty hidden">还没有保存的连接<br>在右侧创建第一个 →</div>
+    </aside>
+
+    <!-- 右侧：新建/编辑连接 -->
+    <main class="main">
+      <div class="form-card">
+        <h2 id="form-title">新建连接</h2>
+        <input id="f-id" type="hidden" />
+        <label>连接名称</label>
+        <input id="f-name" type="text" placeholder="例如：办公电脑（可留空，默认用主机名）" />
+        <div class="grid2">
+          <div>
+            <label>计算机 *</label>
+            <input id="f-host" type="text" placeholder="服务器 IP 或域名" />
+          </div>
+          <div>
+            <label>端口</label>
+            <input id="f-port" type="text" value="3389" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label>用户名</label>
+            <input id="f-username" type="text" placeholder="例如：administrator" />
+          </div>
+          <div>
+            <label>密码</label>
+            <input id="f-password" type="password" placeholder="保存于本机，不上传" />
+          </div>
+        </div>
+        <label>显示</label>
+        <select id="f-resolution">
+          <option value="fit_window">自适应窗口</option>
+          <option value="fullscreen">全屏</option>
+          <option value="custom">自定义分辨率</option>
+        </select>
+        <div id="custom-res" class="grid2 hidden">
+          <div><input id="f-cw" type="text" placeholder="宽（如 1920）" /></div>
+          <div><input id="f-ch" type="text" placeholder="高（如 1080）" /></div>
+        </div>
+        <div class="actions">
+          <button id="btn-save" class="btn primary">保存连接</button>
+          <button id="btn-connect" class="btn">连 接</button>
+          <button id="btn-cancel" class="btn ghost hidden">取消编辑</button>
+          <span id="msg" class="msg"></span>
+        </div>
+        <p class="note">α 预览版说明：远程画面引擎（FreeRDP）将在后续版本接入；当前版本提供连接管理与 .rdp 导入。</p>
       </div>
-      <pre id="output" class="output">// 结果显示在这里</pre>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <script type="module" src="ui/main.js"></script>
 </body>

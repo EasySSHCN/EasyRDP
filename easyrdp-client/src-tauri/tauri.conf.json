@@ -10,11 +10,12 @@
     "beforeBuildCommand": ""
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "EasyRDP",
-        "width": 960,
-        "height": 640,
+        "width": 1080,
+        "height": 700,
         "resizable": true
       }
     ],
