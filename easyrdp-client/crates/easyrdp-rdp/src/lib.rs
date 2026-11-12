@@ -10,15 +10,25 @@ use std::fmt;
 
 use easyrdp_core::profile::SessionProfile;
 
-/// 帧缓冲/会话事件（占位）。
+/// 帧缓冲/会话事件。
 ///
-/// native 引擎接入后，将由此通道推送：
-/// - `Framebuffer { x, y, width, height, pixels }` 区域脏矩形更新
-/// - `Pointer`、`Clipboard`、`Disconnected(reason)` 等会话事件
+/// native 引擎的 FFI 回调（`rdpUpdate.BitmapUpdate`、`rdpPointerUpdate.PointerPosition`
+/// 等，见 `ffi.rs`）把帧数据/指针更新推入 mpsc channel，由上层消费：
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FramebufferEvent {
-    /// 占位变体：native 实现落地前不会产生。
-    Placeholder,
+    /// 服务端推来的位图脏矩形更新（对应 FreeRDP `BITMAP_UPDATE`/`BITMAP_DATA`）。
+    /// `pixels` 为原始位图字节（α 版按服务端格式透传，未做 BGRA->RGBA 转换）。
+    Framebuffer {
+        x: u32,
+        y: u32,
+        width: u32,
+        height: u32,
+        pixels: Vec<u8>,
+    },
+    /// 远端指针位置更新（对应 FreeRDP `POINTER_POSITION_UPDATE`）。
+    Pointer { x: u32, y: u32 },
+    /// 会话断开（含原因描述）。
+    Disconnected(String),
 }
 
 /// 一次 RDP 会话的抽象。
@@ -31,21 +41,33 @@ pub trait RdpSession: Send {
     fn disconnect(&mut self) -> Result<(), RdpError>;
 
     /// 帧缓冲事件接收端（native 引擎实现；stub 返回 None）。
-    fn events(&self) -> Option<&crossbeam_like_channel::Receiver> {
+    fn events(&self) -> Option<&event_channel::Receiver> {
         None
     }
 }
 
-/// 事件通道占位：native 接入前用最小类型撑住 trait 签名。
-pub mod crossbeam_like_channel {
-    /// 占位接收端。native 实现落地后替换为真实 mpsc/rtrb channel。
-    #[derive(Debug)]
-    pub struct Receiver;
+/// 事件通道：native FFI 回调（C 线程）经 [`event_channel::Sender`] 推送，
+/// 上层经 [`event_channel::Receiver`] 消费。
+pub mod event_channel {
+    // 公开再导出：ffi.rs 经 `crate::event_channel::FramebufferEvent` 引用。
+    pub use super::FramebufferEvent;
+
+    /// 发送端（被 FFI 回调侧共享，要求 `Send + Clone`）。
+    pub type Sender = std::sync::mpsc::Sender<FramebufferEvent>;
+
+    /// 接收端包装。`try_recv` 非阻塞，适合 UI 轮询/重绘循环。
+    pub struct Receiver(std::sync::mpsc::Receiver<FramebufferEvent>);
 
     impl Receiver {
-        pub fn try_recv(&self) -> Option<super::FramebufferEvent> {
-            None
+        pub fn try_recv(&self) -> Option<FramebufferEvent> {
+            self.0.try_recv().ok()
         }
+    }
+
+    /// 创建一对事件通道。
+    pub fn channel() -> (Sender, Receiver) {
+        let (tx, rx) = std::sync::mpsc::channel();
+        (tx, Receiver(rx))
     }
 }
 
@@ -73,9 +95,16 @@ pub fn create_session() -> Box<dyn RdpSession> {
     }
 }
 
-/// 引擎是否具备真实 RDP 能力（`native` feature 已编译）。
+/// 引擎是否具备真实 RDP 能力（`native` feature 已编译时为 true）。
 pub fn native_ready() -> bool {
-    cfg!(feature = "native")
+    #[cfg(feature = "native")]
+    {
+        true
+    }
+    #[cfg(not(feature = "native"))]
+    {
+        false
+    }
 }
 
 pub mod ffi;
