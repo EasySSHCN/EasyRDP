@@ -197,9 +197,7 @@ jobs:
           appimage=$(ls "${{ env.CLIENT_DIR }}/target/release/bundle/appimage/"*.AppImage | head -n1)
           if [ -z "$appimage" ]; then echo "No .AppImage found"; ls -R "${{ env.CLIENT_DIR }}/target/release/bundle"; exit 1; fi
           cp "$appimage" "dist/${APP_NAME}-${VER}-linux.AppImage"
-          # 可选：deb/rpm 一并附上
-          cp "${{ env.CLIENT_DIR }}/target/release/bundle/deb/"*.deb dist/ 2>/dev/null || true
-          cp "${{ env.CLIENT_DIR }}/target/release/bundle/rpm/"*.rpm dist/ 2>/dev/null || true
+          # 注意：绿色免安装便携定位，不收集 deb/rpm 安装器产物
           ls -la dist
 
       # ---------- 上传到 workflow artifact，供 publish job 汇总 ----------
