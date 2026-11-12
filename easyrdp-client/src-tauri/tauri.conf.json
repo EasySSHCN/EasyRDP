@@ -1,13 +1,21 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "EasyRDP",
-  "version": "0.1.0-alpha",
-  "identifier": "com.easyrdp.app",
+  "version": "0.1.0",
+  "identifier": "cn.easyrdp.client",
   "build": {
     "frontendDist": "../src",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ]
   },
   "app": {
     "withGlobalTauri": true,
