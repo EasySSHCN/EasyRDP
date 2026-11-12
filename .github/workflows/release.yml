@@ -1,0 +1,246 @@
+# EasyRDP Release workflow
+# 触发：推送 v* 标签（如 v0.1.0-alpha）
+# 三平台矩阵构建（Windows / macOS / Linux），产物统一命名为：
+#   EasyRDP-<ver>-portable.exe / EasyRDP-<ver>-win32-x64-portable.zip
+#   EasyRDP-<ver>-macos.dmg / EasyRDP-<ver>-linux.AppImage
+# 最后由 publish job 汇总所有平台产物，生成全量 SHA256SUMS.txt 并发布到 GitHub Release。
+#
+# 注意：本仓库的 Cargo workspace 根在 easyrdp-client/，Tauri 工程在 easyrdp-client/src-tauri/。
+# Windows 发布构建必须启用 custom-protocol feature（cargo tauri build 会自动启用，
+# 下面的步骤额外显式传入以确保不会以 dev 模式编译）。
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: EasyRDP
+  CLIENT_DIR: easyrdp-client
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
+          - os: ubuntu-22.04
+            platform: linux
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---------- 基础工具链：Rust / Node / tauri-cli ----------
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ env.CLIENT_DIR }}
+
+      - name: Install Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # taiki-e/install-action 预编译二进制，比 cargo install tauri-cli --locked 快得多
+      - name: Install tauri-cli
+        uses: taiki-e/install-action@tauri-cli
+
+      # ---------- Linux 系统依赖（Tauri v2 官方清单）+ AppImage 打包依赖 ----------
+
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libfuse2
+
+      # ---------- 解析版本号（取自 tauri.conf.json） ----------
+
+      - name: Read version from tauri.conf.json (bash)
+        if: matrix.platform != 'windows'
+        id: ver_bash
+        shell: bash
+        run: |
+          VER=$(node -p "require('./${{ env.CLIENT_DIR }}/src-tauri/tauri.conf.json').version")
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "EasyRDP version: $VER"
+
+      - name: Read version from tauri.conf.json (windows)
+        if: matrix.platform == 'windows'
+        id: ver_win
+        shell: pwsh
+        run: |
+          $conf = Get-Content "${{ env.CLIENT_DIR }}/src-tauri/tauri.conf.json" -Raw | ConvertFrom-Json
+          "version=$($conf.version)" >> $env:GITHUB_OUTPUT
+          Write-Host "EasyRDP version: $($conf.version)"
+
+      # ---------- Windows：Trusted Signing 签名（预留，默认跳过） ----------
+      #
+      # ============================================================
+      #  如何启用 Azure Trusted Signing（代码签名）：
+      #  1. 开通 Trusted Signing 资源（需要 Azure 订阅 + 身份验证）：
+      #     https://learn.microsoft.com/azure/trusted-signing/overview
+      #     （个人开发者定价 $9.99/月；需要在门户完成组织/个人身份验证）
+      #  2. 在账号下创建证书 profile，并记录 Account Name / Endpoint URL /
+      #     Certificate Profile Name / Certificate Name。
+      #  3. 创建一个 Entra ID (Azure AD) App Registration，授予
+      #     "Trusted Signing Certificate Profile Signer" 角色，拿到
+      #     Tenant ID / Client ID / Client Secret。
+      #  4. 在 GitHub 仓库 Settings -> Secrets and variables -> Actions
+      #     配置以下 secrets（全部配置后签名步骤才会执行）：
+      #       AZURE_SIGNING_ACCOUNT        # Trusted Signing 账号名
+      #       AZURE_SIGNING_ENDPOINT       # 如 https://eus.codesigning.azure.net/
+      #       AZURE_SIGNING_CERT_PROFILE   # 证书 profile 名
+      #       AZURE_SIGNING_CERT_NAME      # 证书名
+      #       AZURE_SIGNING_TENANT_ID      # Entra 租户 ID
+      #       AZURE_SIGNING_CLIENT_ID      # App Registration 客户端 ID
+      #       AZURE_SIGNING_CLIENT_SECRET  # 客户端密钥
+      #  未配置时本步骤自动跳过，不影响发布流程。
+      # ============================================================
+
+      - name: Sign Windows executables (Azure Trusted Signing)
+        if: matrix.platform == 'windows' && secrets.AZURE_SIGNING_ACCOUNT != ''
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_SIGNING_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_SIGNING_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_SIGNING_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_SIGNING_CERT_PROFILE }}
+          # 签名所有 release 可执行文件（主程序 exe）
+          files-folder: ${{ env.CLIENT_DIR }}/target/release
+          files-folder-filter: exe
+          file-digest-routine: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      # ---------- 构建（统一 cargo tauri build） ----------
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: cargo tauri build --features custom-protocol
+        working-directory: ${{ env.CLIENT_DIR }}
+
+      - name: Build (macOS / Linux)
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: cargo tauri build
+        working-directory: ${{ env.CLIENT_DIR }}
+
+      # ---------- 收集产物到 dist/ ----------
+
+      - name: Collect artifacts (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        env:
+          VER: ${{ steps.ver_win.outputs.version }}
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $exe = "${{ env.CLIENT_DIR }}/target/release/easyrdp-app.exe"
+          if (-not (Test-Path $exe)) { throw "Build output not found: $exe" }
+          # 单文件 portable exe
+          Copy-Item $exe "dist/${{ env.APP_NAME }}-$env:VER-portable.exe"
+          # zip portable 包
+          Compress-Archive -Path $exe -DestinationPath "dist/${{ env.APP_NAME }}-$env:VER-win32-x64-portable.zip"
+          # 安装器（如生成）
+          Get-ChildItem "${{ env.CLIENT_DIR }}/target/release/bundle" -Recurse -Include *.msi,*.exe -File |
+            Where-Object { $_.FullName -match '\\bundle\\' } |
+            Copy-Item -Destination dist
+          Get-ChildItem dist
+
+      - name: Collect artifacts (macOS)
+        if: matrix.platform == 'macos'
+        shell: bash
+        env:
+          VER: ${{ steps.ver_bash.outputs.version }}
+        run: |
+          mkdir -p dist
+          dmg=$(ls "${{ env.CLIENT_DIR }}/target/release/bundle/dmg/"*.dmg | head -n1)
+          if [ -z "$dmg" ]; then echo "No .dmg found"; ls -R "${{ env.CLIENT_DIR }}/target/release/bundle"; exit 1; fi
+          cp "$dmg" "dist/${APP_NAME}-${VER}-macos.dmg"
+          ls -la dist
+
+      - name: Collect artifacts (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        env:
+          VER: ${{ steps.ver_bash.outputs.version }}
+        run: |
+          mkdir -p dist
+          appimage=$(ls "${{ env.CLIENT_DIR }}/target/release/bundle/appimage/"*.AppImage | head -n1)
+          if [ -z "$appimage" ]; then echo "No .AppImage found"; ls -R "${{ env.CLIENT_DIR }}/target/release/bundle"; exit 1; fi
+          cp "$appimage" "dist/${APP_NAME}-${VER}-linux.AppImage"
+          # 可选：deb/rpm 一并附上
+          cp "${{ env.CLIENT_DIR }}/target/release/bundle/deb/"*.deb dist/ 2>/dev/null || true
+          cp "${{ env.CLIENT_DIR }}/target/release/bundle/rpm/"*.rpm dist/ 2>/dev/null || true
+          ls -la dist
+
+      # ---------- 上传到 workflow artifact，供 publish job 汇总 ----------
+
+      - name: Upload platform artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Generate SHA256SUMS.txt
+        run: |
+          cd artifacts
+          sha256sum * > SHA256SUMS.txt
+          # 把校验文件移回与产物同级，便于一并附加
+          mv SHA256SUMS.txt ../SHA256SUMS.txt
+          cd ..
+          ls -la artifacts SHA256SUMS.txt
+
+      - name: Attach files to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # tag 名即触发本次发布的 tag
+          tag_name: ${{ github.ref_name }}
+          name: EasyRDP ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          generate_release_notes: true
+          files: |
+            artifacts/*
+            SHA256SUMS.txt
