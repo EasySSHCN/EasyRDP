@@ -50,8 +50,9 @@
       <p>
         1. 从<a href="download.html">下载页</a>获取对应平台的安装包，并按说明完成 <strong>SHA256 校验</strong>。<br>
         2. Windows 解压 zip 直接运行；macOS 挂载 dmg 拖入应用程序；Linux 对 AppImage 执行 <code>chmod +x</code> 后运行。<br>
-        3. 启动后点击「新建连接」，填写主机、端口（默认 <code>3389</code>）与认证信息，保存后双击卡片即可进入会话。<br>
-        4. 使用 <code>Ctrl+K</code> 呼出全局搜索，在多台主机间极速切换。
+        3. 启动后在「新建连接」中<strong>三步完成</strong>：① 填写主机、端口（默认 <code>3389</code>）、用户名与密码 → ② 点击「保存」将连接存入连接中心 → ③ 点击「测试连通」执行 TCP 握手，确认主机可达并查看延迟。<br>
+        4. 已有 mstsc 的 <code>.rdp</code> 文件？在导入时点击文件选择框（系统文件选择对话框）直接选取 <code>.rdp</code> 文件，字段自动映射为 JSON Profile，无需手动输入。<br>
+        5. 使用 <code>Ctrl+K</code> 呼出全局搜索，在多台主机间极速切换。
       </p>
       <div class="callout">
         Windows 需 WebView2 Runtime（Win10/11 通常已内置）；如缺失，运行时会提示自动安装。
@@ -94,7 +95,8 @@
   "gateway": null
 }</pre>
       <div class="callout">
-        Profile 中<strong>永远不存储明文密码</strong>：<code>auth.store</code> 指向系统凭据库（DPAPI / Keychain / libsecret）的条目引用。
+        <strong>凭据存储说明</strong>：v0.1.0-alpha 中密码仅保存在本机用户配置目录（暂为明文，不上传服务器）；
+        后续版本将切换为系统凭据库（DPAPI / Keychain / libsecret）加密存储，Profile 中仅保留加密条目引用，见 <a href="faq.html">FAQ</a>。
       </div>
 
       <h2 id="rdp-import">.rdp 导入说明</h2>
@@ -102,7 +104,7 @@
         EasyRDP 兼容 mstsc 生成的标准 <code>.rdp</code> 文件。导入方式有两种：
       </p>
       <ul>
-        <li><strong>图形界面</strong>：将 <code>.rdp</code> 文件拖入连接中心窗口，或在「新建连接」中选择「导入 .rdp 文件」。</li>
+        <li><strong>图形界面</strong>：在「新建连接 / 导入」中点击<strong>文件选择框</strong>（系统文件选择对话框）选取 <code>.rdp</code> 文件，字段自动映射为 EasyRDP 的 JSON Profile。</li>
         <li><strong>命令行</strong>：<code>linkdesk import office.rdp</code>（见下文 CLI）。</li>
       </ul>
       <p>支持的字段映射（节选）：</p>

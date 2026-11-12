@@ -31,6 +31,9 @@ pub struct AuditEvent {
     pub resource: String,
     /// 客户端来源 IP
     pub source_ip: String,
+    /// 错误摘要（连接失败等场景；成功事件为 None）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
 }
 
 /// 内存环形缓冲审计日志。
@@ -63,7 +66,8 @@ impl AuditLog {
         if buf.items.len() < cap {
             buf.items.push(event);
         } else {
-            buf.items[buf.head] = event;
+            let head = buf.head;
+            buf.items[head] = event;
         }
         buf.head = (buf.head + 1) % cap;
         buf.count += 1;
@@ -144,6 +148,7 @@ mod tests {
             event: event.to_string(),
             resource: "rdp-win01".to_string(),
             source_ip: "10.0.0.5".to_string(),
+            error: None,
         }
     }
 

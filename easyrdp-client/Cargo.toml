@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "crates/easyrdp-core",
+    "crates/easyrdp-rdp",
     "src-tauri",
 ]
 

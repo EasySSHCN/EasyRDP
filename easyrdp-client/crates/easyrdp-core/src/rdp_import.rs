@@ -155,22 +155,23 @@ pub fn parse_lines(lines: &[String]) -> SessionProfile {
             "redirectdrives" => p.redirect.drives = value.trim() == "1",
             "redirectcameras" => p.redirect.camera = value.trim() == "1",
             "gatewayhostname" => {
-                let gw = p.gateway.get_or_insert_with(|| GatewayConfig {
-                    hostname: String::new(),
-                    auth: GatewayAuth::Inherit,
-                });
-                gw.hostname = value;
+                // mstsc 的 Default.rdp 常含空值 gatewayhostname —— 视为未配置网关
+                if !value.trim().is_empty() {
+                    let gw = p.gateway.get_or_insert_with(|| GatewayConfig {
+                        hostname: String::new(),
+                        auth: GatewayAuth::Inherit,
+                    });
+                    gw.hostname = value;
+                }
             }
             "gatewaycredentialssource" => {
-                let gw = p.gateway.get_or_insert_with(|| GatewayConfig {
-                    hostname: String::new(),
-                    auth: GatewayAuth::Inherit,
-                });
-                // mstsc: 0 = NTLM/继承凭据, 5 = 用户提供（此处映射为 OTP Cookie）
-                gw.auth = match value.trim() {
-                    "5" => GatewayAuth::OtpCookie,
-                    _ => GatewayAuth::Inherit,
-                };
+                // 仅当网关配置已存在（hostname 非空）时才设置认证方式
+                if let Some(gw) = p.gateway.as_mut() {
+                    gw.auth = match value.trim() {
+                        "5" => GatewayAuth::OtpCookie,
+                        _ => GatewayAuth::Inherit,
+                    };
+                }
             }
             // 未知键一律忽略
             _ => {}

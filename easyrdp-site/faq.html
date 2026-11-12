@@ -103,8 +103,34 @@
         <summary>密码存在哪里？会不会泄露明文？</summary>
         <div class="faq-body">
           <p>
-            勾选"记住凭据"后，密码存入操作系统级凭据库：Windows 使用 DPAPI、macOS 使用 Keychain、Linux 使用 libsecret，
-            Profile JSON 中仅保留条目引用，<strong>不落明文</strong>。传输层强制 TLS 1.2+，并使用 NLA（网络级身份验证）优先。
+            在 v0.1.0-alpha 中，密码仅保存在<strong>本机</strong>用户配置目录，暂为明文存储，不会上传任何服务器；
+            后续版本将迁移到操作系统级凭据库（Windows DPAPI、macOS Keychain、Linux libsecret）加密存储，
+            Profile JSON 中仅保留条目引用。<a href="changelog.html">更新日志</a>会记录此迁移。
+            传输层强制 TLS 1.2+，并使用 NLA（网络级身份验证）优先。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>连接按钮报错 / 提示"引擎未接入"是什么意思？</summary>
+        <div class="faq-body">
+          <p>
+            v0.1.0-alpha 的<strong>画面引擎正在接入中</strong>：当前版本已实现连接中心（保存 / 编辑 / 删除连接）、
+            <code>.rdp</code> 导入与 TCP 连通性测试（握手 + 延迟显示），但尚未接入 FreeRDP 图形会话引擎。
+            因此点击「连接」后会出现"引擎未接入"的提示，这属于预期行为，不代表主机配置有误。
+            可先用「测试连通」验证主机可达；图形会话能力将在后续版本开放。
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>密码是如何存储的？安全吗？</summary>
+        <div class="faq-body">
+          <p>
+            在 v0.1.0-alpha 中，勾选"记住密码"后凭据仅保存在<strong>本机</strong>（用户配置目录），<strong>不会上传任何服务器</strong>，
+            且当前以明文形式存储在本地文件中——请确保你的用户账户受登录密码保护。
+            后续版本将切换为操作系统级加密存储：Windows 使用 DPAPI、macOS 使用 Keychain、Linux 使用 libsecret，
+            Profile JSON 中仅保留加密条目引用。<a href="security.html">安全策略页</a>会同步跟进这一变更。
           </p>
         </div>
       </details>

@@ -31,6 +31,9 @@ struct ConnectionView {
     port: u16,
     username: String,
     resolution_kind: String,
+    /// easyrdp-rdp native 引擎（FreeRDP FFI）就绪后为 true；
+    /// 当前 stub 实现恒为 false。
+    rdp_ready: bool,
 }
 
 impl From<&SavedConnection> for ConnectionView {
@@ -46,6 +49,7 @@ impl From<&SavedConnection> for ConnectionView {
                 Resolution::Fullscreen => "fullscreen".into(),
                 Resolution::Custom { .. } => "custom".into(),
             },
+            rdp_ready: easyrdp_rdp::native_ready(),
         }
     }
 }
@@ -87,7 +91,13 @@ impl ConnectionStore {
             return Ok(ConnectionView::from(&items[idx]));
         }
         let idx = match items.iter().position(|x| x.id == c.id) {
-            Some(i) => i,
+            Some(i) => {
+                // 密码留空 => 保留原密码；否则用新值覆盖
+                Self::merge_password(&mut items[i], c.password.clone());
+                c.password = items[i].password.clone();
+                items[i] = c;
+                i
+            }
             None => {
                 items.push(c);
                 items.len() - 1
@@ -95,6 +105,14 @@ impl ConnectionStore {
         };
         self.persist(&items)?;
         Ok(ConnectionView::from(&items[idx]))
+    }
+
+    /// 更新已有连接：密码留空则保留原密码，否则覆盖。
+    fn merge_password(existing: &mut SavedConnection, new_password: String) {
+        if !new_password.is_empty() {
+            existing.password = new_password;
+        }
+        // 为空 => 保持原密码不动
     }
 
     fn delete(&self, id: &str) -> Result<(), String> {
@@ -173,6 +191,26 @@ fn delete_connection(id: String, store: State<ConnectionStore>) -> Result<(), St
     store.delete(&id)
 }
 
+/// 连通性测试：TCP 握手 host:port，返回耗时（毫秒）。
+#[tauri::command]
+fn test_connection(host: String, port: u16) -> Result<u128, String> {
+    use std::net::ToSocketAddrs;
+    let addr = (host.as_str(), port)
+        .to_socket_addrs()
+        .map_err(|e| format!("DNS 解析失败: {e}"))?
+        .next()
+        .ok_or("DNS 解析无结果")?;
+    let start = SystemTime::now();
+    std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_secs(3))
+        .map(|_| {
+            SystemTime::now()
+                .duration_since(start)
+                .map(|d| d.as_millis())
+                .unwrap_or(0)
+        })
+        .map_err(|e| format!("连接失败: {e}"))
+}
+
 /// 导入 mstsc 导出的 .rdp 文件并保存为新连接，返回连接视图。
 #[tauri::command]
 fn import_rdp(path: String, store: State<ConnectionStore>) -> Result<ConnectionView, String> {
@@ -202,8 +240,49 @@ fn main() {
             save_connection,
             list_connections,
             delete_connection,
-            import_rdp
+            import_rdp,
+            test_connection
         ])
+        .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())
         .expect("EasyRDP 启动失败");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn conn(id: &str, pw: &str) -> SavedConnection {
+        SavedConnection {
+            id: id.into(),
+            profile: SessionProfile::default(),
+            password: pw.into(),
+        }
+    }
+
+    #[test]
+    fn empty_password_keeps_original() {
+        let mut existing = conn("c1", "old-secret");
+        ConnectionStore::merge_password(&mut existing, String::new());
+        assert_eq!(existing.password, "old-secret");
+    }
+
+    #[test]
+    fn nonempty_password_overwrites() {
+        let mut existing = conn("c1", "old-secret");
+        ConnectionStore::merge_password(&mut existing, "new-pass".into());
+        assert_eq!(existing.password, "new-pass");
+    }
+
+    #[test]
+    fn connection_view_never_has_password_and_reports_not_ready() {
+        let c = conn("c1", "secret");
+        let v = ConnectionView::from(&c);
+        // ConnectionView 根本没有 password 字段；序列化后也不得出现
+        let json = serde_json::to_string(&v).unwrap();
+        assert!(!json.contains("secret"));
+        assert!(!json.contains("password"));
+        // native 引擎未编译 => false
+        assert!(!v.rdp_ready);
+    }
 }

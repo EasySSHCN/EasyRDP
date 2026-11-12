@@ -11,6 +11,7 @@ axum = { version = "0.7", features = ["ws", "macros"] }
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.5", features = ["trace"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 
 # 序列化
 serde = { version = "1", features = ["derive"] }

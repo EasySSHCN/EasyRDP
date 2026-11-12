@@ -1,7 +1,7 @@
 /* EasyRDP 连接中心样式 */
 :root {
   --bg: #0f1117; --panel: #171a23; --panel2: #1e2230; --line: #2a2f3e;
-  --txt: #e6e9f0; --sub: #8b93a7; --acc: #3b82f6; --ok: #22c55e; --bad: #ef4444;
+  --txt: #e6e9f0; --sub: #8b93a7; --acc: #3b82f6; --ok: #22c55e; --bad: #ef4444; --warn: #f59e0b;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
 body { background: var(--bg); color: var(--txt); font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -19,8 +19,12 @@ body { background: var(--bg); color: var(--txt); font-size: 14px; height: 100vh;
 .conn-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; position: relative; }
 .conn-item:hover { background: var(--panel2); }
 .conn-item.selected { border-color: var(--acc); background: var(--panel2); }
-.conn-name { font-weight: 600; margin-bottom: 3px; }
+.conn-name { font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 7px; }
 .conn-sub { color: var(--sub); font-size: 12px; }
+/* 连接状态小圆点：上次连通性测试结果（缓存于 localStorage） */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--sub); opacity: .45; }
+.status-dot.ok { background: var(--ok); opacity: 1; }
+.status-dot.fail { background: var(--bad); opacity: 1; }
 .conn-ops { display: none; gap: 6px; margin-top: 8px; }
 .conn-item:hover .conn-ops, .conn-item.selected .conn-ops { display: flex; }
 .empty { padding: 24px 14px; color: var(--sub); text-align: center; line-height: 1.9; }
@@ -34,6 +38,8 @@ input:focus, select:focus { outline: none; border-color: var(--acc); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .actions { display: flex; align-items: center; gap: 10px; margin-top: 20px; }
 .msg { font-size: 13px; }
+.form-errors { margin-top: 14px; color: var(--bad); font-size: 12.5px; line-height: 1.9; list-style: none; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.35); border-radius: 7px; padding: 8px 12px 8px 26px; }
+.form-errors li::before { content: "✕"; margin-right: 6px; font-size: 11px; }
 .note { margin-top: 16px; color: var(--sub); font-size: 12px; line-height: 1.7; border-top: 1px dashed var(--line); padding-top: 12px; }
 
 .btn { background: var(--panel2); border: 1px solid var(--line); color: var(--txt); padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 13px; }

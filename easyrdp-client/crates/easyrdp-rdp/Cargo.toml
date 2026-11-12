@@ -1,0 +1,20 @@
+[package]
+name = "easyrdp-rdp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP remote-desktop engine layer (FreeRDP integration skeleton)"
+
+[dependencies]
+easyrdp-core = { path = "../easyrdp-core" }
+
+# FreeRDP FFI 绑定。default 不启用；`native` feature 才参与链接：
+#   cargo build -p easyrdp-rdp --features native
+# 需要系统已安装 FreeRDP 开发库（如 Debian: libfreerdp-dev / Windows: vcpkg freerdp）。
+# 注：crates.io 上没有 `libfreerdp-sys`，这里用社区发布的 `freerdp2-sys` 绑定。
+freerdp2-sys = { version = "0.2", optional = true }
+
+[features]
+default = []
+native = ["dep:freerdp2-sys"]

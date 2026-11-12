@@ -235,9 +235,26 @@ mod tests {
 
     #[test]
     fn expired_token_is_rejected() {
-        // 负 TTL 会把 exp 置于过去，从而确定性地触发过期路径。
-        let s = AuthState::new("test-secret", 0);
-        let token = s.issue_token("carol", &["user"]).expect("issue with ttl=0");
+        // 直接手工编码一个 exp 已过期 10 分钟的 claims（默认 leeway 60s，
+        // 过期 10 分钟可确定性触发过期路径）。
+        let s = state();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let claims = Claims {
+            sub: "carol".to_string(),
+            roles: vec!["user".to_string()],
+            iat: now - 1_200,
+            exp: now - 600,
+            iss: "easyrdp-gateway".to_string(),
+        };
+        let token = encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(b"test-secret"),
+        )
+        .expect("encode expired claims");
         assert!(matches!(
             s.validate_token(&token),
             Err(AuthError::InvalidToken)

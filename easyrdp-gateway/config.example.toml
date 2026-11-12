@@ -22,3 +22,19 @@ key_path = "/etc/easyrdp/tls/server.key"
 [audit]
 # 内存环形缓冲容量
 ring_capacity = 4096
+
+# 资源注册表：id -> 内网 RDP 后端（隧道按 id 查询后端地址）
+# GET /api/resources 只暴露 id/name，不会返回 backend。
+[[resources]]
+id = "rdp-win01"
+name = "Windows 跳板机"
+backend = "10.0.0.5:3389"
+
+[[resources]]
+id = "rdp-linux01"
+name = "Linux 桌面"
+backend = "192.168.1.20:3390"
+
+# 说明：未注册的 resource_id 只有在本身是显式 "host:port" 且主机位于
+# 私网白名单（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16、localhost/127.0.0.0/8、::1）
+# 时才允许直连——防止 SSRF 任意探测公网/DNS 目标（见 src/resources.rs::is_allowed_backend）。

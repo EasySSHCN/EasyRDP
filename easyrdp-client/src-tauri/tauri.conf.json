@@ -16,7 +16,8 @@
         "title": "EasyRDP",
         "width": 1080,
         "height": 700,
-        "resizable": true
+        "resizable": true,
+        "theme": "Dark"
       }
     ],
     "security": {
