@@ -31,6 +31,14 @@ cargo run                      # 默认监听 0.0.0.0:8443
 
 （本 README 为版本历史权威源，CHANGELOG.md 由本节生成）
 
+### v0.1.0（正式版候选，草稿）
+
+- 变更：版本号由 0.1.0-alpha 升级为 0.1.0（正式版候选），客户端各 crate 版本统一对齐
+- 新增：原生 FreeRDP2 FFI 实现（feature gate 后置启用，画面引擎接入的基础）
+- 新增：发布流水线（GitHub Actions）：push `v*` 标签自动触发 Windows / macOS / Linux 三平台构建并附 GitHub Release + 全量 SHA256SUMS.txt
+- 新增：便携版产物策略 — Windows portable.exe / win32-x64-portable.zip、macOS dmg、Linux AppImage；绿色免安装，下载解压（或直接双击）即用，不提供 MSI/NSIS/deb/rpm 安装器
+- 修复：CI 修复若干 — workflow `secrets` 上下文误用于 step 条件导致 startup failure、`taiki-e/install-action@tauri-cli` 解析失效（改用 npm 官方预编译 @tauri-apps/cli）、补齐 `src-tauri/icons/icon.png`（Linux/macOS codegen 必需）
+
 ### v0.1.0-alpha (2026-11-11)
 
 - 新增：连接中心 UI 原型与客户端 MVP 骨架（Tauri 2 + Rust workspace）
