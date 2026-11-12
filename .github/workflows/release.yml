@@ -22,6 +22,8 @@ permissions:
 env:
   APP_NAME: EasyRDP
   CLIENT_DIR: easyrdp-client
+  # secrets 上下文不能用于 step 的 if 条件，这里映射到 env 供签名步骤判断
+  AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
 
 jobs:
   build:
@@ -57,9 +59,10 @@ jobs:
         with:
           node-version: '20'
 
-      # taiki-e/install-action 预编译二进制，比 cargo install tauri-cli --locked 快得多
-      - name: Install tauri-cli
-        uses: taiki-e/install-action@tauri-cli
+      # tauri-cli 改用 npm 官方预编译发行版（taiki-e/install-action 的 tauri-cli
+      # tool 短名已无法解析：Unable to resolve action ...@tauri-cli）
+      - name: Install tauri-cli (npm prebuilt)
+        run: npm install -g @tauri-apps/cli
 
       # ---------- Linux 系统依赖（Tauri v2 官方清单）+ AppImage 打包依赖 ----------
 
@@ -124,7 +127,7 @@ jobs:
       # ============================================================
 
       - name: Sign Windows executables (Azure Trusted Signing)
-        if: matrix.platform == 'windows' && secrets.AZURE_SIGNING_ACCOUNT != ''
+        if: matrix.platform == 'windows' && env.AZURE_SIGNING_ACCOUNT != ''
         uses: azure/trusted-signing-action@v0
         with:
           azure-tenant-id: ${{ secrets.AZURE_SIGNING_TENANT_ID }}
@@ -145,13 +148,13 @@ jobs:
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
-        run: cargo tauri build --features custom-protocol
+        run: tauri build --features custom-protocol
         working-directory: ${{ env.CLIENT_DIR }}
 
       - name: Build (macOS / Linux)
         if: matrix.platform != 'windows'
         shell: bash
-        run: cargo tauri build
+        run: tauri build
         working-directory: ${{ env.CLIENT_DIR }}
 
       # ---------- 收集产物到 dist/ ----------
@@ -169,10 +172,7 @@ jobs:
           Copy-Item $exe "dist/${{ env.APP_NAME }}-$env:VER-portable.exe"
           # zip portable 包
           Compress-Archive -Path $exe -DestinationPath "dist/${{ env.APP_NAME }}-$env:VER-win32-x64-portable.zip"
-          # 安装器（如生成）
-          Get-ChildItem "${{ env.CLIENT_DIR }}/target/release/bundle" -Recurse -Include *.msi,*.exe -File |
-            Where-Object { $_.FullName -match '\\bundle\\' } |
-            Copy-Item -Destination dist
+          # 注意：EasyRDP 定位绿色免安装便携软件，不收集 MSI/NSIS 安装器
           Get-ChildItem dist
 
       - name: Collect artifacts (macOS)
@@ -238,6 +238,10 @@ jobs:
           # tag 名即触发本次发布的 tag
           tag_name: ${{ github.ref_name }}
           name: EasyRDP ${{ github.ref_name }}
+          body: |
+            绿色免安装：下载解压（或直接双击）即用。
+
+            全部产物均为便携版（Windows: portable exe / zip；macOS: dmg；Linux: AppImage），不提供任何安装器（MSI/NSIS/deb/rpm）。SHA256SUMS.txt 为全量校验文件。
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
           generate_release_notes: true
