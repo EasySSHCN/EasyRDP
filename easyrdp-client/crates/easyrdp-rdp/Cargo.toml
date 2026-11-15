@@ -1,0 +1,57 @@
+[package]
+name = "easyrdp-rdp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP remote-desktop engine layer (FreeRDP integration skeleton)"
+
+[dependencies]
+easyrdp-core = { path = "../easyrdp-core" }
+# 帧管线：BGRA32 -> JPEG（q75, 4:2:0）编码（见 src/frame_jpeg.rs）。
+jpeg-encoder.workspace = true
+
+# FreeRDP FFI 绑定。default 不启用；`native` feature 才参与链接：
+#   cargo build -p easyrdp-rdp --features native
+# 需要系统已安装 FreeRDP 开发库（如 Debian: libfreerdp-dev / Windows: vcpkg freerdp）。
+# 注：crates.io 上没有 `libfreerdp-sys`，这里用社区发布的 `freerdp2-sys` 绑定。
+freerdp2-sys = { version = "0.2", optional = true }
+
+[features]
+default = []
+native = ["dep:freerdp2-sys"]
+
+# 远端 -> 本地剪贴板落盘（ffi.rs set_local_clipboard_text）：
+# Win32 剪贴板 / 全局内存 API。遵循工作区既有 windows-sys 0.61 版本线。
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_Threading",
+    "Win32_System_DataExchange",
+    "Win32_System_Memory",
+] }
+
+# 构建脚本依赖（仅 Windows native 需要）：cc 驱动 MSVC cl.exe 编译 vendor 的
+# FreeRDP cliprdr 通道源码（静态链接 freerdp-client2.lib 时 tables.c 静态入口表
+# 需要真实 cliprdr_VirtualChannelEntryEx 符号，见 build.rs / channel_stubs.rs）。
+[target.'cfg(windows)'.build-dependencies]
+cc = "1"
+
+# 示例直接 use freerdp2_sys，仅在 native 构建时参与编译
+# （否则 cargo test --workspace 在无 FreeRDP 环境下会因缺依赖而失败）。
+[[example]]
+name = "freerdp_probe"
+required-features = ["native"]
+
+# e2e_connect 解析 connections.json（serde_json 经 easyrdp-core 已在工作区依赖图）。
+[dev-dependencies]
+serde.workspace = true
+serde_json.workspace = true
+# e2e 输入验证探针：解码全帧 JPEG 兜底帧，合成真实像素缓冲做前后差异对比
+jpeg-decoder = "0.3"
+
+[[example]]
+name = "e2e_connect"
+required-features = ["native"]
