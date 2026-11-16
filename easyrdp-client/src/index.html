@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="background:#0f1117">
+<head>
+  <script>
+    // 防白屏预绘：webview 样式表加载前先把根背景压成深色。
+    document.documentElement.style.background = '#0f1117';
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyRDP</title>
+  <!-- 缓存破坏（2026-11）：WebView2 可能缓存旧版前端 JS 导致"前端修复不生效"。
+       每次发布递增 v 参数（格式 v=YYYYMMDDNN）强制重新拉取资源。 -->
+  <link rel="stylesheet" href="ui/style.css?v=2026111401" />
+</head>
+<body>
+  <!-- 自绘标题栏（decorations:false）：LOGO 集成于此，中部可拖拽，右侧窗口控制 -->
+  <div class="titlebar">
+    <div class="tb-brand">
+      <img src="icons/logo.png?v=2026111401" alt="" class="tb-logo" onerror="this.style.display='none'" />
+      <span>EasyRDP</span>
+      <span class="tag" id="app-version-tag">…</span>
+    </div>
+    <div class="tb-drag" data-tauri-drag-region></div>
+    <button id="btn-feedback" class="btn ghost tb-btn-import" title="向开发者提交使用反馈（加密上传）">反馈</button>
+    <button id="btn-import" class="btn ghost tb-btn-import" title="导入 mstsc 导出的 .rdp 文件">导入 .rdp</button>
+    <div class="tb-controls">
+      <button id="btn-win-min" class="tb-btn" title="最小化">─</button>
+      <button id="btn-win-max" class="tb-btn" title="最大化/还原">□</button>
+      <button id="btn-win-close" class="tb-btn close" title="关闭">✕</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- 左侧：已保存连接 -->
+    <aside class="sidebar">
+      <div class="side-actions">
+        <button id="btn-new-conn" class="btn primary new-conn">＋ 新建连接</button>
+        <input id="conn-search" type="text" class="search" placeholder="搜索名称 / 主机 / 用户名…" />
+        <div class="side-btn-row">
+          <button id="btn-new-group" class="btn sm" title="为当前编辑的连接设置/新建分组">新建分组</button>
+          <button id="btn-export" class="btn sm" title="导出全部连接到 JSON 文件">导出</button>
+          <button id="btn-import-json" class="btn sm" title="从 JSON 文件导入连接（id 冲突跳过）">导入JSON</button>
+        </div>
+      </div>
+      <div class="side-head">已保存连接 <span id="conn-count" class="count">0</span></div>
+      <div id="conn-list" class="conn-list"></div>
+      <div id="conn-empty" class="empty hidden">还没有保存的连接<br>点击「＋ 新建连接」创建第一个</div>
+    </aside>
+
+    <!-- 右侧：新建/编辑连接 -->
+    <main class="main">
+      <div class="form-card">
+        <h2 id="form-title">新建连接</h2>
+        <input id="f-id" type="hidden" />
+        <label>连接名称</label>
+        <input id="f-name" type="text" placeholder="例如：办公电脑（可留空，默认用主机名）" />
+        <div class="grid2">
+          <div>
+            <label>计算机 *</label>
+            <input id="f-host" type="text" placeholder="服务器 IP 或域名" />
+          </div>
+          <div>
+            <label>端口</label>
+            <input id="f-port" type="text" value="3389" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label>用户名</label>
+            <input id="f-username" type="text" placeholder="例如：administrator" />
+          </div>
+          <div>
+            <label>密码</label>
+            <input id="f-password" type="password" placeholder="保存于本机，不上传" />
+          </div>
+        </div>
+        <label>分组</label>
+        <input id="f-group" type="text" placeholder="可选，如：公司 / 客户A（留空为「未分组」）" />
+        <label>显示</label>
+        <select id="f-resolution">
+          <option value="fit_window">自适应窗口</option>
+          <option value="fullscreen">全屏</option>
+          <option value="custom">自定义分辨率</option>
+        </select>
+        <div id="custom-res" class="grid2 hidden">
+          <div><input id="f-cw" type="text" placeholder="宽（如 1920）" /></div>
+          <div><input id="f-ch" type="text" placeholder="高（如 1080）" /></div>
+        </div>
+        <ul id="form-errors" class="form-errors hidden"></ul>
+        <div class="actions">
+          <button id="btn-save" class="btn primary">保存连接</button>
+          <button id="btn-connect" class="btn">连 接</button>
+          <button id="btn-cancel" class="btn ghost hidden">取消编辑</button>
+          <span id="msg" class="msg"></span>
+        </div>
+        <p class="note">α 预览版：远程画面引擎（FreeRDP 2.11）已接入，支持剪贴板同步；音频/文件重定向后续版本。</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- 远程画面视图（会话期间隐藏连接中心） -->
+  <section id="rdp-view" class="rdp-view hidden">
+    <div class="rdp-toolbar">
+      <span id="rdp-title" class="rdp-title">—</span>
+      <span id="rdp-status" class="rdp-status">连接中…</span>
+      <span class="rdp-spacer"></span>
+      <button id="rdp-fullscreen" class="btn sm" title="切换全屏">全屏</button>
+      <button id="rdp-win" class="btn sm" title="发送 Win 键（本地系统会截获物理 Win 键，点击此按钮打开远端开始菜单）">⊞ Win</button>
+      <button id="rdp-disconnect" class="btn sm danger" title="断开会话并回到连接中心">断开</button>
+    </div>
+    <div class="rdp-stage">
+      <canvas id="rdp-canvas" tabindex="0"
+        title="点击画布以捕获键盘；鼠标/滚轮/按键将发送到远程桌面"></canvas>
+    </div>
+  </section>
+
+  <!-- 使用反馈弹窗（加密提交到官网，与 EasySSH 反馈机制同族） -->
+  <div id="fb-modal" class="fb-mask hidden">
+    <div class="fb-dialog">
+      <div class="fb-head">
+        <span>使用反馈</span>
+        <button id="fb-close" class="fb-x" title="关闭">✕</button>
+      </div>
+      <label class="fb-label">反馈类型</label>
+      <select id="fb-type">
+        <option>功能建议</option>
+        <option selected>问题反馈</option>
+        <option>其他</option>
+      </select>
+      <label class="fb-label">联系方式（选填，邮箱/微信/QQ 等，便于我们回复您）</label>
+      <input id="fb-contact" type="text" maxlength="120" placeholder="选填" />
+      <label class="fb-label">反馈内容（5-2000 字）</label>
+      <textarea id="fb-content" placeholder="请描述您遇到的问题或建议：使用场景、操作步骤、期望行为等，越具体越有利于定位。"></textarea>
+      <div class="fb-count-row">
+        <button id="fb-count" class="btn sm">计算字数</button>
+        <span id="fb-count-result" class="fb-count-result"></span>
+      </div>
+      <div class="fb-foot">
+        <span class="fb-privacy">内容加密上传；系统基础信息（版本/系统/分辨率）随反馈匿名收集用于问题定位。</span>
+        <button id="fb-submit" class="btn primary">提 交</button>
+      </div>
+      <div id="fb-msg" class="fb-msg"></div>
+    </div>
+  </div>
+
+  <script type="module" src="ui/main.js?v=2026111401"></script>
+  <script>
+    // 防呆双保险：即使模块脚本失败也强制显示窗口，并把 JS 错误画在界面上（便于截图反馈）。
+    (function () {
+      var errs = [];
+      window.addEventListener("error", function (e) {
+        errs.push((e.message || String(e.error || e)) + " @ " + (e.filename || "?") + ":" + (e.lineno || "?"));
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        errs.push("promise: " + String(e.reason));
+      });
+      setTimeout(function () {
+        try {
+          var T = window.__TAURI__;
+          var w = T && T.window && T.window.getCurrentWindow && T.window.getCurrentWindow();
+          if (w && w.show) w.show();
+        } catch (e) { errs.push("show(): " + e); }
+        document.body.classList.add("ready");
+        if (!window.__TAURI__) {
+          errs.push("window.__TAURI__ 未注入（withGlobalTauri 未生效？）");
+        }
+        if (errs.length) {
+          var bar = document.createElement("div");
+          bar.style.cssText = "position:fixed;bottom:0;left:0;right:0;max-height:45%;overflow:auto;" +
+            "background:#3a1a1a;color:#ffb4b4;font:12px/1.6 Consolas,monospace;padding:10px;z-index:9999;white-space:pre-wrap;";
+          bar.textContent = "EasyRDP 启动诊断（请截图反馈）：\n" + errs.join("\n");
+          document.body.appendChild(bar);
+        }
+      }, 2500);
+    })();
+  </script>
+</body>
+</html>
