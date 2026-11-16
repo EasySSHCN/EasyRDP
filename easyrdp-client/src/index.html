@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="background:#0f1117">
+<head>
+  <script>
+    // 防白屏预绘：webview 样式表加载前先把根背景压成深色。
+    document.documentElement.style.background = '#0f1117';
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyRDP</title>
+  <!-- 缓存破坏（2026-11）：WebView2 可能缓存旧版前端 JS 导致"前端修复不生效"。
+       每次发布递增 v 参数（格式 v=YYYYMMDDNN）强制重新拉取资源。 -->
+  <link rel="stylesheet" href="ui/style.css?v=2026111701" />
+</head>
+<body>
+  <!-- 自绘标题栏（decorations:false）：LOGO 集成于此，中部可拖拽，右侧窗口控制 -->
+  <div class="titlebar">
+    <div class="tb-brand">
+      <img src="icons/logo.png?v=2026111401" alt="" class="tb-logo" onerror="this.style.display='none'" />
+      <span>EasyRDP</span>
+      <span class="tag" id="app-version-tag">…</span>
+    </div>
+    <div class="tb-drag" data-tauri-drag-region></div>
+    <button id="btn-settings" class="btn ghost tb-btn-import" data-i18n="tb.settings" data-i18n-title="tb.title.openSettings">⚙ 设置</button>
+    <button id="btn-feedback" class="btn ghost tb-btn-import" data-i18n="tb.feedback" data-i18n-title="tb.title.feedback">反馈</button>
+    <button id="btn-import" class="btn ghost tb-btn-import" data-i18n="tb.importRdp" data-i18n-title="tb.title.importRdp">导入 .rdp</button>
+    <div class="tb-controls">
+      <button id="btn-win-min" class="tb-btn" data-i18n-title="tb.title.min">─</button>
+      <button id="btn-win-max" class="tb-btn" data-i18n-title="tb.title.max">□</button>
+      <button id="btn-win-close" class="tb-btn close" data-i18n-title="tb.title.close">✕</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- 左侧：已保存连接 -->
+    <aside class="sidebar">
+      <div class="side-actions">
+        <button id="btn-new-conn" class="btn primary new-conn" data-i18n="side.newConn">＋ 新建连接</button>
+        <input id="conn-search" type="text" class="search" data-i18n-ph="side.ph.search" placeholder="搜索名称 / 主机 / 用户名…" />
+        <div class="side-btn-row">
+          <button id="btn-new-group" class="btn sm" data-i18n="side.newGroup" data-i18n-title="side.title.newGroup">新建分组</button>
+          <button id="btn-export" class="btn sm" data-i18n="side.export" data-i18n-title="side.title.export">导出</button>
+          <button id="btn-import-json" class="btn sm" data-i18n="side.importJson" data-i18n-title="side.title.importJson">导入JSON</button>
+        </div>
+      </div>
+      <!-- R-20261116-007 多会话并行：活跃会话数 + 快捷断开入口（动态渲染） -->
+      <div id="session-bar" class="side-head hidden" style="flex-wrap:wrap;gap:6px;">
+        <span id="session-bar-count">0</span>
+        <span id="session-bar-items" style="display:flex;flex-wrap:wrap;gap:4px;"></span>
+      </div>
+      <div class="side-head"><span data-i18n="side.head">已保存连接</span> <span id="conn-count" class="count">0</span></div>
+      <div id="conn-list" class="conn-list"></div>
+      <div id="conn-empty" class="empty hidden" data-i18n-html="side.empty">还没有保存的连接<br>点击「＋ 新建连接」创建第一个</div>
+    </aside>
+
+    <!-- 右侧：新建/编辑连接 -->
+    <main class="main">
+      <div class="form-card">
+        <h2 id="form-title" data-i18n="form.new">新建连接</h2>
+        <input id="f-id" type="hidden" />
+        <label data-i18n="form.label.name">连接名称</label>
+        <input id="f-name" type="text" data-i18n-ph="form.ph.name" placeholder="例如：办公电脑（可留空，默认用主机名）" />
+        <div class="grid2">
+          <div>
+            <label data-i18n="form.label.host">计算机 *</label>
+            <input id="f-host" type="text" data-i18n-ph="form.ph.host" placeholder="服务器 IP 或域名" />
+          </div>
+          <div>
+            <label data-i18n="form.label.port">端口</label>
+            <input id="f-port" type="text" value="3389" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label data-i18n="form.label.username">用户名</label>
+            <input id="f-username" type="text" data-i18n-ph="form.ph.username" placeholder="例如：administrator" />
+          </div>
+          <div>
+            <label data-i18n="form.label.password">密码</label>
+            <input id="f-password" type="password" data-i18n-ph="form.ph.password" placeholder="保存于本机，不上传" />
+          </div>
+        </div>
+        <label data-i18n="form.label.group">分组</label>
+        <input id="f-group" type="text" data-i18n-ph="form.ph.group" placeholder="可选，如：公司 / 客户A（留空为「未分组」）" />
+        <label data-i18n="form.label.display">显示</label>
+        <select id="f-resolution">
+          <option value="fit_window" data-i18n="form.res.fit">自适应窗口</option>
+          <option value="fullscreen" data-i18n="form.res.full">全屏</option>
+          <option value="custom" data-i18n="form.res.custom">自定义分辨率</option>
+        </select>
+        <div id="custom-res" class="grid2 hidden">
+          <div><input id="f-cw" type="text" data-i18n-ph="form.ph.cw" placeholder="宽（如 1920）" /></div>
+          <div><input id="f-ch" type="text" data-i18n-ph="form.ph.ch" placeholder="高（如 1080）" /></div>
+        </div>
+        <ul id="form-errors" class="form-errors hidden"></ul>
+        <div class="actions">
+          <button id="btn-save" class="btn primary" data-i18n="form.btnSave">保存连接</button>
+          <button id="btn-connect" class="btn" data-i18n="form.btnConnect">连 接</button>
+          <button id="btn-cancel" class="btn ghost hidden" data-i18n="form.btnCancel">取消编辑</button>
+          <span id="msg" class="msg"></span>
+        </div>
+        <!-- F-20261117-002：原「α 预览版」说明行改为连接状态友好提示区
+             （连接中/已连接/已断开/错误原因），由 main.js setConnHint 驱动 -->
+        <p class="note" id="conn-hint">&nbsp;</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- 远程画面视图（会话期间隐藏连接中心） -->
+  <section id="rdp-view" class="rdp-view hidden">
+    <div class="rdp-toolbar">
+      <span id="rdp-title" class="rdp-title">—</span>
+      <span id="rdp-status" class="rdp-status" data-i18n="rdp.connecting">连接中…</span>
+      <span class="rdp-spacer"></span>
+      <button id="rdp-fullscreen" class="btn sm" data-i18n="rdp.fullscreen" data-i18n-title="rdp.title.fullscreen">全屏</button>
+      <button id="rdp-win" class="btn sm" data-i18n="rdp.win" data-i18n-title="rdp.title.win">⊞ Win</button>
+      <button id="rdp-disconnect" class="btn sm danger" data-i18n="rdp.disconnect" data-i18n-title="rdp.title.disconnect">断开</button>
+    </div>
+    <div class="rdp-stage">
+      <canvas id="rdp-canvas" tabindex="0"
+        data-i18n-title="rdp.title.canvas"
+        title="点击画布以捕获键盘；鼠标/滚轮/按键将发送到远程桌面"></canvas>
+    </div>
+  </section>
+
+  <!-- 使用反馈弹窗（加密提交到官网，与 EasySSH 反馈机制同族） -->
+  <div id="fb-modal" class="fb-mask hidden">
+    <div class="fb-dialog">
+      <div class="fb-head">
+        <span data-i18n="fb.title">使用反馈</span>
+        <button id="fb-close" class="fb-x" data-i18n-title="fb.title.close">✕</button>
+      </div>
+      <label class="fb-label" data-i18n="fb.label.type">反馈类型</label>
+      <select id="fb-type">
+        <option data-i18n="fb.type.suggest">功能建议</option>
+        <option selected data-i18n="fb.type.problem">问题反馈</option>
+        <option data-i18n="fb.type.other">其他</option>
+      </select>
+      <label class="fb-label" data-i18n="fb.label.contact">联系方式（选填，邮箱/微信/QQ 等，便于我们回复您）</label>
+      <input id="fb-contact" type="text" maxlength="120" data-i18n-ph="fb.ph.contact" placeholder="选填" />
+      <label class="fb-label" data-i18n="fb.label.content">反馈内容（5-2000 字）</label>
+      <textarea id="fb-content" data-i18n-ph="fb.ph.content" placeholder="请描述您遇到的问题或建议：使用场景、操作步骤、期望行为等，越具体越有利于定位。"></textarea>
+      <div class="fb-count-row">
+        <button id="fb-count" class="btn sm" data-i18n="fb.btn.count">计算字数</button>
+        <span id="fb-count-result" class="fb-count-result"></span>
+      </div>
+      <div class="fb-foot">
+        <span class="fb-privacy" data-i18n="fb.privacy">内容加密上传；系统基础信息（版本/系统/分辨率）随反馈匿名收集用于问题定位。</span>
+        <button id="fb-submit" class="btn primary" data-i18n="fb.btn.submit">提 交</button>
+      </div>
+      <div id="fb-msg" class="fb-msg"></div>
+    </div>
+  </div>
+
+  <!-- 设置弹窗（R-20261116-009 框架：左侧分组导航 + 右侧面板。
+       R-20261116-011/012/013：常规=语言、外观=主题+强调色、快捷方式=生成按钮。
+       更新分组由更新需求填充。关于面板动态显示当前版本。 -->
+  <div id="settings-modal" class="settings-mask hidden">
+    <div class="settings-dialog">
+      <div class="settings-head">
+        <span data-i18n="set.title">设置</span>
+        <button id="settings-close" class="fb-x" data-i18n-title="fb.title.close">✕</button>
+      </div>
+      <div class="settings-wrap">
+        <nav class="settings-nav" aria-label="设置分组">
+          <button type="button" class="item on" data-panel="general" data-i18n="set.nav.general">⚙ 常规</button>
+          <button type="button" class="item" data-panel="appearance" data-i18n="set.nav.appearance">🎨 外观</button>
+          <button type="button" class="item" data-panel="update" data-i18n="set.nav.update">⬆ 更新</button>
+          <button type="button" class="item" data-panel="shortcuts" data-i18n="set.nav.shortcuts">⤓ 快捷方式</button>
+          <button type="button" class="item" data-panel="combos">⌨ 组合键</button>
+          <button type="button" class="item" data-panel="about" data-i18n="set.nav.about">ℹ 关于</button>
+        </nav>
+        <div class="settings-body">
+          <section class="settings-panel on" data-panel="general">
+            <h1 data-i18n="set.general.h">常规</h1>
+            <p class="desc" data-i18n="set.general.desc">应用基础行为配置（界面语言、启动行为等）。</p>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.lang">界面语言</label>
+              <select id="set-lang" class="settings-select">
+                <option value="zh-CN">简体中文</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
+              </select>
+            </div>
+            <div class="settings-tips" data-i18n="set.general.placeholder">占位：常规分组其余设置项将在后续版本中填充。</div>
+          </section>
+          <section class="settings-panel" data-panel="appearance">
+            <h1 data-i18n="set.appearance.h">外观</h1>
+            <p class="desc" data-i18n="set.appearance.desc">深浅主题与界面观感。</p>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.theme">主题</label>
+              <div class="settings-seg" id="set-theme-seg" role="radiogroup">
+                <label class="seg-opt"><input type="radio" name="set-theme" value="dark" /><span data-i18n="theme.dark">深色</span></label>
+                <label class="seg-opt"><input type="radio" name="set-theme" value="light" /><span data-i18n="theme.light">浅色</span></label>
+                <label class="seg-opt"><input type="radio" name="set-theme" value="system" /><span data-i18n="theme.system">跟随系统</span></label>
+              </div>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.accent">强调色</label>
+              <div class="settings-seg" id="set-accent-seg" role="radiogroup">
+                <label class="seg-opt"><input type="radio" name="set-accent" value="a1" /><span data-i18n="accent.a1">经典蓝</span></label>
+                <label class="seg-opt"><input type="radio" name="set-accent" value="a2" /><span data-i18n="accent.a2">翠绿</span></label>
+                <label class="seg-opt"><input type="radio" name="set-accent" value="a3" /><span data-i18n="accent.a3">紫罗兰</span></label>
+              </div>
+            </div>
+          </section>
+          <section class="settings-panel" data-panel="update">
+            <h1 data-i18n="set.update.h">更新</h1>
+            <p class="desc" data-i18n="set.update.desc">自动检查更新与更新频率。</p>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.update.auto">自动检查更新</label>
+              <input id="set-update-auto" type="checkbox" />
+            </div>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.update.freq">检查频率</label>
+              <select id="set-update-freq" class="settings-select">
+                <option value="startup" data-i18n="set.update.freq.startup">每次启动</option>
+                <option value="daily" data-i18n="set.update.freq.daily">每天一次</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label" data-i18n="set.update.current">当前版本</label>
+              <span id="set-update-ver"></span>
+              <button id="set-update-check" class="btn" data-i18n="set.update.check">检查更新</button>
+            </div>
+            <div id="set-update-status" class="settings-status"></div>
+            <div id="set-update-progress" class="settings-progress" style="display:none">
+              <div id="set-update-bar" class="settings-progress-bar"></div>
+            </div>
+            <div id="set-update-notes" class="settings-tips" style="display:none"></div>
+            <button id="set-update-download" class="btn primary" data-i18n="set.update.download" style="display:none">下载并安装</button>
+            <div class="settings-tips" data-i18n="set.update.restartNote">提示：安装完成后应用将自动重启完成升级；升级完成后会自动刷新桌面 / 快速启动栏快捷方式。</div>
+          </section>
+          <section class="settings-panel" data-panel="shortcuts">
+            <h1 data-i18n="set.shortcuts.h">快捷方式</h1>
+            <p class="desc" data-i18n="set.shortcuts.desc">桌面 / 快速启动栏快捷方式生成与自动刷新。</p>
+            <div class="settings-row">
+              <button id="sc-desktop" class="btn" data-i18n="sc.btn.desktop">生成桌面快捷方式</button>
+              <button id="sc-quick" class="btn" data-i18n="sc.btn.quick">生成快速启动栏快捷方式</button>
+            </div>
+            <div id="sc-status" class="settings-status"></div>
+            <div class="settings-tips" data-i18n="set.shortcuts.autorefresh">升级完成后将自动检查并刷新桌面 / 快速启动栏快捷方式（默认开启）。</div>
+          </section>
+          <section class="settings-panel" data-panel="combos">
+            <h1>组合键</h1>
+            <p class="desc">远程窗口标题栏 SAS 菜单的「全局」自定义组合键（对所有会话生效）。</p>
+            <div id="combos-list" class="settings-status"></div>
+            <div class="settings-row">
+              <input id="combo-name" type="text" class="settings-select" placeholder="名称（如：任务管理器）" style="flex:1" maxlength="40" />
+              <input id="combo-keys" type="text" class="settings-select" placeholder="组合键（如：Ctrl+Shift+Esc）" style="flex:1" maxlength="60" />
+              <button id="combo-add" class="btn">添加</button>
+            </div>
+            <div class="settings-tips">格式：用 + 连接，支持 Win / Ctrl / Alt / Shift / 单个字母数字 / F1-F12 / Esc / Tab / Enter / Del / 方向键等。添加后出现在远程窗口 SAS 菜单底部。</div>
+          </section>
+          <section class="settings-panel" data-panel="about">
+            <h1 data-i18n="set.about.h">关于</h1>
+            <p class="desc" data-i18n="set.about.desc">版本与项目信息。</p>
+            <div class="settings-tips" id="settings-about-ver">EasyRDP</div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="ui/main.js?v=2026111701"></script>
+  <script>
+    // 防呆双保险：即使模块脚本失败也强制显示窗口，并把 JS 错误画在界面上（便于截图反馈）。
+    (function () {
+      var errs = [];
+      window.addEventListener("error", function (e) {
+        errs.push((e.message || String(e.error || e)) + " @ " + (e.filename || "?") + ":" + (e.lineno || "?"));
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        errs.push("promise: " + String(e.reason));
+      });
+      setTimeout(function () {
+        try {
+          var T = window.__TAURI__;
+          var w = T && T.window && T.window.getCurrentWindow && T.window.getCurrentWindow();
+          if (w && w.show) w.show();
+        } catch (e) { errs.push("show(): " + e); }
+        document.body.classList.add("ready");
+        if (!window.__TAURI__) {
+          errs.push("window.__TAURI__ 未注入（withGlobalTauri 未生效？）");
+        }
+        if (errs.length) {
+          var bar = document.createElement("div");
+          bar.style.cssText = "position:fixed;bottom:0;left:0;right:0;max-height:45%;overflow:auto;" +
+            "background:#3a1a1a;color:#ffb4b4;font:12px/1.6 Consolas,monospace;padding:10px;z-index:9999;white-space:pre-wrap;";
+          bar.textContent = "EasyRDP 启动诊断（请截图反馈）：\n" + errs.join("\n");
+          document.body.appendChild(bar);
+        }
+      }, 2500);
+    })();
+  </script>
+</body>
+</html>
