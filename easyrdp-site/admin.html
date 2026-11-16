@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>EasyRDP 官网后台管理</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+<style>
+:root{--bg:#0.2.00;--panel:#111a2e;--panel2:#16213a;--line:#233150;--txt:#d7e2f2;--muted:#8fa3bf;--acc:#4f8dff;--ok:#35e08a;--warn:#ffb454;--bad:#ff6b6b;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;}
+.hidden{display:none!important;}
+a{color:var(--acc);text-decoration:none;}
+button{font-family:inherit;}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);}
+.topbar .logo{font-weight:700;font-size:16px;color:var(--txt);}
+.topbar .logo b{color:var(--acc);}
+.topbar .spacer{flex:1;}
+.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;}
+.btn:hover{border-color:var(--acc);}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff;}
+.btn.danger{border-color:var(--bad);color:var(--bad);}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:6px;}
+.wrap{max-width:1180px;margin:0 auto;padding:20px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;}
+input,select,textarea{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);}
+textarea{width:100%;min-height:90px;resize:vertical;}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 4px;}
+/* 登录 */
+#loginBox{max-width:380px;margin:8vh auto;}
+#loginBox h2{text-align:center;}
+#loginBox .captcha-row{display:flex;gap:10px;align-items:center;}
+#loginBox .captcha-row img{height:42px;border-radius:6px;cursor:pointer;border:1px solid var(--line);}
+#loginMsg{text-align:center;margin-top:10px;font-size:13px;min-height:18px;}
+/* 工具行 */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.toolbar .count{color:var(--muted);font-size:12px;margin-left:auto;}
+/* 表格 */
+table{width:100%;border-collapse:collapse;}
+th,td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left;vertical-align:top;font-size:13px;}
+th{color:var(--muted);font-weight:600;white-space:nowrap;}
+td .fb-content{white-space:pre-wrap;word-break:break-word;}
+.tag{display:inline-block;border-radius:5px;padding:1px 8px;font-size:12px;margin-right:4px;}
+.tag.type{background:#1c2b4a;color:#9fc1ff;}
+.tag.pub{background:#123527;color:var(--ok);}
+.tag.new{background:#3a2a12;color:var(--warn);}
+.badge-ver{color:var(--muted);font-size:12px;}
+.reply-box{margin-top:6px;background:var(--panel2);border-left:3px solid var(--ok);border-radius:0 8px 8px 0;padding:8px 10px;color:var(--txt);white-space:pre-wrap;word-break:break-word;}
+.reply-box .rlabel{color:var(--ok);font-size:12px;font-weight:600;}
+.sysinfo{color:var(--muted);font-size:12px;margin-top:6px;cursor:pointer;}
+/* 分页 */
+.pager{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:14px;flex-wrap:wrap;font-size:13px;}
+.pager .info{color:var(--muted);margin-right:10px;}
+.pager button{min-width:32px;padding:5px 9px;}
+.pager button.cur{background:var(--acc);border-color:var(--acc);color:#fff;}
+.pager select{padding:4px 8px;}
+/* 弹窗 */
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;width:min(560px,92vw);max-height:86vh;overflow:auto;}
+.modal h3{margin:0 0 12px;}
+.modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;}
+.chip{color:var(--muted);font-size:12px;}
+#toast{position:fixed;right:18px;bottom:18px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:8px;padding:10px 16px;font-size:13px;z-index:99;display:none;}
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="loginBox" class="card">
+  <h2>EasyRDP 官网后台</h2>
+  <label>用户名</label>
+  <input id="lgUser" style="width:100%" autocomplete="username">
+  <label>密码</label>
+  <input id="lgPass" type="password" style="width:100%" autocomplete="current-password">
+  <label>图形验证码（点击图片可刷新）</label>
+  <div class="captcha-row">
+    <input id="lgCaptcha" style="flex:1" maxlength="8" autocomplete="off">
+    <img id="lgCaptchaImg" alt="验证码" title="点击刷新">
+  </div>
+  <div style="display:flex;gap:10px;margin-top:16px;">
+    <button id="btnLogin" class="btn primary" style="flex:1">登 录</button>
+    <button id="btnForgot" class="btn">忘记密码?</button>
+  </div>
+  <div id="loginMsg"></div>
+</div>
+
+<!-- 主界面 -->
+<div id="main" class="hidden">
+  <div class="topbar">
+    <span class="logo">Easy<b>RDP</b> 官网后台</span>
+    <span class="chip" id="whoami"></span>
+    <span class="spacer"></span>
+    <button id="btnProfile" class="btn sm">👤 账号设置</button>
+    <button id="btnLogout" class="btn sm">退出</button>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="toolbar">
+        <select id="fType">
+          <option value="">全部类型</option>
+          <option>功能建议</option>
+          <option>问题反馈</option>
+          <option>其他</option>
+        </select>
+        <select id="fStatus">
+          <option value="">全部状态</option>
+          <option value="new">待处理</option>
+          <option value="replied">已回复</option>
+        </select>
+        <select id="fPublic">
+          <option value="">全部公开态</option>
+          <option value="1">已公开</option>
+          <option value="0">未公开</option>
+        </select>
+        <input id="fKeyword" placeholder="搜索内容/联系方式…" style="width:220px">
+        <button id="btnRefresh" class="btn sm">刷新</button>
+        <button id="btnAdd" class="btn sm primary">＋ 补录反馈</button>
+        <span class="count" id="statCount"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th style="width:150px">时间 / 版本</th><th>反馈内容</th><th style="width:200px">操作</th></tr></thead>
+          <tbody id="fbList"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 回复/补录 弹窗 -->
+<div id="dlgMask" class="modal-mask hidden">
+  <div class="modal">
+    <h3 id="dlgTitle">回复反馈</h3>
+    <div id="dlgQuote" class="reply-box hidden"></div>
+    <label id="dlgInputLabel">回复内容（1-2000 字）</label>
+    <textarea id="dlgText"></textarea>
+    <div id="dlgMeta" class="hidden">
+      <label>类型</label>
+      <select id="dlgType"><option>功能建议</option><option>问题反馈</option><option>其他</option></select>
+      <label>联系方式（选填）</label>
+      <input id="dlgContact" style="width:100%" maxlength="120">
+    </div>
+    <div class="actions">
+      <button class="btn" id="dlgCancel">取消</button>
+      <button class="btn primary" id="dlgOk">确 定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 账号设置 弹窗 -->
+<div id="profMask" class="modal-mask hidden">
+  <div class="modal">
+    <h3>账号设置</h3>
+    <p class="chip">当前绑定邮箱：<span id="profEmail">加载中…</span>（绑定邮箱后可自助找回密码）</p>
+    <label>绑定邮箱</label>
+    <div style="display:flex;gap:8px;">
+      <input id="profNewEmail" style="flex:1">
+      <button class="btn sm" id="btnBindCode">发送验证码</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <input id="profBindCode" placeholder="6 位验证码" style="flex:1" maxlength="6">
+      <button class="btn sm primary" id="btnBindConfirm">确认绑定</button>
+    </div>
+    <hr style="border-color:var(--line);margin:16px 0;">
+    <label>当前密码（修改密码必填）</label>
+    <input id="profCurPass" type="password" style="width:100%">
+    <label>新用户名（留空不改）</label>
+    <input id="profNewUser" style="width:100%">
+    <label>新密码（留空不改，至少 8 位）</label>
+    <input id="profNewPass" type="password" style="width:100%">
+    <button class="btn sm" id="btnChangePwd" style="margin-top:10px;">修改用户名/密码</button>
+    <div class="actions">
+      <button class="btn" id="profClose">关 闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 忘记密码 弹窗 -->
+<div id="forgotMask" class="modal-mask hidden">
+  <div class="modal">
+    <h3>找回密码</h3>
+    <p class="chip">需与管理员用户名 + 绑定邮箱匹配；验证码发送至绑定邮箱。</p>
+    <label>用户名</label><input id="fgUser" style="width:100%">
+    <label>绑定邮箱</label><input id="fgEmail" style="width:100%">
+    <label>邮箱验证码</label><input id="fgCode" style="width:100%" maxlength="6">
+    <label>新密码（至少 8 位）</label><input id="fgNewPass" type="password" style="width:100%">
+    <div class="actions">
+      <button class="btn" id="fgCancel">取消</button>
+      <button class="btn primary" id="fgSend">先发验证码</button>
+      <button class="btn primary" id="fgReset">重置密码</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const API = 'api/feedback/admin.php';
+const CAPTCHA = 'api/captcha/img.php';
+const PAGE_KEY = 'rdp_admin_page_size';
+const $ = (s) => document.querySelector(s);
+let USER = '', TOKEN = '', CAPTCHA_ID = '';
+let ALL = [], view = [], page = 1, pageSize = parseInt(localStorage.getItem(PAGE_KEY) || '10', 10);
+let dlgMode = 'reply', dlgId = '';
+
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function toast(msg, ok=true){const t=$('#toast');t.textContent=msg;t.style.borderLeftColor=ok?'var(--ok)':'var(--bad)';t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',3200);}
+async function post(payload){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});return r.json();}
+
+/* ---------- 验证码 ---------- */
+async function loadCaptcha(){
+  try{
+    const r = await fetch(CAPTCHA + '?t=' + Date.now());
+    const j = await r.json();
+    if (j.ok){ CAPTCHA_ID = j.id; $('#lgCaptchaImg').src = j.img; }
+    else { $('#loginMsg').textContent = j.message || ''; $('#loginMsg').style.color = 'var(--bad)';
+      if ((j.message||'').includes('秒后再试')) setTimeout(loadCaptcha, 3200); }
+  }catch(e){ $('#loginMsg').textContent = '验证码加载失败'; $('#loginMsg').style.color='var(--bad)'; }
+}
+$('#lgCaptchaImg').addEventListener('click', loadCaptcha);
+
+/* ---------- 登录/登出 ---------- */
+$('#btnLogin').addEventListener('click', async () => {
+  const btn = $('#btnLogin'); btn.disabled = true;
+  $('#loginMsg').textContent = '登录中…'; $('#loginMsg').style.color = '';
+  try{
+    const j = await post({action:'login', user:$('#lgUser').value.trim(), pass:$('#lgPass').value, captchaId:CAPTCHA_ID, captchaCode:$('#lgCaptcha').value.trim()});
+    if (j.ok){ USER = j.user; TOKEN = j.token; enter(); }
+    else { $('#loginMsg').textContent = j.message || '登录失败'; $('#loginMsg').style.color = 'var(--bad)'; loadCaptcha(); }
+  }catch(e){ $('#loginMsg').textContent = '网络错误: ' + e.message; $('#loginMsg').style.color='var(--bad)'; loadCaptcha(); }
+  finally{ btn.disabled = false; }
+});
+$('#lgPass').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnLogin').click(); });
+$('#btnLogout').addEventListener('click', () => { USER=''; TOKEN=''; location.reload(); });
+$('#btnForgot').addEventListener('click', () => { $('#forgotMask').classList.remove('hidden'); });
+
+async function enter(){
+  $('#loginBox').classList.add('hidden'); $('#main').classList.remove('hidden');
+  $('#whoami').textContent = USER;
+  const p = await post({action:'profile', user:USER, token:TOKEN});
+  if (p.ok) $('#profEmail').textContent = p.email || '（未绑定）';
+  refresh();
+}
+
+/* ---------- 列表 ---------- */
+async function refresh(){
+  const j = await post({action:'list', user:USER, token:TOKEN});
+  if (!j.ok){ toast(j.message || '加载失败', false); if ((j.message||'').includes('重新登录')) location.reload(); return; }
+  ALL = j.items || [];
+  applyFilter();
+}
+function applyFilter(){
+  const t = $('#fType').value, st = $('#fStatus').value, pub = $('#fPublic').value, kw = $('#fKeyword').value.trim().toLowerCase();
+  view = ALL.filter(it =>
+    (!t || it.type === t) &&
+    (!st || it.status === st) &&
+    (pub === '' || String(it.public ? 1 : 0) === pub) &&
+    (!kw || (it.content||'').toLowerCase().includes(kw) || (it.contact||'').toLowerCase().includes(kw))
+  );
+  const pages = Math.max(1, Math.ceil(view.length / pageSize));
+  if (page > pages) page = pages;
+  render();
+}
+$('#fType').addEventListener('change', applyFilter);
+$('#fStatus').addEventListener('change', applyFilter);
+$('#fPublic').addEventListener('change', applyFilter);
+$('#btnRefresh').addEventListener('click', refresh);
+$('#fKeyword').addEventListener('input', () => { page = 1; applyFilter(); });
+$('#btnAdd').addEventListener('click', () => { dlgMode='add'; $('#dlgTitle').textContent='补录反馈';
+  $('#dlgQuote').classList.add('hidden'); $('#dlgMeta').classList.remove('hidden');
+  $('#dlgInputLabel').textContent='反馈内容（5-2000 字）'; $('#dlgText').value=''; $('#dlgContact').value='';
+  $('#dlgMask').classList.remove('hidden'); });
+
+function render(){
+  const tb = $('#fbList'); tb.innerHTML = '';
+  const start = (page-1)*pageSize, rows = view.slice(start, start+pageSize);
+  for (const it of rows){
+    const tr = document.createElement('tr');
+    const sysCount = (it.systemInfo && Object.keys(it.systemInfo).length) || 0;
+    tr.innerHTML =
+      '<td>' + esc(it.date) + '<div class="badge-ver">' + esc(it.appVersion ? 'v' + it.appVersion : '') + '</div>' +
+        '<div class="badge-ver">' + esc(it.ipHash ? it.ipHash.slice(0,8) + '…' : '') + '</div></td>' +
+      '<td><span class="tag type">' + esc(it.type) + '</span>' +
+        (it.public ? '<span class="tag pub">已公开</span>' : '') +
+        (it.status === 'new' ? '<span class="tag new">待处理</span>' : '') + '</span>' +
+        '<div class="fb-content">' + esc(it.content) + '</div>' +
+        (it.contact ? '<div class="chip">联系方式: ' + esc(it.contact) + '</div>' : '') +
+        (it.reply ? '<div class="reply-box"><span class="rlabel">官方回复 · ' + esc(fmtTs(it.replyAt)) + '</span><br>' + esc(it.reply) + '</div>' : '') +
+        (sysCount ? '<div class="sysinfo" title="点击查看系统信息" data-sys="'+esc(it.id)+'">🖥 系统信息(' + sysCount + '项)</div>' : '') +
+      '</td>' +
+      '<td>' +
+        '<button class="btn sm" data-act="reply" data-id="'+esc(it.id)+'">回复</button> ' +
+        '<button class="btn sm" data-act="pub" data-id="'+esc(it.id)+'">' + (it.public ? '取消公开' : '公开') + '</button> ' +
+        '<button class="btn sm" data-act="del" data-id="'+esc(it.id)+'">删除</button>' +
+      '</td>';
+    tb.appendChild(tr);
+  }
+  if (!rows.length) tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:30px;">暂无反馈</td></tr>';
+  $('#statCount').textContent = '共 ' + view.length + ' 条（全库 ' + ALL.length + ' 条）';
+  renderPager();
+}
+function fmtTs(ms){ if(!ms) return ''; const d = new Date(ms); const p = n => String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+
+/* ---------- 完整分页（项目级永久规范） ---------- */
+function renderPager(){
+  const el = $('#pager'); el.innerHTML = '';
+  const total = view.length, pages = Math.max(1, Math.ceil(total / pageSize));
+  if (page > pages) page = pages;
+  const startIdx = total ? (page-1)*pageSize + 1 : 0, endIdx = Math.min(page*pageSize, total);
+  const info = document.createElement('span'); info.className = 'info';
+  info.textContent = '当前显示第 ' + startIdx + ' - ' + endIdx + ' 条 · 共 ' + total + ' 条 · 第 ' + page + ' / ' + pages + ' 页';
+  el.appendChild(info);
+  const mk = (label, target, disabled, cur) => {
+    const b = document.createElement('button'); b.className = 'btn sm' + (cur ? ' cur' : ''); b.textContent = label;
+    b.disabled = !!disabled; if (!disabled && target) b.addEventListener('click', () => { page = target; render(); });
+    el.appendChild(b);
+  };
+  mk('«', 1, page === 1); mk('‹', page-1, page === 1);
+  const list = [];
+  for (let i = 1; i <= pages; i++){
+    if (i === 1 || i === pages || Math.abs(i - page) <= 2) list.push(i);
+  }
+  let prev = 0;
+  for (const i of list){
+    if (i - prev > 1){ const dots = document.createElement('span'); dots.className = 'info'; dots.textContent = '…'; el.appendChild(dots); }
+    mk(String(i), i, false, i === page); prev = i;
+  }
+  mk('›', page+1, page === pages); mk('»', pages, page === pages);
+  const lbl = document.createElement('span'); lbl.className = 'info'; lbl.textContent = '每页'; el.appendChild(lbl);
+  const sel = document.createElement('select');
+  for (const n of [10, 20, 50, 100]){ const o = document.createElement('option'); o.value = n; o.textContent = n; if (n === pageSize) o.selected = true; sel.appendChild(o); }
+  sel.addEventListener('change', () => { pageSize = parseInt(sel.value, 10); localStorage.setItem(PAGE_KEY, sel.value); page = 1; render(); });
+  el.appendChild(sel);
+}
+
+/* ---------- 系统信息弹窗 ---------- */
+document.addEventListener('click', (e) => {
+  const id = e.target && e.target.getAttribute && e.target.getAttribute('data-sys');
+  if (id){
+    const it = ALL.find(x => x.id === id);
+    if (it && it.systemInfo){
+      const lines = Object.entries(it.systemInfo).map(([k, v]) => k + ': ' + v).join('\n');
+      alert('系统信息（提交时静默采集）\n\n' + lines);
+    }
+    return;
+  }
+  const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
+  if (!act) return;
+  const fid = e.target.getAttribute('data-id');
+  const it = ALL.find(x => x.id === fid);
+  if (act === 'reply'){ dlgMode='reply'; dlgId=fid;
+    $('#dlgTitle').textContent = '回复反馈';
+    $('#dlgQuote').classList.remove('hidden');
+    $('#dlgQuote').innerHTML = '<span class="rlabel">用户反馈 · ' + esc(it.date) + '</span><br>' + esc(it.content);
+    $('#dlgMeta').classList.add('hidden');
+    $('#dlgInputLabel').textContent = '回复内容（1-2000 字）';
+    $('#dlgText').value = it.reply || '';
+    $('#dlgMask').classList.remove('hidden');
+  }
+  if (act === 'pub'){ doAction({action:'setpublic', id:fid, public:!it.public}, it.public ? '已取消公开' : '已公开到前台 TOP10'); }
+  if (act === 'del'){ if (confirm('确认删除这条反馈？删除后不可恢复。')) doAction({action:'delete', id:fid}, '已删除'); }
+});
+async function doAction(payload, okMsg){
+  const j = await post(Object.assign({user:USER, token:TOKEN}, payload));
+  if (j.ok){ toast(okMsg); refresh(); } else toast(j.message || '操作失败', false);
+}
+
+/* ---------- 回复/补录 弹窗 ---------- */
+$('#dlgCancel').addEventListener('click', () => $('#dlgMask').classList.add('hidden'));
+$('#dlgOk').addEventListener('click', async () => {
+  const text = $('#dlgText').value.trim();
+  const btn = $('#dlgOk'); btn.disabled = true;
+  try{
+    let j;
+    if (dlgMode === 'reply'){
+      if (!text){ toast('回复内容不能为空', false); return; }
+      j = await post({action:'reply', user:USER, token:TOKEN, id:dlgId, reply:text});
+    } else {
+      if (text.length < 5){ toast('内容至少 5 个字', false); return; }
+      j = await post({action:'add', user:USER, token:TOKEN, type:$('#dlgType').value, contact:$('#dlgContact').value.trim(), content:text, public:false});
+    }
+    if (j.ok){ toast(dlgMode === 'reply' ? '回复成功' : '补录成功'); $('#dlgMask').classList.add('hidden'); refresh(); }
+    else toast(j.message || '操作失败', false);
+  } finally { btn.disabled = false; }
+});
+
+/* ---------- 账号设置 ---------- */
+$('#btnProfile').addEventListener('click', async () => {
+  $('#profMask').classList.remove('hidden');
+  const p = await post({action:'profile', user:USER, token:TOKEN});
+  if (p.ok) $('#profEmail').textContent = p.email || '（未绑定）';
+});
+$('#profClose').addEventListener('click', () => $('#profMask').classList.add('hidden'));
+$('#btnBindCode').addEventListener('click', async () => {
+  const j = await post({action:'setemail_request', user:USER, token:TOKEN, email:$('#profNewEmail').value.trim()});
+  toast(j.ok ? '验证码已发送，请查收邮箱' : (j.message || '发送失败'), j.ok);
+});
+$('#btnBindConfirm').addEventListener('click', async () => {
+  const j = await post({action:'setemail_confirm', user:USER, token:TOKEN, email:$('#profNewEmail').value.trim(), code:$('#profBindCode').value.trim()});
+  toast(j.ok ? '邮箱绑定成功' : (j.message || '绑定失败'), j.ok);
+  if (j.ok) $('#profEmail').textContent = $('#profNewEmail').value.trim();
+});
+$('#btnChangePwd').addEventListener('click', async () => {
+  if (!$('#profCurPass').value){ toast('请输入当前密码', false); return; }
+  const j = await post({action:'changepwd', user:USER, token:TOKEN, curpass:$('#profCurPass').value,
+    newuser:$('#profNewUser').value.trim(), newpass:$('#profNewPass').value});
+  if (j.ok){ toast('修改成功，请重新登录'); setTimeout(() => location.reload(), 1200); }
+  else toast(j.message || '修改失败', false);
+});
+
+/* ---------- 忘记密码 ---------- */
+$('#fgCancel').addEventListener('click', () => $('#forgotMask').classList.add('hidden'));
+$('#fgSend').addEventListener('click', async () => {
+  const j = await post({action:'forgot_request', user:$('#fgUser').value.trim(), email:$('#fgEmail').value.trim()});
+  toast(j.message || '已提交', true);
+});
+$('#fgReset').addEventListener('click', async () => {
+  const j = await post({action:'forgot_reset', user:$('#fgUser').value.trim(), email:$('#fgEmail').value.trim(),
+    code:$('#fgCode').value.trim(), newpass:$('#fgNewPass').value});
+  toast(j.ok ? '密码已重置，请用新密码登录' : (j.message || '重置失败'), j.ok);
+  if (j.ok) $('#forgotMask').classList.add('hidden');
+});
+
+/* ---------- 弹窗点击遮罩关闭 ---------- */
+for (const [mask, box] of [['#dlgMask','.modal'], ['#profMask','.modal'], ['#forgotMask','.modal']]){
+  $(mask).addEventListener('click', (e) => { if (e.target === $(mask)) $(mask).classList.add('hidden'); });
+}
+
+loadCaptcha();
+</script>
+</body>
+</html>
