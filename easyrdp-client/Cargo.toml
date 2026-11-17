@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/easyrdp-core",
+    "crates/easyrdp-rdp",
+    "src-tauri",
+]
+
+[workspace.package]
+version = "0.3.2"
+edition = "2021"
+license = "MIT"
+authors = ["EasyRDP Contributors"]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+encoding_rs = "0.8"
+thiserror = "1"
+# 帧编码 JPEG（纯 Rust、零传递依赖、支持 4:2:0 子采样；依赖树最小的 JPEG 编码器，
+# 相比 image crate（default 带全部 codec + 大量传递依赖）显著更小。
+# simd = AVX2 快速 DCT（x86_64 release 实测编码耗时显著下降）。
+jpeg-encoder = { version = "0.6", features = ["simd"] }
