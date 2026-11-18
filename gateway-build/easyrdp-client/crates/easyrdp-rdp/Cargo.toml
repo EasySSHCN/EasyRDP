@@ -1,0 +1,52 @@
+﻿[package]
+name = "easyrdp-rdp"
+version.workspace = true
+edition = "2021"
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP remote-desktop engine layer (FreeRDP integration skeleton)"
+
+[dependencies]
+easyrdp-core = { path = "../easyrdp-core" }
+# 甯х绾匡細BGRA32 -> JPEG锛坬75, 4:2:0锛夌紪鐮侊紙瑙?src/frame_jpeg.rs锛夈€?jpeg-encoder.workspace = true
+
+# FreeRDP FFI 缁戝畾銆俤efault 涓嶅惎鐢紱`native` feature 鎵嶅弬涓庨摼鎺ワ細
+#   cargo build -p easyrdp-rdp --features native
+# 闇€瑕佺郴缁熷凡瀹夎 FreeRDP 寮€鍙戝簱锛堝 Debian: libfreerdp-dev / Windows: vcpkg freerdp锛夈€?# 娉細crates.io 涓婃病鏈?`libfreerdp-sys`锛岃繖閲岀敤绀惧尯鍙戝竷鐨?`freerdp2-sys` 缁戝畾銆?freerdp2-sys = { version = "0.2", optional = true }
+
+# 缃戝叧鍥炵幆妗ワ紙gateway_bridge.rs锛夛細鏈湴 TCP <-> 浜戠綉鍏?WS 鍙屽悜杞彂銆?# 涓?FreeRDP 鏄惁缂栬瘧鏃犲叧锛堥粯璁?feature 涔熺紪璇戯紝渚夸簬鍗曟祴锛夈€?tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "sync", "macros", "time"] }
+# 0.21 涓?easyrdp-gateway锛坅xum 0.7 -> tungstenite 0.21锛夊悓鐗堟湰绾匡紝甯ц涔変竴鑷淬€?tokio-tungstenite = "0.21"
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+serde_json = "1"
+
+[features]
+default = []
+native = ["dep:freerdp2-sys"]
+
+# 杩滅 -> 鏈湴鍓创鏉胯惤鐩橈紙ffi.rs set_local_clipboard_text锛夛細
+# Win32 鍓创鏉?/ 鍏ㄥ眬鍐呭瓨 API銆傞伒寰伐浣滃尯鏃㈡湁 windows-sys 0.61 鐗堟湰绾裤€?[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_Threading",
+    "Win32_System_DataExchange",
+    "Win32_System_Memory",
+] }
+
+# 鏋勫缓鑴氭湰渚濊禆锛堜粎 Windows native 闇€瑕侊級锛歝c 椹卞姩 MSVC cl.exe 缂栬瘧 vendor 鐨?# FreeRDP cliprdr 閫氶亾婧愮爜锛堥潤鎬侀摼鎺?freerdp-client2.lib 鏃?tables.c 闈欐€佸叆鍙ｈ〃
+# 闇€瑕佺湡瀹?cliprdr_VirtualChannelEntryEx 绗﹀彿锛岃 build.rs / channel_stubs.rs锛夈€?[target.'cfg(windows)'.build-dependencies]
+cc = "1"
+
+# 绀轰緥鐩存帴 use freerdp2_sys锛屼粎鍦?native 鏋勫缓鏃跺弬涓庣紪璇?# 锛堝惁鍒?cargo test --workspace 鍦ㄦ棤 FreeRDP 鐜涓嬩細鍥犵己渚濊禆鑰屽け璐ワ級銆?[[example]]
+name = "freerdp_probe"
+required-features = ["native"]
+
+# e2e_connect 瑙ｆ瀽 connections.json锛坰erde_json 缁?easyrdp-core 宸插湪宸ヤ綔鍖轰緷璧栧浘锛夈€?[dev-dependencies]
+serde.workspace = true
+serde_json.workspace = true
+# e2e 杈撳叆楠岃瘉鎺㈤拡锛氳В鐮佸叏甯?JPEG 鍏滃簳甯э紝鍚堟垚鐪熷疄鍍忕礌缂撳啿鍋氬墠鍚庡樊寮傚姣?jpeg-decoder = "0.3"
+
+[[example]]
+name = "e2e_connect"
+required-features = ["native"]

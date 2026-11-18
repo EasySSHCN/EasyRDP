@@ -1,0 +1,1 @@
+{"latestVersion":"0.3.9","file":"EasyRDP-0.3.9-portable.exe","notes":"- 在线升级后文件名跟随新版本：EasyRDP-&lt;新版本&gt;-portable.exe（旧版保留 .bak 回滚；快捷方式自动改指；固定名安装不受影响）","sha256":"d23152c4c1793d435d44ba279b8003af9b6bbfe87588ab1465a3648fd7177b24","sig":"pFd7pVdu8UQgJgr96kn1DoJ4QZhP8IXJlsK2EcLxFXWk+opC41avXTxGCPUX9F9EMDpwYS/m3vZYLJu+i9U/Aw=="}

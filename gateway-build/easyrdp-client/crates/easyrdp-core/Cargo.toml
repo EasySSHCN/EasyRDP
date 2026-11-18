@@ -1,0 +1,20 @@
+﻿[package]
+name = "easyrdp-core"
+version.workspace = true
+edition = "2021"
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP core: session profile model, .rdp import/export"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+encoding_rs.workspace = true
+
+# 瀵嗙爜淇濇姢锛坈rates/easyrdp-core/src/secret.rs锛夛細
+# Windows 鐢?DPAPI锛圕ryptProtectData/CryptUnprotectData锛夊姞瀵嗗悗 base64 瀛樺偍锛?# 闈?Windows 鏆備互 plain: 鍓嶇紑鍥為€€銆傚潎涓?target 渚濊禆锛屼笉褰卞搷鍏朵粬骞冲彴鏋勫缓浜х墿銆?[target.'cfg(windows)'.dependencies]
+base64 = "0.23"
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security_Cryptography",
+] }

@@ -1,0 +1,6 @@
+secrets-vault/
+signing/
+reqpool/
+*.enc
+target/
+dist/
