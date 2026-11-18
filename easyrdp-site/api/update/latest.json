@@ -1,0 +1,1 @@
+{"latestVersion":"0.3.8","file":"EasyRDP-0.3.8-portable.exe","notes":"- 修复升级横幅当日配额死角：启动检查不再因「每日一次」跳过，发版当天必定被发现\n- 手动检查发现新版同样挂常驻横幅；已是最新时清除横幅与记录","sha256":"c58f1495028a5ca6eb695866f6209c9a70af7f6ff40ece70ba7be3a7a4917614","sig":"8LCxt0kARZfF3P3cEZeyz3LAVE7m87NrevNlpIDt6h21K4x6QnYiGd+iKbmxhmKu7gNRlUq3v1MEa5PUYx2DCA=="}

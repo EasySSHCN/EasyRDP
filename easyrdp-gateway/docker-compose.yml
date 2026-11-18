@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  gateway:
+    build: .
+    container_name: easyrdp-gateway
+    # 不直接暴露端口到公网，仅在内网供 Nginx 反代访问
+    expose:
+      - "8443"
+    volumes:
+      - ./config.toml:/etc/easyrdp/config.toml:ro
+      - ./certs:/etc/easyrdp/tls:ro
+    environment:
+      RUST_LOG: info
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: easyrdp-nginx
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
+# Nginx 反代示例（./nginx/nginx.conf 中 server 块核心片段，443 TLS -> 8443 WSS）：
+#
+# server {
+#     listen 443 ssl;
+#     http2 on;                       # RDP-over-WebSocket 走 h2 亦可
+#     server_name rdp.example.com;
+#
+#     ssl_certificate     /etc/nginx/certs/server.crt;
+#     ssl_certificate_key /etc/nginx/certs/server.key;
+#
+#     location / {
+#         proxy_pass http://gateway:8443;
+#         proxy_http_version 1.1;
+#         proxy_set_header Upgrade $http_upgrade;       # WebSocket 升级
+#         proxy_set_header Connection "upgrade";
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_read_timeout 3600s;   # 长连接隧道，读超时放宽
+#         proxy_send_timeout 3600s;
+#         proxy_buffering off;
+#     }
+# }
