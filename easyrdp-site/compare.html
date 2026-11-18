@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品对比：EasyRDP vs mstsc vs Remmina vs 向日葵/ToDesk — EasyRDP</title>
+  <meta name="description" content="EasyRDP 与 mstsc、Remmina、向日葵/ToDesk 的客观对比：RDP 标准协议、单文件绿色部署、卡片式连接管理、.rdp 兼容与 JSON 配置即代码、多会话并行与剪贴板双向同步，100% 开源（MIT）。">
+  <meta property="og:title" content="产品对比：EasyRDP vs mstsc vs Remmina vs 向日葵/ToDesk — EasyRDP">
+  <meta property="og:description" content="EasyRDP 与 mstsc、Remmina、向日葵/ToDesk 的客观对比：RDP 标准协议、单文件绿色部署、卡片式连接管理、.rdp 兼容与 JSON 配置即代码、多会话并行、剪贴板双向同步、组合键发送与开源协议。">
+  <meta property="og:url" content="https://easyrdp.cn/compare.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EasyRDP">
+  <meta property="og:locale" content="zh_CN">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* COMPARE-PAGE 2026-11-18：对齐 easyssh.cn compare.html 版式；配色全部取自 :root 变量 */
+    .cmp-wrap { max-width: 960px; margin: 0 auto; }
+    .cmp-wrap table { width: 100%; border-collapse: collapse; }
+    .cmp-wrap th, .cmp-wrap td { padding: 10px 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; font-size: 13.5px; }
+    .cmp-wrap thead th { background: var(--bg-soft); white-space: nowrap; }
+    .cmp-wrap td:first-child { white-space: nowrap; color: var(--text); }
+    .cmp-wrap tr td:nth-child(2) { background: var(--bg-soft); }
+    .cmp-prose { margin-top: 28px; line-height: 1.75; }
+    .cmp-prose h2 { margin: 26px 0 12px; font-size: 20px; }
+    .cmp-prose ul, .cmp-prose ol { padding-left: 20px; margin: 8px 0; }
+    .cmp-prose li { margin: 6px 0; }
+    .cmp-prose p { color: var(--text-dim); }
+    .cmp-prose strong { color: var(--text); }
+  </style>
+  <link rel="canonical" href="https://easyrdp.cn/compare.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/compare.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/compare.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.3.4</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="migrate.html">迁移指南</a>
+        <a href="compare.html" class="active">产品对比</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a class="lang-switch" href="en/compare.html" hreflang="en" lang="en" title="Switch to English">EN</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>产品对比</h1>
+      <p class="section-desc">EasyRDP vs mstsc vs Remmina vs 向日葵/ToDesk · 基于公开资料与 v0.3.4 实际功能的客观对照，不贬低任何竞品。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container cmp-wrap">
+      <h2 class="section-title">核心对比表</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>维度</th><th>EasyRDP</th><th>mstsc（Windows 自带）</th><th>Remmina</th><th>向日葵 / ToDesk 类远控</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>协议与架构</strong></td>
+              <td>标准 RDP 协议，基于 FreeRDP 协议栈（Rust + Tauri 2 壳）</td>
+              <td>标准 RDP 协议，Windows 系统内置实现</td>
+              <td>多协议插件架构（RDP/VNC/SSH 等，基于 FreeRDP）</td>
+              <td>私有远控协议（非 RDP 标准），需两端同装客户端</td>
+            </tr>
+            <tr>
+              <td><strong>连接管理</strong></td>
+              <td>卡片式连接中心：分组 / 收藏 / 置顶、Ctrl+K 全局搜索、连通性测试、密码仅存本机</td>
+              <td>无内置管理器，靠手工保存 <code>.rdp</code> 文件列表</td>
+              <td>连接列表 + 分组管理，功能较完善</td>
+              <td>设备列表为主，面向「找人帮」的设备绑定模式</td>
+            </tr>
+            <tr>
+              <td><strong>.rdp 兼容</strong></td>
+              <td>导入 mstsc <code>.rdp</code>（含文件对话框选取），也可导出回 <code>.rdp</code>，双向互通</td>
+              <td>原生 <code>.rdp</code> 格式（基准）</td>
+              <td>不直接使用 <code>.rdp</code>，配置存于自有格式</td>
+              <td>不涉及 <code>.rdp</code>，凭设备 ID / 识别码配对</td>
+            </tr>
+            <tr>
+              <td><strong>配置即代码</strong></td>
+              <td>每条连接即一份 JSON Profile，可纳入 Git 与代码评审；CLI：<code>linkdesk connect / import</code></td>
+              <td>仅 <code>.rdp</code> 文本文件，无 CLI 编排能力</td>
+              <td>配置存于本地数据库 / 配置文件，无导出为代码的工作流</td>
+              <td>无对外配置导出能力</td>
+            </tr>
+            <tr>
+              <td><strong>多会话并行</strong></td>
+              <td>每条远程会话运行在独立标签页，多远程桌面并行 + 快速切换</td>
+              <td>每会话一个独立窗口，可手动多开</td>
+              <td>标签页多会话，支持并行</td>
+              <td>以单设备远控为主，多设备需切换窗口</td>
+            </tr>
+            <tr>
+              <td><strong>剪贴板</strong></td>
+              <td>文本双向（v0.1 起）+ 文件双向传输（v0.3.4 起，CLIPRDR FileContents 标准协议，单次 ≤128 文件、单文件 ≤2GiB）</td>
+              <td>文本与文件双向（系统 RDP 能力）</td>
+              <td>文本剪贴板同步；文件传输视插件而定</td>
+              <td>文本与文件互传，依赖自有传输通道与会员策略</td>
+            </tr>
+            <tr>
+              <td><strong>组合键发送</strong></td>
+              <td>标题栏 SAS 菜单：Ctrl+Alt+Del / Win 键 / Win+D / Win+E / Win+R / Win+L / Ctrl+Shift+Esc / Alt+Tab；支持自定义组合键（settings.json）；物理 Win 键直达远端；本地 Ctrl+Alt+End 亦可</td>
+              <td>Ctrl+Alt+End 发送 SAS，组合键经系统会话通道，能力完整</td>
+              <td>提供发送按键工具栏；SAS 组合键发送视 RDP 插件能力而定</td>
+              <td>远控模式下组合键支持程度不一，SAS 依赖远端环境</td>
+            </tr>
+            <tr>
+              <td><strong>显示能力</strong></td>
+              <td>自适应分辨率、窗口 / 全屏、多显示器支持（RDP 8+ 远程压缩、画质自适应降级）</td>
+              <td>自适应与多显示器，能力完整（系统级）</td>
+              <td>自适应缩放与全屏，支持多显示器</td>
+              <td>画质自适应为主，多显示器映射各家实现不一</td>
+            </tr>
+            <tr>
+              <td><strong>部署形态</strong></td>
+              <td>单文件绿色版（FreeRDP 全静态链接）或解压即用 zip：不写注册表、不装驱动、删目录即卸载、无 DLL 依赖（需 WebView2，Win10/11 通常内置）</td>
+              <td>系统自带，无需部署</td>
+              <td>Linux 发行版仓库安装为主；Windows/macOS 需自行获取构建</td>
+              <td>安装版客户端 + 被控端，常含服务 / 驱动组件</td>
+            </tr>
+            <tr>
+              <td><strong>开源协议</strong></td>
+              <td>100% 开源（MIT），源码公开可审计</td>
+              <td>闭源（Windows 系统组件）</td>
+              <td>开源（GPL-2.0 + WebView2 插件等附加许可）</td>
+              <td>闭源商业软件</td>
+            </tr>
+            <tr>
+              <td><strong>平台支持现状</strong></td>
+              <td>Windows x64 已发布（v0.3.4）；macOS / Linux 规划中，暂未提供</td>
+              <td>Windows / macOS（微软官方 Remote Desktop）</td>
+              <td>Linux 为主，Windows / macOS 可用</td>
+              <td>Windows / macOS / Linux / 移动端覆盖广</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmp-prose">
+        <h2 id="fair">关于各竞品的公允说明</h2>
+        <ul>
+          <li><strong>mstsc</strong>：Windows 自带的远程桌面客户端，系统级 RDP 实现最成熟稳定、零部署成本，是 RDP 场景的事实基准；但它没有内置的连接管理器，高级功能（.rdp 批量管理、编排、CLI）需要用户自行组织。</li>
+          <li><strong>Remmina</strong>：老牌开源远程桌面客户端，多协议（RDP/VNC/SSH 等）插件架构与标签页多会话是长期优势，Linux 桌面用户的主力工具之一；其核心在 Linux 生态，Windows/macOS 版本获取渠道与体验相对受限。</li>
+          <li><strong>向日葵 / ToDesk 类国内远控</strong>：面向「跨网络找人帮 / 远控家人电脑」场景，穿透 NAT 与移动端覆盖做得好，对小白用户友好；使用私有远控协议而非标准 RDP，被控端需安装服务组件，商业闭源，部分高级能力与商用场景需付费授权。</li>
+        </ul>
+
+        <h2 id="why">EasyRDP 的取舍</h2>
+        <p>EasyRDP 选择做一件克制的事：<strong>Windows 上一款免费开源（MIT）、单文件绿色版的 RDP 客户端</strong>。它沿用标准 RDP 协议（FreeRDP），不重造私有协议；把工程预算花在连接中心（卡片 / 分组 / Ctrl+K）、.rdp 双向兼容与 JSON 配置即代码、多标签页并行会话、剪贴板文件双向、SAS 菜单与组合键这些日常刚需上。</p>
+        <p>同时如实说明：macOS / Linux 版本仍在规划中（待 CI 三平台构建接入）；云网关（F4）与管理控制台（F5）列于路线图，v0.3.4 暂未提供。如果你管理的是一批 RDP 主机、希望「拷到 U 盘就能用、连接可进 Git、文件可直接复制粘贴」，EasyRDP 值得一试；如果只是偶尔连一台 Windows 且不想装任何软件，mstsc 仍是可靠的选择。</p>
+        <p>
+          <a class="btn btn-primary" href="download.html">立即下载</a>
+          <a class="btn btn-ghost" href="docs.html">查看文档</a>
+        </p>
+        <p style="color:var(--text-dim);font-size:.9rem;">对比信息基于各产品 2026-11 公开资料与 EasyRDP v0.3.4 实际功能整理，如有出入以官方为准。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="migrate.html">迁移指南</a>
+          <a href="compare.html">产品对比</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js?v=13"></script>
+  <script src="assets/js/visit-beacon.js" async></script>
+</body>
+</html>
