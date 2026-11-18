@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>更新日志 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 更新日志：v0.3.4 组合键按键捕获与匿名遥测归因，v0.3.3 TCP 连通性测试与界面升级，含 Added / Fixed 变更明细，持续迭代的开源远程桌面客户端。">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/changelog.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/changelog.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/changelog.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="migrate.html">迁移指南</a>
+        <a href="compare.html">产品对比</a>
+
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a class="lang-switch" href="en/changelog.html" hreflang="en" lang="en" title="Switch to English">EN</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>更新日志</h1>
+      <p>遵循 <a href="https://keepachangelog.com/zh-CN/" target="_blank" rel="noopener">Keep a Changelog</a> 规范，版本号遵循语义化版本（SemVer）。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.13</h2>
+          <span class="badge">当前构建</span>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V2 增强第二批（收官）：多网关高可用 + 本地帧管线 SIMD/GPU 加速 + 网关 Web 管理控制台（SSO/OIDC）。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>多网关高可用（R-20261118-016）</strong>：网关配置支持备用网关列表（主→备依次故障转移，5s/条；认证失败可配置快速失败）；健康探测按钮（逐节点连通性+延迟 🟢/🔴）；重连自动按上次成功节点轮转；全部失败返回逐节点聚合错误</li>
+          <li><strong>本地帧管线 SIMD/GPU 加速（R-20261118-017）</strong>：新增 easyrdp-pixels 管线库（隔离 crate，默认关、不影响主路径）——AVX2 颜色转换/降采样（真机 bench 2.7x）+ D3D11 VideoProcessor 缩放（硬件失败自动 WARP→CPU 回退）+ 运行时 CPU 特性检测</li>
+          <li><strong>网关 Web 管理控制台 + SSO/OIDC（R-20261118-018）</strong>：OIDC Authorization Code 真实对接（JWKS 签名校验/RS256+ES256/state 防 CSRF）；内置深色控制台（资源列表/策略矩阵只读视图/审计检索分页）；HttpOnly 会话 + CSRF double-submit；占位登录在配置 OIDC 后自动禁用</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>会话快照浮层显示修复</strong>：浮层挂载即被永真条件自删导致悬停永远看不到——改为定点清理；收藏胶囊补绑定；已在运行实例实测浮层存活/定位/渲染正常</li>
+          <li>多网关场景下 401/TLS 拒绝错误信息透传（含状态码与响应体，不再只显示 HTTP error: 403）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.12</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V2 增强第一批：会话快照预览 + 团队模板库 + Profile Git 同步。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>会话快照预览（R-20261118-013）</strong>：连接卡片悬停显示最近会话画面缩略图（直读会话帧数据源，遮挡/最小化也可捕获）；画面无变化不重复捕获；单张 ≤200KB、总量 20MB 最旧优先清理；删除连接同步清理；设置页可关</li>
+          <li><strong>团队模板库（R-20261118-014）</strong>：连接可存为模板（凭据强制剥离 + 导出门禁）；.erdp-template/.erdp-templates 包（sha256 完整性 + schema 校验）；模板库管理（基于模板新建/导出/删除/已建连接数）</li>
+          <li><strong>Profile Git 同步（R-20261118-015）</strong>：connections/groups/templates 数据 git 化同步（自动 commit/推送/拉取）；跨机器安全语义：DPAPI 密文同步前替换为占位符（跨机不可解密），恢复后凭据重填；冲突本地优先 + 远端版本留 .bak</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>横幅「立即升级」全流程化</strong>：修复按钮引用失配导致只跳设置页的问题——现在升级进度/结果/重试全部在横幅内完成（对齐 EasySSH updater 模式）</li>
+          <li>网关配置区新增官方网关提示与完整地址粘贴解析（https://gw:8443 自动拆域名/端口/TLS）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.11</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V1 增强第二批：多显示器 + 网关安全（wss/OTP/策略矩阵）+ 审计增强。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>多显示器优化（R-20261118-010）</strong>：显示器枚举与选择、指定显示器全屏、跨所有显示器全屏、按所选屏分辨率填充；全屏窗口直达目标屏（不缩放不居中），标题栏按钮在该屏「全屏↔95%」切换</li>
+          <li><strong>wss TLS + OTP（R-20261118-012）</strong>：网关支持 TLS（[tls] 段 rustls）；客户端 wss + 自签证书明示豁免勾选；网关 TOTP 二次认证（RFC 6238，±1 窗口；401 otp_required → 客户端弹码重试）</li>
+          <li><strong>策略矩阵 + 审计增强（R-20261118-011）</strong>：资源×角色×动作可配置策略矩阵（deny by default、首条命中、通配符）+ 30s 热加载失败回退；隧道拒绝 403 + policy_denied 审计；审计按 user/resource/result 过滤 + CSV 导出（RFC4180 防注入）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.10</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V1 增强第一批：连接中心组织力 + 批量导入 + Profile 规范化。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>收藏与分组增强（R-20261118-007）</strong>：分组嵌套（≤3 层）树形折叠、连接/分组拖拽排序与跨组归组、收藏置顶栏（点击即连、拖拽排序）、分组 8 色着色（树节点+卡片左边条）</li>
+          <li><strong>批量导入与去重（R-20261118-008）</strong>：.rdp / JSON（含数组）多文件混选批量导入；向导式预览（勾选、目标分组=分组树下拉、重复高亮）；去重三策略（跳过/覆盖/两者保留自动加后缀）；逐条错误报告不全量失败；明文密码与网关凭据 DPAPI 加密入库</li>
+          <li><strong>JSON Profile Schema 校验（R-20261118-009）</strong>：draft-07 Schema 派生与固化单测（防字段漂移）；导入前轻量校验器（必填/类型/端口越界/未知字段警告，错误带 JSON Pointer 定位，strict 模式可选）；<code>linkdesk schema / validate</code> CLI</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li>官网 JSON Profile 规范文档与实现对齐（auth_method 扁平化、redirect 字段名、resolution 枚举、gateway 已实现、order 字段、凭据 DPAPI 口径）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.9</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">升级文件名跟随新版本（对齐 EasySSH v4.3.7 用户确认方案）。</p>
+
+        <h3>Changed 变更</h3>
+        <ul>
+          <li><strong>升级后文件名跟随新版本</strong>：版本化命名的安装（EasyRDP-&lt;版本&gt;-portable.exe）在在线升级后，新版本文件命名为 EasyRDP-&lt;新版本&gt;-portable.exe，旧版保留为 .bak 供回滚；桌面/快速启动栏快捷方式自动改指新文件。固定名安装（EasyRDP.exe）维持原地替换不变</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.8</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">升级提醒补漏：发版当天必提醒。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>横幅当日配额死角</strong>：此前「每天一次」判重会跳过启动检查——若当日配额在服务端发新版之前已消耗，当天永远不会发现新版本、横幅不出现；现取消启动检查的当日跳过（检查请求 &lt;1KB），发版当天必定被发现并挂横幅</li>
+          <li><strong>手动检查发现新版也挂横幅</strong>：设置 → 更新手动检查发现新版时同样写入未处理记录并挂常驻横幅（此前仅自动检查挂）；「已是最新」时自动清除记录与横幅</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.7</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">网关接入首发：客户端经云网关连接 RDP + 网关凭据 DPAPI 加密 + 官网后台网关审计。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>网关接入（F4 MVP）</strong>：新建连接新增「网关（可选）」配置区（地址/端口/TLS/认证方式 Token 或用户名密码/资源 ID）；客户端内起本地回环桥，把 RDP 会话流量经网关 WS 隧道双向转发（字节级回环测试逐字节一致）；网关不可达时连接失败并给出明确错误</li>
+          <li><strong>网关凭据 DPAPI 加密</strong>：token/用户名/密码随 Profile 以 Windows DPAPI 密文落盘（与主密码同标准）；旧明文 JSON 首次保存自动迁移；.rdp 导出不含网关凭据</li>
+          <li><strong>网关审计后台（F5 轻量）</strong>：gateway 新增管理密钥鉴权的审计导出端点；官网后台新增「网关审计」卡片（需部署侧配置 gateway 地址与管理密钥后生效）</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li>OpenSSL legacy provider 环境依赖测试改为条件跳过（x64-windows 动态布局无 legacy 模块属环境差异，不再误报）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.6</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">升级体验修复：在线升级下载期间 UI 不再未响应。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>在线升级 UI 冻结（用户真机反馈）</strong>：下载并安装为同步命令、在主线程执行，18MB 升级包下载期间整个界面无响应（Windows 判定「未响应」）；改为 async 命令在异步运行时执行，下载/校验/安装全程 UI 可操作，进度条正常刷新</li>
+          <li><strong>check_update 同步转 async</strong>：检查更新同样脱离主线程，弱网下不再卡顿界面</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.5</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">升级提示强化版本：新版发布当天强制复查 + 常驻升级横幅。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>常驻升级横幅（R-20261118-002）</strong>：发现新版本后，标题栏下方常驻横幅提示（含「立即升级」一键直达设置 → 更新并启动升级）；✕ 仅本次会话隐藏，升级成功后自动消失</li>
+          <li><strong>发现新版当天强制复查</strong>：daily 频率的「当日已查」判重只对无新版结果生效；一旦发现新版，后续每次启动强制复查并重新挂横幅，不再漏提醒</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.4</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">后台增强配套版本：组合键按键捕获 + 客户端匿名遥测上报（下载票据归因）。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>组合键输入框按键捕获（R-20261117-012）</strong>：设置页组合键输入框获得焦点后进入捕获模式，直接按下键盘组合自动填入等价格式串；支持 Win/Ctrl/Alt/Shift + 主键（字母数字/F1-F24/Esc/Tab/Enter/Del/方向键等），Esc 清空退出、纯修饰键不填入，捕获期间抑制系统快捷键</li>
+          <li><strong>客户端匿名遥测上报（R-20261118-001 客户端部分）</strong>：首次启动异步上报匿名设备信息（anonId/版本/操作系统/架构/语言，白名单字段不含任何个人信息，每日一次，失败全静默）；携带官网下载票据 ticket.id 时自动归因，官网后台「已产生设备的访客记录」随之出数据</li>
+        </ul>
+
+        <h3>Improved 改进</h3>
+        <ul>
+          <li>官网后台同批增强：登录记忆、访客 IP 完整显示与归属地、设备 ID 截断、邮件通道、英文版、全站 SEO（详见官网更新记录 v1.5.0）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.3</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">剪贴板补全版本：文本剪贴板协议修复 + 文件剪贴板双向传输。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>本地复制无法粘贴到远程桌面（文本方向，R-20261117-011）</strong>：客户端剪贴板公告早于 Monitor Ready 属协议乱序，严格服务端静默丢弃；改为等 Monitor Ready/Capabilities 交换完成后公告（未就绪时缓存待补发）。另：连接 10s 未收到 MonitorReady 时底部提示「远端剪贴板服务未就绪（rdpclip 未响应）」，引导重启远端 rdpclip</li>
+        </ul>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>文件剪贴板双向传输（R-20261117-011）</strong>：实现 CLIPRDR FileContents 标准协议——本地复制文件后向远端公告 FileGroupDescriptorW + FileContents 命名格式，远端粘贴时按 FileContentsRequest 回应描述符与内容分块（1 MiB 读盘）；反向远端复制文件自动下载落地到「下载\EasyRDP-Clipboard\」并写入本地剪贴板。启用流式文件能力位（路径不出网线）；签名比对去重防回环；单次 ≤128 个文件、单文件 ≤2GiB</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.2</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">提示整合收尾 + 检查更新签名校验根因修复。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>检查更新「升级清单签名校验失败，已拒绝」根因修复（R-20261117-008）</strong>：客户端规范串重建用 serde_json Map 默认按字段名字母序输出（file 排在 latestVersion 前），与服务端签名的固定字段顺序（latestVersion→file→notes→sha256）不一致，导致任何版本检查更新都必然验签失败；改为按约定顺序手工拼接规范串，端到端探针（Rust 语义）对现役清单验签 VALID</li>
+        </ul>
+
+        <h3>Changed 变更</h3>
+        <ul>
+          <li><strong>连接提示单一显示位（R-20261117-003）</strong>：取消连接表单按钮右侧 #msg 提示，flash 操作反馈全部整合到底部 conn-hint 状态提示区（防覆盖 token，不冲掉连接生命周期状态）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.1</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">真机复测快速修复版本：组合键菜单发送 Win 键、小键盘二义键、标题栏文案与关闭字形四处修复。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>「发送 Win 键」无效修复（R-20261117-004）</strong>：组合键菜单 down/up 零间隔发送被服务端/远端应用丢弃；改为按下后持键 80ms 再释放（模拟真实按键节奏），全部组合键菜单项统一受益</li>
+          <li><strong>小键盘 Del 键 NumLock 开启时误发 Del 修复（R-20261117-005）</strong>：NumpadDecimal 二义键在本地 NumLock ON 时改发主键盘句点码位（0x34），与 mstsc 行为一致；NumLock OFF 时保持 Del 码位</li>
+        </ul>
+
+        <h3>Changed 变更</h3>
+        <ul>
+          <li><strong>标题栏 SAS 槽文案改为「发送」（R-20261117-006）</strong>：贴合组合键下拉菜单语义</li>
+          <li><strong>标题栏关闭按钮字形改为字母 X（R-20261117-007）</strong>：原 ✕ 字形偏小，X 更大更清晰</li>
+        </ul>
+
+        <h3>Notes 说明</h3>
+        <ul>
+          <li><strong>v0.3.0 检查更新「签名校验失败」（R-20261117-008）</strong>：v0.3.1 时曾误判为 OTA 清单补传时间差；v0.3.2 定位到真正根因（客户端规范串字段顺序错乱）并已修复，详见 v0.3.2 条目</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.0</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">里程碑版本（需求池累计 28 条触发 minor 升级）：远程窗口组合键菜单 + 连接状态提示区，同批携带 v0.2.2 残影根治（增量管线停用）。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>远程窗口组合键下拉菜单（R-20261117-001）</strong>：标题栏 SAS 槽点击弹出菜单——发送 Ctrl+Alt+Del（SAS）/ 发送 Win 键 / Win+D / Win+E / Win+R / Win+L / Ctrl+Shift+Esc（任务管理器）/ Alt+Tab；设置中心新增「⌨ 组合键」全局分组，自定义组合键（名称 + 组合键串，如 Ctrl+Shift+Esc）保存于 settings.json，菜单底部动态展示，对所有会话生效</li>
+          <li><strong>连接状态友好提示区（R-20261117-002）</strong>：连接表单底部原「α 预览版」说明行改为实时状态提示——连接中（蓝）/ 已连接（绿）/ 连接失败（红，附原因）/ 远程会话已断开（红，附原因）</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>方块残影根治（R-20261116-023/024/025/026，GHOSTFIX4/5，随本版首次正式发布）</strong>：增量贴图管线默认停用，只走「EndPaint 门控 + 整帧双路校验和快照」全帧通路；呈现层帧世代计数封堵 WM_PAINT 旧背板通道；撤销首刷抑制回归。真机复测：载入/悬停/拖动/点击五场景方块残影全部消除</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.2</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">残影根治版本：增量贴图管线默认停用，呈现链路全帧化 + 呈现层陈旧背板通道修复。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>方块残影根治：增量贴图管线默认停用（GHOSTFIX4-R023）</strong>：载入/按钮悬停/窗口拖动/图标拖动/点击五场景方块残影的载体是增量管线本身（tile 从合成缓冲逐包抠像素 → 16ms 合并批 → 呈现层贴回帧存储），多级时序缝隙无法逐一封堵；现默认只走「EndPaint 门控 + 整帧双路校验和快照」全帧通路（撕裂即丢弃不发射），结构上不存在旧 tile 贴回通道；增量模式改为 EASYRDP_ENABLE_DELTAS=1 显式启用（实验对照用），发射线程终点再加最后一道闸门</li>
+          <li><strong>呈现层陈旧背板通道修复（GHOSTFIX5-R023）</strong>：帧存储写入与窗口背板更新非原子，间隙内 WM_PAINT 会 blit 旧背板呈现整幅旧画面；引入帧世代计数（FRAME_GEN/BACKING_GEN），背板世代落后于帧世代时禁止 blit 背板、直绘画帧分支</li>
+          <li><strong>撤销首刷抑制与守卫撤销的连锁回归（GHOSTFIX2-R023 回收）</strong>：此前引入的「首刷覆盖率 ≥80% 才发射」闸门造成载入期画面冻结在旧内容、全帧模式死锁风险，已整体撤销</li>
+        </ul>
+
+        <h3>Verified 验证</h3>
+        <ul>
+          <li>端到端审计（present-audit）：全帧模式下 pump delta=0、引擎仅发整帧快照；载入/欢迎屏/桌面各阶段抽帧目检无黑基底、无 tile 网格、无旧内容混入</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.1</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">残影专项修复版本：呈现层 Delta/全帧时序反转根因修复，载入/拖动窗口/按钮悬停三场景残影封堵。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>远程桌面残影根因修复（呈现层 Delta/全帧时序反转）</strong>：全帧到达后到期的旧增量批把旧像素写回帧存储并重绘脏矩形造成旧画面闪回；修复为全帧呈现前先冲刷待处理增量批，恢复严格事件序，结构性消除载入过程闪烁残影、拖动软件窗口边缘残影、标题栏最小化/最大化/关闭按钮悬停残影三场景（真机流量回放：旧行为 8 张残影帧/65 万旧像素 → 修复后该路径归零）</li>
+          <li><strong>引擎快照一致性校验加固</strong>：稀疏采样升级为整帧双路校验和（单字节级写入必捕获）；EndPaint 批处理期间推迟发射线程快照，堵住 order 直写帧缓冲的残留撕裂窗口</li>
+          <li><strong>增量脏矩形 1px 欠覆盖修复</strong>：非整数缩放比下右/底边缘旧像素残留列，脏矩形改边缘点取整并做窗口边界钳制</li>
+          <li><strong>启动时闪现两个 PowerShell 控制台窗口修复</strong>：快捷方式刷新子进程补 CREATE_NO_WINDOW</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.0</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">里程碑版本：设置中心 + 在线更新 + 多会话并行三大功能簇集中交付。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>软件端在线更新</strong>：检测/加密下载/验签/原子替换/分离重启全链路（AES-256-GCM 信封 + CTR 加密包、Ed25519 清单签名、SHA-256 双校验、防降级、失败自愈）</li>
+          <li><strong>设置中心</strong>：「⚙ 设置」弹窗，常规/外观/更新/快捷方式/关于五分组导航，settings.json 统一持久化</li>
+          <li><strong>在线升级检测</strong>：自动检查（启动延迟 90s 静默）+ 频率选择 + 手动检查 + 下载/校验/安装进度条 + 新版 toast 提醒</li>
+          <li><strong>皮肤/主题</strong>：深色/浅色/跟随系统 + 3 套强调色，即时生效并持久化；原生窗口标题栏联动</li>
+          <li><strong>多语言</strong>：简体/繁體/English/한국어 四语字典体系，切换即时生效、重启保持</li>
+          <li><strong>快捷方式生成</strong>：桌面与快速启动栏快捷方式手动生成（同步回传成败、重复生成=覆盖）</li>
+          <li><strong>升级后快捷方式自动刷新</strong>：升级替换后自动校正 .lnk 指向（分离执行、失败静默）</li>
+          <li><strong>多会话并行</strong>：主界面保持可见，多远程桌面窗口并存；活跃会话数显示与逐会话快捷断开</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>物理键盘 Win 键送达远端</strong>：RDP 会话激活期间低级键盘钩子拦截 LWin/RWin 经会话通道转发并抑制本地开始菜单（引用计数、自动卸载防泄漏）</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.5</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">残影收尾修复版：快照一致性校验撕裂免疫，真机取证 230 帧撕裂帧归零。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>远程桌面残影收尾（撕裂快照免疫）</strong>：全帧快照前后 17 采样行哈希比对，快照期间画面缓冲有写入（撕裂）即丢弃重试（微秒级开销）；tile 写入后 15ms 内推迟快照。覆盖载入过程与拖动窗口两场景（鼠标点击残影已在 v0.1.4 根除）。真机取证：修复前载入期必现 7-8 张撕裂帧 → 修复后 230 帧归零。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.4</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">残影问题根因修复版：取证探针定位残影帧本体后，对呈现/发射链 7 处缺陷逐一修复（真机强复现场景全链路验证）。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>远程桌面残影根因修复（7 项）</strong>：增量模式全帧兜底误用残缺合成缓冲（残影帧本体）→ 改直读完整画面缓冲；画面快照与 tile 合成加互斥锁消除半更新撕裂；WM_PAINT 不再回写旧帧到背板（防画面倒退闪现）；窗口移动不再整窗失效重绘；增量批双维度守卫（面积/小 tile 风暴）+ 批像素预校验；全帧兜底周期 5s→500ms。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.3</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">远程桌面残影根修版：定位残影真因为服务端位图缓存引用失同步（非呈现层），禁用位图缓存协商根治网格平铺与文字叠加闪现。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>远程桌面残影根修（TILEGHOST）</strong>：载入/鼠标点击/输入法选择框/窗口拖动/软件打开等成片图像变化时整屏 64×64 网格平铺残影与登录屏旧文字叠加——根因是服务端位图缓存条目失同步后被合成进会话画面缓冲（memblt 缓存引用）。禁用位图缓存协商（BitmapCache/V3），服务端改发直接位图数据，从源头根治。代价：带宽略增，画面正确性优先。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.2</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">v0.1.1 真机反馈快速修复版：反馈提交 TLS 后端缺失与主界面版本号显示两处问题。</p>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>使用反馈提交报「no TLS backend is configured」</strong>：HTTP 客户端 TLS 后端显式挂载（schannel），连接全局复用；网络类失败自动重试一次，失败提示附排查建议。</li>
+          <li><strong>主界面标题栏版本号显示旧版本</strong>：改为动态读取应用实际版本，随每次发布自动更新。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.1</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">本版两大主题：① 修复原生远程桌面窗口点击闪现错位/拼贴画面（GDI 背板直绘改造）；② 上线用户反馈全链路——软件端一键反馈（加密上传）、官网后台回复审核、前台「用户之声」精选展示。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>用户反馈功能</strong>：标题栏「反馈」按钮，支持功能建议/问题反馈/其他分类、联系方式选填、5-2000 字内容（带字数校验）；反馈经 AES-256-GCM 加密信封上传官网（HMAC-SHA256 派生密钥 + 时间窗防重放），随反馈匿名采集系统基础信息（版本/系统/分辨率，不含任何个人身份信息）用于问题定位。</li>
+          <li><strong>官网「用户之声·反馈精选」</strong>：下载页新增板块，展示已回复且公开的用户反馈与官方回复成对内容（仅展示公开条目，最新 10 条，全部转义防 XSS）。</li>
+          <li><strong>官网统一后台</strong>：管理员登录（图形验证码 + 防爆破锁定），反馈管理支持列表筛选 / 回复 / 公开 / 删除 / 手动补录，完整分页；支持修改密码与邮箱绑定自助找回。</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>原生窗口点击闪现错位/拼贴画面（fix36）</strong>：新增每窗口 GDI 背板（内存 DC + 兼容位图），帧经 SetDIBitsToDevice 整帧入背板后统一 StretchBlt 呈现，消除 top-down DIB 子矩形源 y 坐标的驱动级歧义；半帧判别收紧为精确等长，异常长度缓冲丢弃等全帧兜底；窗口销毁释放背板防泄漏。</li>
+        </ul>
+
+        <h3>官网 / 基础设施</h3>
+        <ul>
+          <li>反馈 API 上线（提交 / 管理 / 公开 TOP10 / 图形验证码），IP 哈希频控（每小时 5 条 + 60 秒间隔）。</li>
+          <li>每日自动采集用户反馈入需求池 + AI 复审闭环（真实反馈入池公开 / 垃圾下架 / 不纳入开发则关闭回复）。</li>
+          <li>HTML 页面缓存策略优化：版本徽章与页面更新普通刷新（F5）即时生效，无需强制刷新。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.0（正式版）</h2>
+          <span class="badge badge-blue">2026-11-15</span>
+          <time datetime="2026-11-15">2026-11-15</time>
+        </div>
+        <p style="color:var(--text-dim);">EasyRDP 首个正式版。绿色免安装：双击即用（Windows 单文件全静态链接，无需任何 DLL）。本版远程桌面核心体验全面落地：原生 FreeRDP 会话窗口、鼠标键盘输入直通、双向剪贴板同步、增量帧管线与残影根修、远端光标形状同步、Win 键与 Ctrl+Alt+Del（SAS）支持。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li><strong>原生 FreeRDP 会话窗口</strong>（Windows）：独立顶层窗口 + 自绘标题栏（最小化/最大化/关闭/拖动），StretchDIBits 全帧直绘，零编码零 IPC 开销。</li>
+          <li><strong>输入直通</strong>：鼠标（移动/左中右键/滚轮/横向滚轮）与键盘全键转发；<strong>Win 键</strong>经低级键盘钩子拦截转发（远端开始菜单正常使用）。</li>
+          <li><strong>Ctrl+Alt+Del 送达远端</strong>：标题栏 SAS 按钮或本地 <code>Ctrl+Alt+End</code> 热键（扩展扫描码序列，服务端合成 SAS）。</li>
+          <li><strong>剪贴板双向同步</strong>（CLIPRDR CF_UNICODETEXT）：本地复制 → 远端粘贴、远端复制 → 本地粘贴，带回环防护。</li>
+          <li><strong>增量帧管线</strong>：脏矩形增量直绘 + EndPaint 全帧（运动期 33ms 节流 ~30FPS + 5s 兜底 + pending 补发），运动期自适应降载。</li>
+          <li>远端光标形状同步（单色/彩色/32bpp alpha 抗锯齿）；键盘 LED（NumLock/CapsLock）同步。</li>
+          <li>灾备包机制：源码 + 构建组件 + 恢复文档一键打包，异地设备可完整恢复开发/构建能力。</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li><strong>拖拽残影（根修）</strong>：全帧快照改读 GDI primary buffer——此前 order 更新（窗口拖动）内容不进合成缓冲导致残影定格。</li>
+          <li>输入失效根因：窗口过程消息臂缺陷修复（WM_NCCREATE/WM_DESTROY 退化绑定吞掉全部消息）。</li>
+          <li>关窗后主界面恢复与进程退出；移动/缩放黑块残影；光标黑色方块；ACTIVE 后首包掉线；拖拽 1-2FPS 卡顿——均已修复。</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.0-alpha</h2>
+          <span class="badge badge-blue">初始预览</span>
+          <time datetime="2026-11-11">2026-11-11</time>
+        </div>
+        <p style="color:var(--text-dim);">EasyRDP 首个公开预览版本（源码形态）。核心远程桌面能力可用，企业网关与管理控制台列入 V1 / V2 路线图。</p>
+
+        <h3>Added 新增</h3>
+        <ul>
+          <li>连接中心：卡片式连接管理、分组与收藏。</li>
+          <li>标签页多会话：并行运行多个远程桌面会话并快速切换。</li>
+          <li>全局搜索 <code>Ctrl+K</code>：按主机名 / 备注 / 标签模糊检索连接。</li>
+          <li>JSON Profile：连接配置以 JSON 描述，支持导入 / 导出与版本化管理。</li>
+          <li>.rdp 兼容：支持导入 mstsc 生成的 <code>.rdp</code> 文件，并可导出回 <code>.rdp</code>。</li>
+          <li>远程会话：基于 FreeRDP 协议栈的基础 RDP 会话，支持剪贴板与驱动器重定向开关。</li>
+          <li>凭据安全存储：Windows DPAPI / macOS Keychain / Linux libsecret。</li>
+          <li>跨平台构建：Windows x64 zip、macOS dmg、Linux AppImage 三种产物。</li>
+          <li>CLI 初版：<code>linkdesk connect</code> 与 <code>linkdesk import</code>。</li>
+        </ul>
+
+        <h3>Changed 变更</h3>
+        <ul>
+          <li>技术栈确定：Rust + Tauri 2 + FreeRDP 协议栈 + WebView2（Windows）。</li>
+          <li>TLS 策略：强制 TLS 1.2 及以上版本，拒绝弱加密套件。</li>
+          <li>构建安全：启用 CFG（控制流防护）与 ASLR 编译期缓解。</li>
+        </ul>
+
+        <h3>Fixed 修复</h3>
+        <ul>
+          <li>初始发布，无历史问题修复记录。</li>
+          <li>已知限制：安装包尚未代码签名；多显示器切换在个别驱动下可能出现分辨率抖动（后续版本修复）。</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        旧版本归档见 GitHub Releases 页面。企业用户请关注 <a href="security.html">安全公告</a> 订阅方式。
+      </div>
+
+      <!-- 分页（CHANGELOG-PAGER 2026-11-17：默认每页 10 条） -->
+      <div id="chlog-pager" class="pager" style="display:flex;gap:6px;justify-content:center;margin-top:28px;flex-wrap:wrap;"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="migrate.html">迁移指南</a>
+          <a href="compare.html">产品对比</a>
+
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+/* CHANGELOG-PAGER 2026-11-17：完整分页，默认每页 10 条（可改 PAGE_SIZE） */
+(function () {
+  var PAGE_SIZE = 10;
+  var releases = Array.prototype.slice.call(document.querySelectorAll('.release'));
+  if (!releases.length) return;
+  var pager = document.getElementById('chlog-pager');
+  var pages = Math.ceil(releases.length / PAGE_SIZE);
+  var current = 1;
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function show(p) {
+    current = Math.min(Math.max(1, p), pages);
+    releases.forEach(function (el, i) {
+      el.style.display = (i >= (current - 1) * PAGE_SIZE && i < current * PAGE_SIZE) ? '' : 'none';
+    });
+    var html = '';
+    html += '<button class="pg" data-p="' + (current - 1) + '"' + (current === 1 ? ' disabled' : '') + '>‹ 上一页</button>';
+    for (var i = 1; i <= pages; i++) {
+      html += '<button class="pg' + (i === current ? ' cur' : '') + '" data-p="' + i + '">' + i + '</button>';
+    }
+    html += '<button class="pg" data-p="' + (current + 1) + '"' + (current === pages ? ' disabled' : '') + '>下一页 ›</button>';
+    html += '<span style="color:var(--text-dim);font-size:13px;align-self:center;margin-left:8px;">共 ' +
+            releases.length + ' 条 / ' + pages + ' 页</span>';
+    pager.innerHTML = html;
+    pager.querySelectorAll('button.pg').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = parseInt(b.getAttribute('data-p'), 10);
+        show(p);
+        var sec = document.querySelector('.page-header, .section-title, h1');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  }
+  // 样式（复用站点变量，深浅主题自适应）
+  var css = document.createElement('style');
+  css.textContent =
+    '.pager .pg{min-width:34px;padding:6px 12px;border:1px solid var(--border);background:var(--bg-card);' +
+    'color:var(--text);border-radius:8px;cursor:pointer;font-size:13px;}' +
+    '.pager .pg:hover:not(:disabled){background:var(--bg-soft);}' +
+    '.pager .pg.cur{background:var(--primary,#3b82f6);border-color:var(--primary,#3b82f6);color:#fff;}' +
+    '.pager .pg:disabled{opacity:.4;cursor:not-allowed;}';
+  document.head.appendChild(css);
+  show(1);
+})();
+</script>
+  <script src="assets/js/main.js?v=21"></script>
+<script>
+/* CHANGELOG-COLLAPSE v2 2026-11-18：最新一条默认展开，其余默认收缩；仅点击版本标题行切换，
+   提示文案与箭头随状态实时更新，点击标题行内链接不误触 */
+(function () {
+  var rels = document.querySelectorAll("section .container > .release");
+  if (!rels.length) return;
+  var css = document.createElement("style");
+  css.textContent =
+    ".release .release-head{cursor:pointer;user-select:none;}" +
+    ".release .rl-chevron{margin-left:auto;color:var(--text-dim);font-size:14px;transition:transform .2s;}" +
+    ".release.rl-collapsed .rl-chevron{transform:rotate(-90deg);}" +
+    ".release.rl-collapsed .rl-body{display:none;}" +
+    ".release-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px;}" +
+    ".rl-hint{font-size:12px;color:var(--text-dim);}";
+  document.head.appendChild(css);
+  function applyState(r) {
+    var open = !r.classList.contains("rl-collapsed");
+    var hint = r.querySelector(".rl-hint");
+    if (hint) hint.textContent = open ? "（展开中 · 点击标题行收起）" : "（已收起 · 点击标题行展开）";
+  }
+  rels.forEach(function (r, idx) {
+    var head = r.querySelector(".release-head");
+    if (!head) return;
+    // 把 head 之后的所有内容包进 .rl-body
+    var body = document.createElement("div");
+    body.className = "rl-body";
+    while (head.nextElementSibling) body.appendChild(head.nextElementSibling);
+    r.appendChild(body);
+    // 展开/收起指示箭头
+    var chev = document.createElement("span");
+    chev.className = "rl-chevron";
+    chev.textContent = "▾";
+    head.appendChild(chev);
+    var hint = document.createElement("span");
+    hint.className = "rl-hint";
+    head.appendChild(hint);
+    // 最新一条（第一个）默认展开，其余默认收缩
+    if (idx !== 0) r.classList.add("rl-collapsed");
+    applyState(r);
+    // 仅标题行触发切换；标题行内含链接时交给链接，不切换
+    head.addEventListener("click", function (e) {
+      if (e.target.closest("a")) return;
+      r.classList.toggle("rl-collapsed");
+      applyState(r);
+    });
+  });
+})();
+</script>
+</body>
+</html>
