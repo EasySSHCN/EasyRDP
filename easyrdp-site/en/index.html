@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EasyRDP — Cross-Platform Open Source Remote Desktop Client</title>
+  <meta name="description" content="EasyRDP is a 100% open source (MIT) cross-platform remote desktop client built on Rust + Tauri 2 + FreeRDP. Windows build available, portable.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b82f6'/%3E%3Crect x='5' y='7' width='22' height='14' rx='2' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 15l6-4M16 15l-4-2' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M12 25h8' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="canonical" href="https://easyrdp.cn/" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "EasyRDP",
+        "operatingSystem": "Windows 10/11",
+        "applicationCategory": "UtilitiesApplication",
+        "softwareVersion": "0.3.5",
+        "license": "https://opensource.org/licenses/MIT",
+        "description": "EasyRDP is a 100% open source (MIT) cross-platform remote desktop client built on Rust + Tauri 2 + FreeRDP. Windows build available now.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "WebSite",
+        "url": "https://easyrdp.cn/",
+        "name": "EasyRDP",
+        "inLanguage": "en"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ===== Top navigation ===== -->
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html" aria-label="EasyRDP home">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.3.4</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="download.html">Download</a>
+        <a href="docs.html">Docs</a>
+        <a href="migrate.html">Migration Guide</a>
+        <a href="compare.html">Compare</a>
+
+        <a href="changelog.html">Changelog</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">Security</a>
+        <a class="lang-switch" href="../index.html" hreflang="zh-CN" lang="zh-CN" title="切换到中文">中文</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero" style="padding-bottom:20px;">
+    <div class="container">
+      <h1 style="display:flex;align-items:center;justify-content:center;gap:20px;"><svg width="76" height="76" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex-shrink:0;"><rect width="32" height="32" rx="7" fill="#3b82f6"/><rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/><path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span><span style="color:#fff;">Easy</span><span class="accent">RDP</span></span></h1>
+      <p class="subtitle">
+        Built on the Rust + Tauri 2 + FreeRDP stack, 100% open source (MIT license). A Windows build is available now (macOS / Linux planned). Portable, no installation required: download, extract and run — no registry entries, no leftover files.
+        Card-based connection management, tabbed multi-session support, and configuration as code — remote desktop that is both easy to use and easy to control.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="download.html">⬇ Download <span data-version>v0.3.4</span></a>
+        <a class="btn btn-outline" href="features.html">Feature Overview</a>
+        <a class="btn btn-outline" href="docs.html">Quick Start</a>
+      </div>
+      <div class="hero-meta">
+        Current version <code data-version>v0.3.4</code> · MIT License · Rust + Tauri 2 + FreeRDP · .rdp file import supported
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Real app screenshot (SHOTUI-20261117: animated showcase, aligned with easyssh.cn) ===== -->
+  <style>
+    .shot { max-width: 880px; margin: 0 auto; text-align: left;
+      background: var(--bg-card, #141923); border: 1px solid var(--border, #2a3341);
+      border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      overflow: hidden; position: relative;
+      animation: shot-in .7s cubic-bezier(.2,.7,.3,1) both, shot-float 7s ease-in-out 1s infinite;
+      transition: transform .25s ease, box-shadow .25s ease; }
+    .shot:hover { transform: translateY(-6px) scale(1.012);
+      box-shadow: 0 22px 48px rgba(0,0,0,.45), 0 0 26px rgba(59,130,246,.15); }
+    .shot::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.07) 50%, transparent 58%);
+      transform: translateX(-130%); animation: shot-shine 6.5s ease-in-out 1.6s infinite; }
+    .shot-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: var(--bg-soft, #121a24); border-bottom: 1px solid var(--border, #2a3341); }
+    .shot-bar .title { margin-left: 8px; color: var(--text-dim, #8fa3bf); font-size: .82rem;
+      font-family: var(--mono, Consolas, monospace); }
+    .shot img { display: block; width: 100%; height: auto; }
+    .shot-caret { display: inline-block; width: 7px; height: .95em; margin-left: 6px;
+      background: var(--primary, #3b82f6); vertical-align: text-bottom;
+      animation: shot-blink 1.1s steps(1) infinite; }
+    @keyframes shot-shine { 0% { transform: translateX(-130%); } 38%, 100% { transform: translateX(130%); } }
+    @keyframes shot-in { from { opacity: 0; transform: translateY(26px) scale(.985); } to { opacity: 1; transform: none; } }
+    @keyframes shot-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
+    @keyframes shot-blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .shot::after, .shot-caret { animation: none; }
+      .shot { animation: shot-in .5s ease both; }
+      .shot:hover { transform: none; }
+    }
+  </style>
+  <section class="section" style="padding:0 0 10px;">
+    <div class="container">
+      <figure class="shot" aria-label="Screenshot of the EasyRDP application">
+        <div class="shot-bar">
+          <span class="dot" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:#ff5f57;"></span><span class="dot" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:#febc2e;"></span><span class="dot" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:#28c840;"></span>
+          <span class="title">EasyRDP — New connection<span class="shot-caret"></span></span>
+        </div>
+        <picture>
+          <source srcset="../assets/img/app-screenshot.webp?v=1" type="image/webp" />
+          <img src="../assets/img/app-screenshot.png?v=1" width="906" height="614" loading="eager" decoding="async" fetchpriority="high"
+               alt="EasyRDP application interface: connection management, new connection, remote desktop window, and settings center" />
+        </picture>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== Feature overview (6 cards) ===== -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Core Features</h2>
+      <p class="section-desc">From personal remote work to enterprise-wide rollout, EasyRDP covers the full range of scenarios with a single open source client.</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="icon">🗂</div>
+          <h3>Connection Center</h3>
+          <p>Card-based connection management shows every host at a glance; tabs carry multiple parallel sessions; <code>Ctrl+K</code> global search gets keyboard users there in seconds.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📄</div>
+          <h3>Configuration as Code</h3>
+          <p>Connection settings are described in JSON profiles — versionable and reviewable. Import mstsc <code>.rdp</code> files directly, or export your connections back out in one click.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🖥</div>
+          <h3>Remote Sessions</h3>
+          <p>Powered by the FreeRDP stack: RDP 8+ compression, multi-monitor, clipboard and drive redirection. v0.3.4 adds a pre-connection <strong>TCP connectivity check</strong> (one-click verification of host reachability and port response); the rendering engine is on its way.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛡</div>
+          <h3>Enterprise Gateway Access <span class="badge badge-blue">Roadmap</span></h3>
+          <p>A planned self-hosted cloud gateway: TLS tunnel over port 443 + pre-authentication + OTP second-factor verification, cutting through even the most complex network environments.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🏢</div>
+          <h3>Admin Console <span class="badge badge-blue">Roadmap</span></h3>
+          <p>Planned SSO/OIDC + MFA, a device redirection policy matrix, and session watermarking / recording / audit logging to meet enterprise compliance requirements.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔒</div>
+          <h3>Security Baseline</h3>
+          <p>TLS 1.2+ encrypted transport; credentials stored encrypted via DPAPI / Keychain / libsecret; CFG / ASLR mitigations enabled at build time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Three steps to get started ===== -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Get Started in Three Steps</h2>
+      <p class="section-desc">No complex configuration needed — download, run, connect, and you are inside your remote desktop within a minute.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Download the Package</h3>
+          <p>Go to the <a href="download.html">download page</a>, grab the Windows build, and verify file integrity with SHA256 (macOS / Linux builds are planned).</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Run EasyRDP</h3>
+          <p>Extract or mount and run directly — no extra dependencies required. On first launch, add your host under "New Connection", or simply import a <code>.rdp</code> file.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Connect to a Remote Host</h3>
+          <p>Double-click a connection card to start a session; use <code>Ctrl+K</code> search to switch instantly, and move freely between multiple remote sessions across tabs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Open source statement ===== -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">100% Open Source</h2>
+      <p class="section-desc">
+        EasyRDP is open sourced under the <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">MIT license</a>,
+        with a stack of Rust + Tauri 2 + FreeRDP + WebView2 — no closed-source components, no telemetry backdoors.
+        Issues and PRs are welcome on GitHub / Gitee. Let's build a more open, enterprise-grade remote desktop experience together.
+      </p>
+      <div class="hero-cta" style="margin-top: 30px;">
+        <a class="btn btn-outline" href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub Repository ↗</a>
+        <a class="btn btn-outline" href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee Mirror ↗</a>
+        <a class="btn btn-outline" href="contributing.html">Contributing</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>A cross-platform open source remote desktop client. Rust + Tauri 2 + FreeRDP, MIT license — every remote connection secure and under your control.</p>
+          <p class="footer-lang">中文版: <a href="../index.html" hreflang="zh-CN" lang="zh-CN">简体中文</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="download.html">Download</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="docs.html">Documentation</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee Mirror</a>
+          <a href="docs.html">JSON Profile Spec</a>
+          <a href="migrate.html">Migration Guide</a>
+          <a href="compare.html">Compare</a>
+
+          <a href="faq.html">FAQ</a>
+          <a href="security.html">Security Policy</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="contributing.html">Contributing</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">Issue Tracker</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="license.html">MIT License</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · Released under the MIT license</span>
+        <span>ICP placeholder: 京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js?v=12"></script>
+  <script>(function(){try{var page='en/index';var payload=JSON.stringify({page:page,ref:document.referrer||'',ts:Date.now()});var url=new URL('../api/stats/visit.php',location.href).href;try{if(navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([payload],{type:'application/json'})))return;}catch(e){}try{fetch(url,{method:'POST',keepalive:true,body:payload,headers:{'Content-Type':'application/json'}}).catch(function(){});return;}catch(e){}try{var img=new Image();img.src=url+'?p='+encodeURIComponent(page)+'&r='+encodeURIComponent(document.referrer||'')+'&t='+Date.now();}catch(e){}}catch(e){}})();</script>
+</body>
+</html>
