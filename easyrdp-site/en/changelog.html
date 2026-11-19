@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — EasyRDP</title>
+  <meta name="description" content="EasyRDP changelog: v0.3.4 hotkey-capture input and anonymous telemetry attribution, v0.3.3 TCP connectivity testing and UI upgrades, with Added / Fixed details.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/changelog.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/changelog.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/changelog.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.1.0</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="download.html">Download</a>
+        <a href="docs.html">Docs</a>
+        <a href="migrate.html">Migration Guide</a>
+        <a href="compare.html">Compare</a>
+
+        <a href="changelog.html">Changelog</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">Security</a>
+        <a class="lang-switch" href="../changelog.html" hreflang="zh-CN" lang="zh-CN" title="切换到中文">中文</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Changelog</h1>
+      <p>Following the <a href="https://keepachangelog.com/en/" target="_blank" rel="noopener">Keep a Changelog</a> convention, with versioning based on Semantic Versioning (SemVer).</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+            <div class="release">
+        <div class="release-head">
+          <h2>v0.3.13</h2>
+          <span class="badge">Current build</span>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V2 enhancements wave 2 (finale): multi-gateway HA + local frame-pipeline SIMD/GPU acceleration + gateway web console (SSO/OIDC).</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Multi-gateway HA (R-20261118-016)</strong>: fallback gateway list (primary→backup failover, 5s/node; configurable auth fail-fast); health check button (per-node reachability + latency 🟢/🔴); reconnects rotate from the last-good node; aggregated per-node errors</li>
+          <li><strong>Local frame pipeline SIMD/GPU acceleration (R-20261118-017)</strong>: new isolated easyrdp-pixels crate (off by default) — AVX2 color conversion/downsampling (2.7x on real hardware) + D3D11 VideoProcessor scaling with WARP→CPU fallback + runtime CPU feature detection</li>
+          <li><strong>Gateway web console + SSO/OIDC (R-20261118-018)</strong>: real OIDC Authorization Code flow (JWKS signature validation, RS256+ES256); built-in dark console (resources / read-only policy matrix / audit search); HttpOnly session + CSRF double-submit; placeholder login auto-disabled once OIDC is configured</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Session snapshot popover display fix</strong>: the popover self-deleted on mount due to an always-true guard — replaced with targeted cleanup; favorites chip binding restored; verified live (popover survives, positions correctly)</li>
+          <li>Multi-gateway 401/TLS rejection errors now pass through status code and body (no more bare HTTP error: 403)</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.12</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V2 enhancements wave 1: session snapshot preview + team template library + Profile Git sync.</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Session snapshot preview (R-20261118-013)</strong>: hover a connection card to see the latest session thumbnail (reads the session frame source directly — works even when occluded/minimized); no-change frames skip capture; ≤200KB each, 20MB quota; deletable; toggle in settings</li>
+          <li><strong>Team template library (R-20261118-014)</strong>: save connections as templates (credentials forcibly stripped with an export gate); .erdp-template/.erdp-templates packages (sha256 integrity + schema validation); template management UI</li>
+          <li><strong>Profile Git sync (R-20261118-015)</strong>: git-ize connections/groups/templates (auto commit/push/pull); cross-machine safety: DPAPI ciphertexts are replaced with placeholders before sync and must be re-entered after restore; conflicts keep local and archive remote as .bak</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Banner Upgrade-now is now a full in-banner flow</strong>: fixes a broken button reference that only opened settings — progress/result/retry all happen inside the banner (mirrors the EasySSH updater pattern)</li>
+          <li>Gateway section gains official gateway tips and full-URL paste parsing (https://gw:8443 auto-splits host/port/TLS)</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <div class="release">
+        <div class="release-head">
+          <h2>v0.3.11</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V1 enhancements wave 2: multi-monitor + gateway security (wss/OTP/policy matrix) + audit enhancements.</p>
+
+<h3>Added</h3>
+        <ul>
+          <li><strong>Multi-monitor optimization (R-20261118-010)</strong>: monitor enumeration &amp; selection, per-monitor fullscreen, span-all-monitors, resolution fill from the selected monitor; the fullscreen window lands directly on the target monitor</li>
+          <li><strong>wss TLS + OTP (R-20261118-012)</strong>: gateway TLS ([tls] rustls); client wss with an explicit self-signed exemption; gateway TOTP second factor (RFC 6238) with client-side code prompt &amp; retry</li>
+          <li><strong>Policy matrix + audit enhancements (R-20261118-011)</strong>: configurable resource×role×action matrix (deny-by-default, hot reload); tunnel denial 403 + policy_denied audit; audit filters &amp; CSV export</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.10</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">V1 enhancements wave 1: connection center organization + batch import + profile standardization.</p>
+
+<h3>Added</h3>
+        <ul>
+          <li><strong>Favorites &amp; grouping enhancements (R-20261118-007)</strong>: nested groups (≤3 levels) with collapsible tree, drag &amp; drop reordering, favorites pin bar, 8-color group coloring</li>
+          <li><strong>Batch import &amp; dedup (R-20261118-008)</strong>: multi-file .rdp/JSON import; wizard preview with three dedup strategies; per-item error reporting; DPAPI-encrypted credentials</li>
+          <li><strong>JSON Profile schema validation (R-20261118-009)</strong>: draft-07 schema with anti-drift tests; pre-import validator with JSON Pointer error paths; <code>linkdesk schema/validate</code> CLI</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.9</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Upgrade file naming follows the new version (mirrors the EasySSH v4.3.7 user-confirmed scheme).</p>
+
+<h3>Changed</h3>
+        <ul>
+          <li><strong>Upgrade file name follows the new version</strong>: versioned installs place the new build as EasyRDP-&lt;new-version&gt;-portable.exe and keep the old build as .bak for rollback; Desktop/Quick Launch shortcuts are re-pointed automatically; fixed-name installs keep in-place replacement</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.8</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Update-reminder gap fix: same-day releases are always noticed.</p>
+
+<h3>Fixed</h3>
+        <ul>
+          <li><strong>Banner same-day quota blind spot</strong>: the startup update check no longer skips on the once-a-day guard, so a release published later the same day is still detected and banner-shown</li>
+          <li><strong>Manual check now raises the persistent banner too</strong>; an up-to-date result clears the record and banner</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.7</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Gateway access debut: connect to RDP through the cloud gateway + DPAPI-encrypted gateway credentials + gateway audit in the site admin.</p>
+
+<h3>Added</h3>
+        <ul>
+          <li><strong>Gateway access (F4 MVP)</strong>: an optional Gateway section in the new-connection form (address/port/TLS/auth: token or user-password/resource ID); a local loopback bridge relays RDP traffic over the gateway WS tunnel (byte-level loopback tested)</li>
+          <li><strong>Gateway credentials DPAPI-encrypted</strong>: legacy plaintext JSON auto-migrates; .rdp export never contains gateway credentials</li>
+          <li><strong>Gateway audit console (F5 lite)</strong>: admin-key-authenticated gateway audit endpoint + a Gateway Audit card in the site admin</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.6</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Upgrade UX fix: the UI no longer freezes while downloading an update.</p>
+
+<h3>Fixed</h3>
+        <ul>
+          <li><strong>Online upgrade UI freeze (real-user report)</strong>: Download &amp; install was a synchronous command on the main thread; it is now an async command, so the UI stays interactive and the progress bar updates during the download</li>
+          <li><strong>check_update switched to async</strong> as well</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.5</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Update-reminder hardening: persistent banner + same-day forced recheck.</p>
+
+<h3>Added</h3>
+        <ul>
+          <li><strong>Persistent update banner (R-20261118-002)</strong>: once a new version is detected, a persistent banner below the titlebar offers one-click upgrade; ✕ hides it for the current session only</li>
+          <li><strong>Same-day forced recheck</strong> once an update is known</li>
+        </ul>
+      </div>
+
+      <h2>v0.3.4</h2>
+          <time datetime="2026-11-18">2026-11-18</time>
+        </div>
+        <p style="color:var(--text-dim);">Admin companion release: combo-key capture + anonymous client telemetry (download-ticket attribution).</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Combo-key input capture (R-20261117-012)</strong>: the hotkey input in Settings enters capture mode on focus — press any combination to auto-fill its canonical string; supports Win/Ctrl/Alt/Shift + primary key (letters/digits/F1-F24/Esc/Tab/Enter/Del/arrows), Esc clears and exits, bare modifiers are ignored, system shortcuts suppressed while capturing</li>
+          <li><strong>Anonymous client telemetry (client side of R-20261118-001)</strong>: async first-launch report of anonymous device info (anonId/version/OS/arch/language — allow-list fields only, no personal data, once per day, fully silent on failure); when a website download ticket (ticket.id) is present the report is attributed automatically, powering the admin "visitor records with attributed devices"</li>
+        </ul>
+
+        <h3>Improved</h3>
+        <ul>
+          <li>Website admin batch upgrades: login persistence, full visitor IPs with geo attribution, truncated device IDs, mail channel, English site, site-wide SEO (see site updates v1.5.0)</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.3</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">Clipboard completion release: text clipboard protocol fix + bidirectional file clipboard transfer.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Local copy could not be pasted into the remote desktop (text direction, R-20261117-011)</strong>: the client's clipboard announcement arrived before Monitor Ready — a protocol ordering violation that strict servers silently drop. Now the announcement waits until the Monitor Ready/Capabilities exchange completes (cached for retransmission when not ready). Additionally: if MonitorReady is not received within 10s of connecting, a hint appears at the bottom — "Remote clipboard service is not ready (rdpclip not responding)" — guiding the user to restart remote rdpclip</li>
+        </ul>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Bidirectional file clipboard transfer (R-20261117-011)</strong>: implements the standard CLIPRDR FileContents protocol — after copying files locally, a FileGroupDescriptorW + FileContents named format is announced to the remote side; when pasting remotely, the server responds to FileContentsRequest with descriptors and content chunks (1 MiB disk reads). In the reverse direction, files copied on the remote side are automatically downloaded to "Downloads\EasyRDP-Clipboard\" and placed on the local clipboard. Enables the streaming file capability bit (paths never leave the wire); signature-based deduplication prevents loops; ≤128 files per transfer, ≤2 GiB per file</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.2</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">Hint consolidation wrap-up + root-cause fix for the update-check signature verification failure.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Root-cause fix for "Upgrade manifest signature verification failed, rejected" during update check (R-20261117-008)</strong>: the client's canonical-string rebuild used serde_json Map, which outputs fields in alphabetical order by default (file before latestVersion), mismatching the server's fixed signing order (latestVersion→file→notes→sha256) — so update checks always failed signature verification on any version. Now the canonical string is assembled manually in the agreed order; the end-to-end probe (Rust semantics) verifies the production manifest as VALID</li>
+        </ul>
+
+        <h3>Changed</h3>
+        <ul>
+          <li><strong>Single display slot for connection hints (R-20261117-003)</strong>: removed the #msg hint to the right of the connection form buttons; all flash-style operation feedback is now consolidated into the bottom conn-hint status area (with token-overwrite protection, and without clobbering connection lifecycle state)</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.1</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">Rapid-fix release after real-machine retesting: four fixes — the hotkey menu's Win key, ambiguous numpad keys, title-bar wording, and the close glyph.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>"Send Win key" not working (R-20261117-004)</strong>: the hotkey menu sent down/up events with zero interval, which the server/remote apps dropped. Now the key is held for 80 ms after press-down before release (mimicking a real keystroke rhythm); all hotkey menu items benefit uniformly</li>
+          <li><strong>Numpad Del incorrectly sent Del when NumLock was on (R-20261117-005)</strong>: the ambiguous NumpadDecimal key now sends the main-keyboard period scancode (0x34) when local NumLock is ON, matching mstsc behavior; the Del scancode is kept when NumLock is OFF</li>
+        </ul>
+
+        <h3>Changed</h3>
+        <ul>
+          <li><strong>Title-bar SAS slot wording changed to "Send" (R-20261117-006)</strong>: matches the semantics of the hotkey dropdown menu</li>
+          <li><strong>Title-bar close button glyph changed to the letter X (R-20261117-007)</strong>: the original ✕ glyph was too small; X is larger and clearer</li>
+        </ul>
+
+        <h3>Notes</h3>
+        <ul>
+          <li><strong>v0.3.0 update check "signature verification failed" (R-20261117-008)</strong>: at v0.3.1 this was mistakenly attributed to an OTA manifest propagation delay; v0.3.2 located the true root cause (wrong field order in the client's canonical string) and it has been fixed — see the v0.3.2 entry</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.3.0</h2>
+          <time datetime="2026-11-17">2026-11-17</time>
+        </div>
+        <p style="color:var(--text-dim);">Milestone release (28 accumulated requirement-pool items triggered a minor bump): remote window hotkey menu + connection status hint area, together with the final fix for v0.2.2 ghosting (incremental pipeline disabled).</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Remote window hotkey dropdown menu (R-20261117-001)</strong>: clicking the title-bar SAS slot opens a menu — Send Ctrl+Alt+Del (SAS) / Send Win key / Win+D / Win+E / Win+R / Win+L / Ctrl+Shift+Esc (Task Manager) / Alt+Tab. The Settings Center gains a new global "⌨ Hotkeys" group; custom hotkeys (name + key combo, e.g. Ctrl+Shift+Esc) are stored in settings.json and shown dynamically at the bottom of the menu, effective for all sessions</li>
+          <li><strong>Friendly connection status hint area (R-20261117-002)</strong>: the "α Preview" note line at the bottom of the connection form became a live status hint — Connecting (blue) / Connected (green) / Connection failed (red, with reason) / Remote session disconnected (red, with reason)</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Block ghosting definitively fixed (R-20261116-023/024/025/026, GHOSTFIX4/5, first officially shipped with this release)</strong>: the incremental blit pipeline is disabled by default; only the "EndPaint gating + full-frame dual checksum snapshot" full-frame path is used. A frame-generation counter in the presentation layer blocks the WM_PAINT stale-backing-store channel; the first-paint suppression regression is reverted. Real-machine retest: block ghosting eliminated in all five scenarios — load / hover / drag / click</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.2</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Ghosting root-fix release: incremental blit pipeline disabled by default, full-frame presentation path + stale backing-store channel fix.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Block ghosting root fix: incremental blit pipeline disabled by default (GHOSTFIX4-R023)</strong>: the carrier of block ghosting in the five scenarios (load / button hover / window drag / icon drag / click) was the incremental pipeline itself (tiles extracted pixel-by-pixel from the composition buffer → merged in 16 ms batches → blitted back to frame storage by the presentation layer); the multi-level timing gaps could not be sealed one by one. Now only the "EndPaint gating + full-frame dual checksum snapshot" full-frame path is used by default (torn frames are discarded and never emitted), structurally eliminating the old tile-blit-back channel. Incremental mode must now be explicitly enabled via EASYRDP_ENABLE_DELTAS=1 (for experimental comparison), with one final gate added at the end of the emit thread</li>
+          <li><strong>Stale backing-store channel fix in the presentation layer (GHOSTFIX5-R023)</strong>: frame-storage writes and window backing-store updates were non-atomic; during the gap, WM_PAINT could blit the stale backing store, presenting an entire old frame. Introduced frame-generation counters (FRAME_GEN/BACKING_GEN); when the backing generation lags the frame generation, blitting the backing store is forbidden and the direct-paint branch is taken</li>
+          <li><strong>Chained regression from first-paint suppression and guarded emission reverts (GHOSTFIX2-R023 rollback)</strong>: the previously introduced "emit only when first-paint coverage ≥80%" gate froze the picture on stale content during load and risked deadlock in full-frame mode; it has been reverted in full</li>
+        </ul>
+
+        <h3>Verified</h3>
+        <ul>
+          <li>End-to-end audit (present-audit): in full-frame mode, pump delta=0 and the engine emits only full-frame snapshots; frame-by-frame sampling inspection across load / welcome screen / desktop shows no black base, no tile grid, and no stale content bleed-in</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.1</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Ghosting-focused fix release: root-cause fix for the presentation-layer Delta/full-frame timing inversion; ghosting sealed in the load / window-drag / button-hover scenarios.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Remote desktop ghosting root fix (presentation-layer Delta/full-frame timing inversion)</strong>: stale incremental batches expiring after a full frame arrived wrote old pixels back into frame storage and repainted dirty rectangles, causing old-frame flashbacks. Fixed by flushing pending incremental batches before presenting the full frame, restoring strict event ordering and structurally eliminating three scenarios: flicker ghosting during load, edge ghosting when dragging software windows, and hover ghosting on title-bar minimize/maximize/close buttons (real-machine traffic replay: previously 8 ghost frames / 650k stale pixels per incident → zero after the fix on that path)</li>
+          <li><strong>Hardened engine snapshot consistency verification</strong>: sparse sampling upgraded to full-frame dual checksums (any single-byte write is captured); emit-thread snapshots are deferred during EndPaint batch processing, closing the residual tearing window where the order path wrote the framebuffer directly</li>
+          <li><strong>1px under-coverage fix for incremental dirty rectangles</strong>: stale pixel columns at the right/bottom edges under non-integer scaling factors; dirty rectangles now use edge-point rounding and are clamped to the window bounds</li>
+          <li><strong>Fixed two PowerShell console windows flashing at startup</strong>: the shortcut-refresh child process now includes CREATE_NO_WINDOW</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.2.0</h2>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Milestone release: three major feature clusters delivered together — Settings Center, online updates, and parallel multi-session.</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>In-app online update</strong>: the full chain — detection / encrypted download / signature verification / atomic replacement / detached restart (AES-256-GCM envelope + CTR-encrypted package, Ed25519 manifest signing, dual SHA-256 verification, downgrade protection, self-healing on failure)</li>
+          <li><strong>Settings Center</strong>: "⚙ Settings" dialog with five navigation groups — General / Appearance / Updates / Shortcuts / About — persisting uniformly in settings.json</li>
+          <li><strong>Online upgrade detection</strong>: automatic check (90s delayed silent check at startup) + frequency selection + manual check + download/verify/install progress bar + toast notification for new versions</li>
+          <li><strong>Skins/themes</strong>: dark / light / follow-system + 3 accent colors, applied instantly and persisted; native window title bar follows suit</li>
+          <li><strong>Multiple languages</strong>: a four-language dictionary system — 简体/繁體/English/한국어 — with instant switching that persists across restarts</li>
+          <li><strong>Shortcut generation</strong>: manual creation of Desktop and Quick Launch shortcuts (with synchronous success/failure feedback; regenerating overwrites)</li>
+          <li><strong>Automatic shortcut refresh after upgrades</strong>: after an upgrade replaces the app, .lnk targets are corrected automatically (executed detached, silent on failure)</li>
+          <li><strong>Parallel multi-session</strong>: the main window stays visible while multiple remote desktop windows coexist; active session count display and per-session quick disconnect</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Physical keyboard Win key now reaches the remote side</strong>: during active RDP sessions, a low-level keyboard hook intercepts LWin/RWin, forwards them over the session channel, and suppresses the local Start menu (reference-counted, auto-unloaded to prevent leaks)</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.5</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Ghosting wrap-up fix: snapshot consistency verification gives tearing immunity; real-machine forensics show 230 frames with zero torn frames.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Remote desktop ghosting wrap-up (torn-snapshot immunity)</strong>: 17 sample rows are hash-compared before and after each full-frame snapshot; if the frame buffer was written during snapshotting (tearing), the snapshot is discarded and retried (microsecond-level overhead). Snapshots are deferred for 15 ms after tile writes. Covers the load and window-drag scenarios (click ghosting was already eradicated in v0.1.4). Real-machine forensics: before the fix, 7–8 torn frames always appeared during load → zero across 230 frames after the fix.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.4</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Ghosting root-cause fix release: after forensic probes located the ghost-frame artifact itself, 7 defects in the presentation/emission chain were fixed one by one (verified end-to-end under real-machine forced-reproduction scenarios).</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Remote desktop ghosting root fixes (7 items)</strong>: incremental mode's full-frame fallback mistakenly used a truncated composition buffer (the ghost-frame artifact) → now reads the full picture buffer directly; a mutex on picture snapshotting and tile composition eliminates half-updated tears; WM_PAINT no longer writes old frames back to the backing store (preventing picture-regression flashbacks); window moves no longer invalidate and repaint the entire window; dual-dimension guards on incremental batches (area / small-tile storms) + pre-validation of batch pixels; full-frame fallback period reduced 5s→500ms.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.3</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Remote desktop ghosting root-fix release: the true cause was located as server-side bitmap cache reference desynchronization (not the presentation layer); disabling bitmap cache negotiation eradicates grid tiling and text-overlay flashbacks.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Remote desktop ghosting root fix (TILEGHOST)</strong>: during batched image changes — load / mouse click / IME candidate window / window drag / app launch — the whole screen showed a 64×64 grid tiling ghost and the login screen's old text overlaid on top. Root cause: desynchronized server bitmap cache entries were composited into the session frame buffer (memblt cache references). Bitmap cache negotiation (BitmapCache/V3) is disabled so the server sends raw bitmap data directly, fixing the problem at its source. Cost: slightly higher bandwidth; picture correctness takes priority.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.2</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Rapid-fix release after real-machine feedback on v0.1.1: two issues — missing TLS backend in feedback submission and the version number shown in the main UI.</p>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Feedback submission reported "no TLS backend is configured"</strong>: the HTTP client's TLS backend (schannel) is now mounted explicitly and the connection is reused globally; network-class failures automatically retry once, and the failure hint includes troubleshooting suggestions.</li>
+          <li><strong>Main UI title bar showed an old version number</strong>: it now reads the app's actual version dynamically, updating automatically with each release.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.1</h2>
+          <span class="badge badge-blue">2026-11-16</span>
+          <time datetime="2026-11-16">2026-11-16</time>
+        </div>
+        <p style="color:var(--text-dim);">Two major themes in this release: ① fixed misaligned/tiled flicker when clicking the native remote desktop window (GDI backing-store direct-paint rework); ② launched the full user-feedback pipeline — one-click in-app feedback (encrypted upload), admin review and replies on the website backend, and curated display in the "User Voices" section on the front end.</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>User feedback feature</strong>: a "Feedback" button in the title bar supporting categories (feature suggestion / bug report / other), optional contact info, and 5–2000 character content with length validation. Feedback is uploaded to the website in an AES-256-GCM encrypted envelope (HMAC-SHA256 derived key + time-window replay protection), with anonymous collection of basic system info (version / OS / resolution, no personal identifying information) to aid problem diagnosis.</li>
+          <li><strong>Website "User Voices · Featured Feedback"</strong>: a new section on the download page pairing published user feedback with official replies (only published entries are shown, the latest 10, fully escaped to prevent XSS).</li>
+          <li><strong>Unified website admin backend</strong>: admin login (CAPTCHA + brute-force lockout); feedback management with list filtering / reply / publish / delete / manual entry, full pagination; password change and email-binding self-service recovery supported.</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Misaligned/tiled flicker when clicking the native window (fix36)</strong>: added a per-window GDI backing store (memory DC + compatible bitmap); frames enter the backing store as full frames via SetDIBitsToDevice and are presented uniformly with StretchBlt, eliminating driver-level ambiguity in the source y-coordinate of top-down DIB sub-rectangles; half-frame detection tightened to exact length equality, with abnormal-length buffers discarded via the full-frame fallback; the backing store is freed on window destruction to prevent leaks.</li>
+        </ul>
+
+        <h3>Website / Infrastructure</h3>
+        <ul>
+          <li>Feedback API launched (submit / manage / public TOP10 / CAPTCHA), with IP-hash rate limiting (5 per hour + 60-second interval).</li>
+          <li>Daily automatic intake of user feedback into the requirement pool + AI re-review loop (genuine feedback published into the pool / spam taken down / replies closed when not adopted for development).</li>
+          <li>HTML page caching strategy optimized: the version badge and page updates take effect immediately on a normal refresh (F5), with no forced refresh needed.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.0 (Stable)</h2>
+          <span class="badge badge-blue">2026-11-15</span>
+          <time datetime="2026-11-15">2026-11-15</time>
+        </div>
+        <p style="color:var(--text-dim);">EasyRDP's first stable release. Portable, no installation: double-click to run (a single fully static-linked Windows file, no DLLs required). This release lands the full remote desktop core experience: native FreeRDP session window, direct mouse/keyboard input pass-through, bidirectional clipboard sync, incremental frame pipeline with ghosting root fixes, remote cursor shape sync, and Win key & Ctrl+Alt+Del (SAS) support.</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li><strong>Native FreeRDP session window</strong> (Windows): an independent top-level window with a custom-drawn title bar (minimize/maximize/close/drag), full-frame direct painting via StretchDIBits, with zero encoding and zero IPC overhead.</li>
+          <li><strong>Input pass-through</strong>: full forwarding of mouse (move / left-middle-right buttons / wheel / horizontal wheel) and all keyboard keys; the <strong>Win key</strong> is intercepted via a low-level keyboard hook and forwarded (remote Start menu works normally).</li>
+          <li><strong>Ctrl+Alt+Del delivered to the remote side</strong>: via the title-bar SAS button or the local <code>Ctrl+Alt+End</code> hotkey (extended scancode sequence, SAS synthesized server-side).</li>
+          <li><strong>Bidirectional clipboard sync</strong> (CLIPRDR CF_UNICODETEXT): local copy → remote paste, remote copy → local paste, with loop protection.</li>
+          <li><strong>Incremental frame pipeline</strong>: dirty-rectangle incremental painting + EndPaint full frames (33 ms throttling ~30 FPS during motion + 5s fallback + pending retransmission), with adaptive load shedding during motion.</li>
+          <li>Remote cursor shape sync (monochrome/color/32bpp alpha anti-aliased); keyboard LED (NumLock/CapsLock) sync.</li>
+          <li>Disaster-recovery package mechanism: source code + build components + recovery docs packaged in one click, allowing full restoration of development/build capability on another machine.</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li><strong>Drag ghosting (root fix)</strong>: full-frame snapshots now read the GDI primary buffer — previously, order updates (window dragging) never entered the composition buffer, freezing ghost frames in place.</li>
+          <li>Input failure root cause: fixed a defect in the window-procedure message arming (degenerate WM_NCCREATE/WM_DESTROY binding swallowed all messages).</li>
+          <li>Main UI restoration and process exit after closing a window; black-block ghosting on move/resize; black square cursor; first-packet disconnect after ACTIVE; 1-2 FPS stutter during dragging — all fixed.</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-head">
+          <h2>v0.1.0-alpha</h2>
+          <span class="badge badge-blue">Initial preview</span>
+          <time datetime="2026-11-11">2026-11-11</time>
+        </div>
+        <p style="color:var(--text-dim);">EasyRDP's first public preview (source form). Core remote desktop capabilities are usable; the enterprise gateway and admin console are on the V1 / V2 roadmap.</p>
+
+        <h3>Added</h3>
+        <ul>
+          <li>Connection Center: card-style connection management, groups, and favorites.</li>
+          <li>Tabbed multi-session: run multiple remote desktop sessions in parallel and switch quickly.</li>
+          <li>Global search <code>Ctrl+K</code>: fuzzy search of connections by hostname / note / tag.</li>
+          <li>JSON Profile: connection configs described as JSON, with import / export and versioned management.</li>
+          <li>.rdp compatibility: import <code>.rdp</code> files generated by mstsc, and export back to <code>.rdp</code>.</li>
+          <li>Remote sessions: basic RDP sessions on the FreeRDP protocol stack, with clipboard and drive-redirection toggles.</li>
+          <li>Secure credential storage: Windows DPAPI / macOS Keychain / Linux libsecret.</li>
+          <li>Cross-platform builds: Windows x64 zip, macOS dmg, and Linux AppImage artifacts.</li>
+          <li>Initial CLI: <code>linkdesk connect</code> and <code>linkdesk import</code>.</li>
+        </ul>
+
+        <h3>Changed</h3>
+        <ul>
+          <li>Tech stack settled: Rust + Tauri 2 + FreeRDP protocol stack + WebView2 (Windows).</li>
+          <li>TLS policy: enforce TLS 1.2 and above; reject weak cipher suites.</li>
+          <li>Build security: CFG (Control Flow Guard) and ASLR compile-time mitigations enabled.</li>
+        </ul>
+
+        <h3>Fixed</h3>
+        <ul>
+          <li>Initial release; no historical bug-fix records.</li>
+          <li>Known limitations: installers are not yet code-signed; multi-monitor switching may show resolution flicker under certain drivers (to be fixed in a later version).</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        Older releases are archived on the GitHub Releases page. Enterprise users: see the <a href="security.html">security advisories</a> page for subscription options.
+      </div>
+
+      <!-- Pagination (CHANGELOG-PAGER 2026-11-17: 10 per page by default) -->
+      <div id="chlog-pager" class="pager" style="display:flex;gap:6px;justify-content:center;margin-top:28px;flex-wrap:wrap;"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>A cross-platform open-source remote desktop client. Rust + Tauri 2 + FreeRDP, MIT licensed — making every remote connection secure and under your control.</p>
+          <p class="footer-lang">Chinese version: <a href="../changelog.html" hreflang="zh-CN" lang="zh-CN">简体中文</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="download.html">Download</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="docs.html">Documentation</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee Mirror</a>
+          <a href="docs.html">JSON Profile Spec</a>
+          <a href="migrate.html">Migration Guide</a>
+          <a href="compare.html">Compare</a>
+
+          <a href="faq.html">FAQ</a>
+          <a href="security.html">Security Policy</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="contributing.html">Contributing</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">Issue Tracker</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="license.html">MIT License</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · Open source under the MIT license</span>
+        <span>ICP placeholder: 京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+/* CHANGELOG-PAGER 2026-11-17: full pagination, 10 per page by default (adjustable PAGE_SIZE) */
+(function () {
+  var PAGE_SIZE = 10;
+  var releases = Array.prototype.slice.call(document.querySelectorAll('.release'));
+  if (!releases.length) return;
+  var pager = document.getElementById('chlog-pager');
+  var pages = Math.ceil(releases.length / PAGE_SIZE);
+  var current = 1;
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function show(p) {
+    current = Math.min(Math.max(1, p), pages);
+    releases.forEach(function (el, i) {
+      el.style.display = (i >= (current - 1) * PAGE_SIZE && i < current * PAGE_SIZE) ? '' : 'none';
+    });
+    var html = '';
+    html += '<button class="pg" data-p="' + (current - 1) + '"' + (current === 1 ? ' disabled' : '') + '>‹ Prev</button>';
+    for (var i = 1; i <= pages; i++) {
+      html += '<button class="pg' + (i === current ? ' cur' : '') + '" data-p="' + i + '">' + i + '</button>';
+    }
+    html += '<button class="pg" data-p="' + (current + 1) + '"' + (current === pages ? ' disabled' : '') + '>Next ›</button>';
+    html += '<span style="color:var(--text-dim);font-size:13px;align-self:center;margin-left:8px;">' +
+            releases.length + ' releases / ' + pages + ' pages</span>';
+    pager.innerHTML = html;
+    pager.querySelectorAll('button.pg').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = parseInt(b.getAttribute('data-p'), 10);
+        show(p);
+        var sec = document.querySelector('.page-header, .section-title, h1');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  }
+  // Styling (reuses site variables; adapts to light/dark themes)
+  var css = document.createElement('style');
+  css.textContent =
+    '.pager .pg{min-width:34px;padding:6px 12px;border:1px solid var(--border);background:var(--bg-card);' +
+    'color:var(--text);border-radius:8px;cursor:pointer;font-size:13px;}' +
+    '.pager .pg:hover:not(:disabled){background:var(--bg-soft);}' +
+    '.pager .pg.cur{background:var(--primary,#3b82f6);border-color:var(--primary,#3b82f6);color:#fff;}' +
+    '.pager .pg:disabled{opacity:.4;cursor:not-allowed;}';
+  document.head.appendChild(css);
+  show(1);
+})();
+</script>
+  <script src="../assets/js/main.js?v=12"></script>
+<script>
+/* CHANGELOG-COLLAPSE 2026-11-18: latest entry expanded by default, all others collapsed; click the version title row to toggle */
+(function () {
+  var rels = document.querySelectorAll("section .container > .release");
+  if (!rels.length) return;
+  var css = document.createElement("style");
+  css.textContent =
+    ".release{cursor:pointer;}" +
+    ".release .rl-chevron{margin-left:auto;color:var(--text-dim);font-size:14px;transition:transform .2s;}" +
+    ".release.rl-collapsed .rl-chevron{transform:rotate(-90deg);}" +
+    ".release.rl-collapsed .rl-body{display:none;}" +
+    ".release-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px;}" +
+    ".rl-hint{font-size:12px;color:var(--text-dim);}";
+  document.head.appendChild(css);
+  rels.forEach(function (r, idx) {
+    var head = r.querySelector(".release-head");
+    if (!head) return;
+    // Wrap everything after the head into .rl-body
+    var body = document.createElement("div");
+    body.className = "rl-body";
+    while (head.nextElementSibling) body.appendChild(head.nextElementSibling);
+    r.appendChild(body);
+    // Expand/collapse chevron
+    var chev = document.createElement("span");
+    chev.className = "rl-chevron";
+    chev.textContent = "▾";
+    head.appendChild(chev);
+    var hint = document.createElement("span");
+    hint.className = "rl-hint";
+    hint.textContent = idx === 0 ? "(expanded · click the title row to collapse)" : "(collapsed · click the title row to expand)";
+    head.appendChild(hint);
+    // Latest entry (first) expanded by default, all others collapsed
+    if (idx !== 0) r.classList.add("rl-collapsed");
+    r.addEventListener("click", function () { r.classList.toggle("rl-collapsed"); });
+  });
+})();
+</script>
+<script>(function(){try{var page='en/changelog';var payload=JSON.stringify({page:page,ref:document.referrer||'',ts:Date.now()});var url=new URL('../api/stats/visit.php',location.href).href;try{if(navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([payload],{type:'application/json'})))return;}catch(e){}try{fetch(url,{method:'POST',keepalive:true,body:payload,headers:{'Content-Type':'application/json'}}).catch(function(){});return;}catch(e){}try{var img=new Image();img.src=url+'?p='+encodeURIComponent(page)+'&r='+encodeURIComponent(document.referrer||'')+'&t='+Date.now();}catch(e){}}catch(e){}})();</script>
+</body>
+</html>

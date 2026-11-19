@@ -1,0 +1,71 @@
+[package]
+name = "easyrdp-gateway"
+version = "0.4.0"
+edition = "2021"
+description = "EasyRDP 云网关：443 TLS 隧道 + 预认证 + 审计（骨架）"
+license = "Apache-2.0"
+
+[dependencies]
+# Web 框架与运行时
+axum = { version = "0.7", features = ["ws", "macros"] }
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5", features = ["trace"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# 认证
+jsonwebtoken = "9"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# 日志 / 审计
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 配置
+toml = "0.8"
+
+# F4-V1（R-20261118-012）TLS：axum-server rustls 直跑 HTTPS/WSS（[tls] 配置
+# cert_path/key_path 时启用；未配置保持 HTTP）。选型：axum-server 0.7 自带
+# tls-rustls feature，一行 serve，比手拼 tokio-rustls acceptor 依赖更少；
+# 0.7 线适配 hyper 1.x / hyper-util 新版（0.6 与当前 Cargo.lock 的
+# hyper-util 不兼容：Buf not implemented，见 f5-policy 交叉提醒）。
+axum-server = { version = "0.7", features = ["tls-rustls-no-provider"] }
+# 显式 ring provider：axum-server 默认 provider 依赖 aws-lc-rs，其 C 构建
+# （aws-lc-sys）在本仓库超长 target 路径下触发 MSVC D8050（命令行无法写入
+# 调试记录）；ring provider 依赖树更小且已在客户端侧（native-tls 之外）验证。
+rustls = { version = "0.23", default-features = false, features = ["ring", "logging", "std", "tls12"] }
+rustls-pemfile = "2"
+# TOTP（RFC 6238，手写实现）加密原语：RustCrypto hmac+sha1（极轻、生态标准，
+# 相比引入 totp-rs/otp 全家桶依赖树最小）。
+hmac = "0.12"
+sha1 = "0.10"
+
+# F5-V2（R-20261118-018）OIDC 真实对接 HTTP 客户端（discovery / token / JWKS 拉取）。
+# 选型说明（reqwest vs openidconnect vs 手写）：
+# - `openidconnect` 0.x：完整 OIDC 库，但依赖树巨大（oauth2 + thiserror 链 + 多套
+#   HTTP/TLS 组合），且其 discovery/验证抽象与本网关既有 JWT/审计结构耦合小、
+#   可控性差，锁定其版本还需连带锁 oauth2 全家桶。
+# - 手写 HTTP（tokio TCP）：只支持明文 HTTP，真实 IdP（Keycloak/企业微信）都是
+#   HTTPS，必须引入 TLS 客户端，绕不开同等依赖。
+# - **reqwest 0.12 + rustls（webpki-roots）**：复用网关已有的 rustls 0.23 + ring
+#   provider 依赖树（不引入 aws-lc-rs / native-tls 双 TLS 栈），异步原生适配
+#   axum handler；仅开 rustls-tls-webpki-roots + json 两个 feature，关闭默认
+#   TLS 后端。MVP 只需 3 个 HTTP 动作（GET discovery / POST token 表单 / GET
+#   JWKS），id_token 校验复用既有 jsonwebtoken 9（ring 后端，from_jwk 选 kid），
+#   不需要 openidconnect 全量语义。
+reqwest = { version = "0.12.12", default-features = false, features = ["rustls-tls-webpki-roots", "json"] }
+# F5-V2：JWT header/claims 段 base64url 解码（jsonwebtoken 9 已用 base64 0.22，
+# 复用同版本避免重复依赖树）。
+base64 = "0.22"
+
+[dev-dependencies]
+# 供测试使用（与主依赖一致即可）
+# F4 端到端集成测试：客户端侧桥接模块（TCP <-> WS，复用 pump 语义）
+easyrdp-rdp = { path = "../easyrdp-client/crates/easyrdp-rdp" }
+easyrdp-core = { path = "../easyrdp-client/crates/easyrdp-core" }
+# wss 回环集成测试：运行时生成自签证书（SAN=localhost，零外部 openssl 依赖）
+rcgen = "0.13"

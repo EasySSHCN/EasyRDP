@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download — EasyRDP</title>
+  <meta name="description" content="Download EasyRDP v0.3.4: Windows x64 single-file portable build (currently available platform), with SHA256 verification instructions and source code access.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/download.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/download.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/download.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.3.13</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="download.html">Download</a>
+        <a href="docs.html">Docs</a>
+        <a href="migrate.html">Migration Guide</a>
+        <a href="compare.html">Compare</a>
+
+        <a href="changelog.html">Changelog</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">Security</a>
+        <a class="lang-switch" href="../download.html" hreflang="zh-CN" lang="zh-CN" title="切换到中文">中文</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Download EasyRDP</h1>
+      <p class="section-desc">Current release <strong data-version>v0.3.4</strong> (v0.3.4 released 2026-11-16): Windows single-file portable build (fully statically linked against FreeRDP — double-click to run, no DLL dependencies), with native session window / direct input passthrough / bidirectional clipboard sync / Win key and Ctrl+Alt+Del all fully supported. macOS / Linux builds will be provided once CI builds for all three platforms are wired up. For build instructions, see <a href="contributing.html">Contributing</a>.</p>
+    </div>
+  </section>
+
+  <style>
+    /* Download cards (FILEDL-CARDS 2026-11-17: card-style layout aligned with easyssh.cn;
+       all colors come from the site :root variables, adapting automatically to light/dark themes) */
+    .dl-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: 8px 0 18px; }
+    .dl-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; transition: transform .15s ease, box-shadow .15s ease; }
+    .dl-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    .dl-icon { font-size: 30px; line-height: 1; }
+    .dl-card h3 { margin: 2px 0 0; font-size: 16px; color: var(--text); }
+    .dl-file { font-family: var(--mono, Consolas, monospace); font-size: 12.5px; color: var(--text-dim); word-break: break-all; }
+    .dl-meta { font-size: 13px; color: var(--text-dim); }
+    .sha-box { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 8px 10px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; }
+    .sha-box code { font-size: 11px; word-break: break-all; flex: 1; color: var(--text-dim); }
+    .copy-btn { flex-shrink: 0; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
+    .copy-btn:hover { background: var(--bg-card); }
+  </style>
+  <section class="section">
+    <div class="container">
+      <div class="dl-cards" id="dl-cards">
+    <div class="dl-card" id="dl-card-portable">
+      <div class="dl-icon">🪟</div>
+      <h3>Windows Single-File Portable</h3>
+      <div class="dl-file">EasyRDP-0.3.4-portable.exe</div>
+      <div class="dl-meta">x86_64 · Portable, no installation required — double-click to run (requires WebView2 Runtime, usually built into Win10/11)</div>
+      <a class="btn btn-primary" href="../downloads/EasyRDP-0.3.4-portable.exe">⬇ Download from this site</a>
+      <div class="sha-box"><code data-sha="EasyRDP-0.3.4-portable.exe">Loading SHA256…</code><button class="copy-btn" type="button">Copy</button></div>
+    </div>
+    <div class="dl-card" id="dl-card-zip">
+      <div class="dl-icon">📦</div>
+      <h3>Windows Portable ZIP</h3>
+      <div class="dl-file">EasyRDP-0.3.4-win32-x64-portable.zip</div>
+      <div class="dl-meta">x86_64 · Extract and run (includes EasyRDP.exe and portable-mode notes)</div>
+      <a class="btn btn-primary" href="../downloads/EasyRDP-0.3.4-win32-x64-portable.zip">⬇ Download from this site</a>
+      <div class="sha-box"><code data-sha="EasyRDP-0.3.4-win32-x64-portable.zip">Loading SHA256…</code><button class="copy-btn" type="button">Copy</button></div>
+    </div>
+    <div class="dl-card" id="dl-card-source">
+      <div class="dl-icon">🧩</div>
+      <h3>Source Package (all platforms)</h3>
+      <div class="dl-file">EasyRDP-src-0.3.4.tar.gz</div>
+      <div class="dl-meta">Complete source code (client + gateway + website), sanitized</div>
+      <a class="btn btn-primary" href="../downloads/EasyRDP-src-0.3.4.tar.gz">⬇ Download from this site</a>
+      <div class="sha-box"><code data-sha="EasyRDP-src-0.3.4.tar.gz">Loading SHA256…</code><button class="copy-btn" type="button">Copy</button></div>
+    </div>
+  </div>
+  <p style="color:var(--text-dim);">🍎 macOS / 🐧 Linux builds: planned, not yet available (check this page and the changelog for release cadence). The Windows build covers the vast majority of remote-desktop scenarios.</p>
+  <div class="callout">🟢 <strong>Portable, no installation required</strong>: every artifact is a single file or an extract-and-run package — no registry writes, no drivers installed; delete the folder and it is fully uninstalled.
+  </div>
+  <div class="callout callout-warn">
+        ⚠️ The Windows single-file build is fully statically linked. The auto-update channel is live (available since v0.2.0: in-app Settings → Updates, encrypted upgrade package with signature verification — the .enc file under downloads is the upgrade package); installer code signing will arrive in a later release.
+      </div>
+    </div>
+  </section>
+  <section class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">SHA256 Verification</h2>
+      <p class="section-desc">The SHA256 values in the cards above come from <code>SHA256SUMS.txt</code> (updated automatically with every release). After downloading, compute the SHA256 of your local file and compare it with the card value; only use the file when they match.</p>
+      <h3 style="margin-bottom:10px;">Windows (PowerShell)</h3>
+      <pre>Get-FileHash .\EasyRDP-0.3.4-win32-x64-portable.zip -Algorithm SHA256</pre>
+      <h3 style="margin-bottom:10px;">macOS / Linux</h3>
+      <pre>sha256sum EasyRDP-0.3.4-portable.exe
+shasum -a 256 EasyRDP-0.3.4-source.tar.gz   <span class="cm"># macOS</span></pre>
+      <div class="callout">
+        If the checksum does not match, do not run the installer: the transfer may be incomplete or the file may have been tampered with. Download again or report it on GitHub Releases.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Release Archive</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Version</th><th>Date</th><th>Downloads (single-file / zip / gateway / source)</th><th>Single-file size</th><th>zip size</th><th>Gateway size</th><th>Source size</th></tr>
+          </thead>
+          <tbody>
+<tr><td>v0.3.13</td><td>2026-11-18</td><td><a href="../downloads/EasyRDP-0.3.13-portable.exe">Single file</a> · <a href="../downloads/EasyRDP-0.3.13-win32-x64-portable.zip">zip</a> · <a href="../downloads/EasyRDP-Gateway-0.3.13-win-x64.zip">Gateway</a> · <a href="../downloads/EasyRDP-src-0.3.13.tar.gz">Source</a></td><td>19.2 MB</td><td>6.6 MB</td><td>3.2 MB</td><td>2.6 MB</td></tr>
+          <tr><td>v0.3.12</td><td>2026-11-18</td><td><a href="../downloads/EasyRDP-0.3.12-portable.exe">Single file</a> · <a href="../downloads/EasyRDP-0.3.12-win32-x64-portable.zip">zip</a> · <a href="../downloads/EasyRDP-Gateway-0.3.12-win-x64.zip">Gateway</a> · <a href="../downloads/EasyRDP-src-0.3.12.tar.gz">Source</a></td><td>18.9 MB</td><td>6.5 MB</td><td>2.3 MB</td><td>2.5 MB</td></tr>
+          <tr><td>v0.3.11</td><td>2026-11-18</td><td><a href="../downloads/EasyRDP-0.3.11-portable.exe">Single file</a> · <a href="../downloads/EasyRDP-0.3.11-win32-x64-portable.zip">zip</a> · <a href="../downloads/EasyRDP-Gateway-0.3.11-win-x64.zip">Gateway</a> · <a href="../downloads/EasyRDP-src-0.3.11.tar.gz">Source</a></td><td>18.3 MB</td><td>6.3 MB</td><td>1.6 MB</td><td>2.5 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color:var(--text-dim);">For more historical releases and build details, see <a href="https://github.com/EasySSHCN/EasyRDP/releases" target="_blank" rel="noopener">GitHub Releases</a> or <a href="https://gitee.com/easyssh/EasyRDP/releases" target="_blank" rel="noopener">Gitee Releases</a>.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">What Users Say · Featured Feedback</h2>
+      <p class="section-desc">Real user feedback and official replies submitted via the in-app “Feedback” entry (only curated items the users have agreed to publish; latest 10).</p>
+      <div id="fbTop" class="card-grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr));">
+        <p class="section-desc" id="fbTopLoading">Loading…</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Source Code</h2>
+      <p class="section-desc">EasyRDP is 100% open source (MIT license). You can clone the source and build it yourself, and Issues and PRs are welcome.</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="icon">🐙</div>
+          <h3>GitHub</h3>
+          <p>Main repository and Release channel:</p>
+          <p style="margin-top:10px;"><a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">github.com/EasySSHCN/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.3.4" target="_blank" rel="noopener">v0.3.4 Release (source package + SHA256SUMS) ↗</a></p>
+          <pre style="margin-top:12px;">git clone https://github.com/EasySSHCN/EasyRDP.git</pre>
+        </div>
+        <div class="card">
+          <div class="icon">🇨🇳</div>
+          <h3>Gitee</h3>
+          <p>China mirror, more reliable access:</p>
+          <p style="margin-top:10px;"><a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">gitee.com/easyssh/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://gitee.com/easyssh/EasyRDP/releases/tag/v0.3.4" target="_blank" rel="noopener">v0.3.4 release (source package attachment) ↗</a></p>
+          <pre style="margin-top:12px;">git clone https://gitee.com/easyssh/EasyRDP.git</pre>
+        </div>
+        <div class="card">
+          <div class="icon">🔨</div>
+          <h3>Build It Yourself</h3>
+          <p>Requires a stable Rust toolchain and Node.js (for building front-end assets):</p>
+          <pre style="margin-top:12px;"><span class="cm"># Tauri build</span>
+cargo tauri build</pre>
+          <p>See the <a href="contributing.html">Contributing</a> documentation for details.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>A cross-platform open-source remote desktop client. Rust + Tauri 2 + FreeRDP, MIT licensed — making every remote connection safe and under your control.</p>
+          <p class="footer-lang">中文版: <a href="../download.html" hreflang="zh-CN" lang="zh-CN">简体中文</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="download.html">Download</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="docs.html">Documentation</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee Mirror</a>
+          <a href="docs.html">JSON Profile Spec</a>
+          <a href="migrate.html">Migration Guide</a>
+          <a href="compare.html">Compare</a>
+
+          <a href="faq.html">FAQ</a>
+          <a href="security.html">Security Policy</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="contributing.html">Contributing</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">Issue Tracker</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="license.html">MIT License</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · Open source under the MIT license</span>
+        <span>ICP placeholder: 京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js?v=12"></script>
+  <script>
+  /* Featured feedback (reads the public top.php endpoint, shows replied + public items only; everything escaped to prevent XSS) */
+  (function () {
+    var box = document.getElementById('fbTop');
+    function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+    fetch('api/feedback/top.php', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok || !j.items || !j.items.length) {
+          box.innerHTML = '<p class="section-desc" style="grid-column:1/-1;text-align:center;margin:0;">No public feedback yet. Feel free to submit your suggestions and issues via the in-app “Feedback” entry.</p>';
+          return;
+        }
+        box.innerHTML = j.items.map(function (it) {
+          return '<div class="card" style="margin:0;">' +
+            '<h3 style="font-size:15px;margin:0 0 6px;"><span style="color:#8fa3bf;font-weight:500;">[' + esc(it.type) + ']</span> ' + esc(it.date) + '</h3>' +
+            '<p style="margin:0 0 10px;white-space:pre-wrap;word-break:break-word;">' + esc(it.content) + '</p>' +
+            '<div style="background:rgba(53,224,138,.08);border-left:3px solid #35e08a;border-radius:0 8px 8px 0;padding:8px 12px;">' +
+            '<div style="color:#35e08a;font-size:12px;font-weight:600;margin-bottom:4px;">Official reply · ' + esc(it.replyAt) + '</div>' +
+            '<div style="white-space:pre-wrap;word-break:break-word;">' + esc(it.reply) + '</div></div>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(function () { box.innerHTML = '<p class="section-desc" style="grid-column:1/-1;text-align:center;margin:0;">Failed to load the feedback list. Please refresh later.</p>'; });
+  })();
+  </script>
+<script>
+/* FILEDL-CARDS: populate card SHA256 from SHA256SUMS.txt + copy buttons */
+(function () {
+  function fill(sums) {
+    var map = {};
+    sums.split(/\r?\n/).forEach(function (line) {
+      var m = line.match(/^([0-9a-fA-F]{64})\s+\*?(.+)$/);
+      if (m) map[m[2].trim()] = m[1].toLowerCase();
+    });
+    document.querySelectorAll('.sha-box code[data-sha]').forEach(function (el) {
+      var f = el.getAttribute('data-sha');
+      var v = map[f];
+      if (v) {
+        el.textContent = 'SHA256: ' + v;
+        var btn = el.parentElement.querySelector('.copy-btn');
+        if (btn) btn.setAttribute('data-copy', v);
+      } else {
+        el.textContent = 'SHA256: not listed for ' + f;
+      }
+    });
+  }
+  fetch('../downloads/SHA256SUMS.txt', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(fill)
+    .catch(function () {
+      document.querySelectorAll('.sha-box code[data-sha]').forEach(function (el) {
+        el.textContent = 'SHA256: temporarily unavailable (checksum list failed to load; download SHA256SUMS.txt to compare)';
+      });
+    });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.copy-btn[data-copy]');
+    if (!btn) return;
+    var v = btn.getAttribute('data-copy');
+    function done() {
+      var old = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(function () { btn.textContent = old; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(v).then(done, done);
+    } else {
+      var t = document.createElement('textarea');
+      t.value = v; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(t); done();
+    }
+  });
+})();
+</script>
+<script>
+/* R-20261118-001 attribution ticket: download card button click → first request a ticket from api/download/ticket.php
+   (issues a download ticket used for anonymous attribution between site visitors ↔ devices); once ticket_id is obtained:
+   1) store it in localStorage (easyrdpTicketId, reused for repeat downloads in the same browser);
+   2) append ?t=<ticket_id> to the download URL and redirect to the original download (behavior unchanged; the official
+      installer build may write the ticket into ticket.id inside the package so the client's first report completes attribution).
+   Any failure (endpoint 4xx/5xx/timeout/no JS fetch) silently degrades to a direct download, never affecting the main download flow. */
+(function () {
+  var cards = document.querySelectorAll('.dl-cards a.btn[href^="../downloads/"]');
+  function goto(href) { window.location.href = href; }
+  cards.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var href = a.getAttribute('href');
+      fetch('api/download/ticket.php', { method: 'POST', cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (j) {
+          if (!j || !j.ok || !j.ticket_id || !/^[0-9a-f]{16,64}$/.test(j.ticket_id)) throw new Error('bad ticket');
+          try { localStorage.setItem('easyrdpTicketId', j.ticket_id); } catch (err) { /* silent in private mode */ }
+          /* Per-ticket delivery endpoint: ticket.id is injected into zip archives (lands next to the exe after extraction);
+             single-file exe is 302-redirected to the original download, behavior unchanged */
+          goto('api/download/get.php?f=' + encodeURIComponent(href) + '&t=' + j.ticket_id);
+        })
+        .catch(function () { goto(href); /* ticket failure silently degrades to direct download */ });
+    });
+  });
+})();
+</script>
+<script>(function(){try{var page='en/download';var payload=JSON.stringify({page:page,ref:document.referrer||'',ts:Date.now()});var url=new URL('../api/stats/visit.php',location.href).href;try{if(navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([payload],{type:'application/json'})))return;}catch(e){}try{fetch(url,{method:'POST',keepalive:true,body:payload,headers:{'Content-Type':'application/json'}}).catch(function(){});return;}catch(e){}try{var img=new Image();img.src=url+'?p='+encodeURIComponent(page)+'&r='+encodeURIComponent(document.referrer||'')+'&t='+Date.now();}catch(e){}}catch(e){}})();</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设置面板 — EasyRDP 用户手册</title>
+  <meta name="description" content="EasyRDP 用户级操作手册：设置面板 的入口、参数说明与典型用法。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/manual/settings.html" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="../index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.3.13</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="../features.html">功能</a>
+        <a href="../download.html">下载</a>
+        <a href="../docs.html">文档</a>
+        <a href="index.html">操作手册</a>
+        <a href="../changelog.html">更新日志</a>
+        <a href="../faq.html">FAQ</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container doc-layout">
+    <aside class="doc-toc">
+      <h4>操作手册目录</h4>
+      <a href="index.html">手册总目录</a>
+      <a href="connections.html">新建连接</a>
+      <a href="settings.html">设置面板</a>
+      <a href="feedback.html">使用反馈</a>
+      <a href="import-rdp.html">导入 .rdp</a>
+      <a href="groups.html">分组管理</a>
+      <a href="export.html">导出连接</a>
+      <a href="import-json.html">导入 JSON</a>
+      <a href="templates.html">模板库</a>
+      <a href="fullscreen.html">会话全屏</a>
+      <a href="win-key.html">发送 Win 键</a>
+      <a href="disconnect.html">断开会话</a>
+    </aside>
+    <article class="doc-content">
+      <h1>设置面板</h1>
+      <h2 id="entry">功能入口</h2>
+      <p>主界面顶部「⚙ 设置」按钮（或 Esc 关闭的弹窗内左侧分组导航）。</p>
+      <h2 id="params">参数说明</h2>
+      <ul>
+$(System.Collections.Hashtable.params | ForEach-Object { "        <li></li>" } | Out-String).TrimEnd()
+      </ul>
+      <h2 id="usage">典型用法</h2>
+      <p>点击「⚙ 设置」→ 左侧分组（通用 / 外观 / 更新 / 快捷方式 / Git 同步 / 组合键）→ 修改即保存，无需「确定」按钮。</p>
+      <div class="callout"><strong>小贴士</strong>：所有设置持久化在用户数据目录 settings.json，缺字段自动补默认值，可纳入 Git 管理。</div>
+      <h2 id="screenshot">界面示意</h2>
+      <div class="callout">（截图占位：后续版本补充该功能界面的实际截图）</div>
+      <p>相关页面：<a href="index.html">操作手册总目录</a> · <a href="../docs.html">使用文档</a> · <a href="../faq.html">FAQ</a></p>
+    </article>
+  </div>
+  <footer class="site-footer">
+    <div class="container">
+      <p>EasyRDP — 轻量 Windows 远程桌面客户端 · <a href="../download.html">下载</a> · <a href="../docs.html">文档</a> · <a href="../security.html">安全说明</a></p>
+    </div>
+  </footer>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>
