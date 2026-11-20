@@ -1,0 +1,36 @@
+# =============================================================================
+# 【已废弃 2026-11-17】旧 push 方案配置模板。现行方案 = sv-pull.conf（部署在
+# sv.trae.show:/opt/dsh/sv-standby/，从 sv 拉取两台正式机）。本文件仅留档。
+# =============================================================================
+# sv-pull.conf — sv 备用服务器从两台正式机拉取同步的配置（历史名称 sv-sync.conf）
+# 复制本文件为 sv-sync.conf 后填写。此文件含服务器地址等敏感信息，勿提交仓库。
+# =============================================================================
+# ---------------- sv 备用服务器（已核实: sv.trae.show，单向接收，只进不出） ----------------
+SV_HOST="sv.trae.show"
+SV_PORT="22"          # sv ssh 端口（若与 la.trae.show 同体系可能为 4685，以实际为准）
+SV_USER="root"
+SV_KEY=""             # 私钥绝对路径（与 la 同体系: /root/.ssh/id_ed25519_easyssh 或本机 P:\Program Files (x86)\EasySSH\keys\id_ed25519_easyssh 对应路径）
+SV_EASYRDP_WEBROOT="/www/wwwroot/easyrdp.cn"
+SV_EASYRDP_DATA_DIR="/www/wwwroot/easyrdp-data"
+SV_EASYSSH_WEBROOT="/www/wwwroot/easyssh.cn"
+SV_EASYSSH_DATA_DIR="/www/wwwroot/data"     # EasySSH 反馈/统计运行时库(已移出 webroot)
+SYNC_LETSENCRYPT="yes"                       # 是否同步 /etc/letsencrypt（推荐 yes）
+
+# ---------------- EasyRDP 主服务器 ----------------
+PRIMARY_EASYRDP_HOST="198.2.231.95"
+PRIMARY_EASYRDP_PORT="22"
+PRIMARY_EASYRDP_USER="root"
+PRIMARY_EASYRDP_KEY=""                       # 主服务器侧读取自身可用的私钥路径
+EASYRDP_WEBROOT="/www/wwwroot/easyrdp.cn"
+EASYRDP_DATA_DIR="/www/wwwroot/easyrdp-data"
+# 额外排除（rsync --exclude 语法，空格分隔）：
+EASYRDP_EXCLUDES="--exclude=api/feedback/uploads/"
+
+# ---------------- EasySSH 主服务器（la 发布机） ----------------
+PRIMARY_EASYSSH_HOST="la.trae.show"
+PRIMARY_EASYSSH_PORT="4685"
+PRIMARY_EASYSSH_USER="root"
+PRIMARY_EASYSSH_KEY=""                       # 如 /root/.ssh/id_ed25519_easyssh
+EASYSSH_WEBROOT="/www/wwwroot/easyssh.cn"
+EASYSSH_DATA_DIR="/www/wwwroot/data"         # feedback-db.json 等运行时库
+EASYSSH_EXCLUDES="--exclude=api/feedback/uploads/ --exclude=data/stats-*"

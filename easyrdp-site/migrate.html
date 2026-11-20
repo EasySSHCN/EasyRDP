@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>迁移指南：从 mstsc / Remmina / Royal TS / 向日葵 ToDesk 迁移到 EasyRDP — EasyRDP</title>
+  <meta name="description" content="EasyRDP 迁移指南：一键导入 mstsc 生成的 .rdp 文件（图形界面 / 拖入 / CLI 三种方式），凭据仅存本机不上传，JSON Profile 导入导出，覆盖多会话并行、剪贴板双向同步与组合键发送等迁移场景对照及常见问题。">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta property="og:title" content="迁移指南：从 mstsc / Remmina / Royal TS / 向日葵 ToDesk 迁移到 EasyRDP — EasyRDP">
+  <meta property="og:description" content="EasyRDP 迁移指南：.rdp 文件一键导入，凭据仅存本机，JSON Profile 版本化管理，多会话并行与剪贴板双向同步无缝衔接。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://easyrdp.cn/migrate.html">
+  <meta property="og:site_name" content="EasyRDP">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="迁移指南：从 mstsc / Remmina / Royal TS / 向日葵 ToDesk 迁移到 EasyRDP — EasyRDP">
+  <meta name="twitter:description" content="EasyRDP 迁移指南：.rdp 文件一键导入，凭据仅存本机，JSON Profile 版本化管理，多会话并行与剪贴板双向同步无缝衔接。">
+  <style>
+    /* 迁移指南正文排版（MIGRATE-PAGE 2026-11-18）：仅使用站点 :root 变量与既有 class，
+       正文容器在窄屏自动收窄，代码块 / 表格复用站点 pre、table 与 .table-wrap 样式 */
+    .mig-wrap { max-width: 880px; margin: 0 auto; }
+    .mig-toc { margin-bottom: 40px; }
+    .mig-toc a { color: var(--accent); }
+    .mig-toc p { line-height: 2; }
+    .mig-prose h2 { font-size: 1.5rem; margin: 44px 0 16px; padding-top: 8px; }
+    .mig-prose h3 { font-size: 1.15rem; margin: 28px 0 12px; }
+    .mig-prose p, .mig-prose li { color: var(--text-dim); font-size: .95rem; line-height: 1.85; }
+    .mig-prose strong { color: var(--text); }
+    .mig-prose a { color: var(--accent); }
+    .mig-prose ul, .mig-prose ol { padding-left: 22px; margin: 12px 0; }
+    .mig-prose li { margin: 6px 0; }
+    .mig-prose table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .9rem; }
+    .mig-prose th, .mig-prose td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+    .mig-prose th { background: var(--bg-soft); color: var(--text); white-space: nowrap; }
+    .mig-prose td { color: var(--text-dim); }
+    .mig-prose code { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-family: var(--mono, Consolas, monospace); font-size: .86em; color: var(--text); }
+  </style>
+  <link rel="canonical" href="https://easyrdp.cn/migrate.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/migrate.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/migrate.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.4.0</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="manual/index.html">操作手册</a>
+        <a href="migrate.html" class="active">迁移指南</a>
+        <a href="compare.html">产品对比</a>
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+        <a class="lang-switch" href="en/migrate.html" hreflang="en" lang="en" title="Switch to English">EN</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>迁移指南</h1>
+      <p class="section-desc">从 mstsc / Remmina / Royal TS / 向日葵 · ToDesk 迁移到 EasyRDP · 导入 <code>.rdp</code> 即完成连接配置搬家，密码始终只留在你的本机</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container mig-wrap">
+
+      <div class="card mig-toc">
+        <h3>目录</h3>
+        <p>
+          <a href="#overview">迁移概览</a> ·
+          <a href="#import">一、.rdp 文件导入（会话/连接配置迁移）</a> ·
+          <a href="#credentials">二、凭据与安全说明</a> ·
+          <a href="#scenarios">三、常见迁移场景对照表</a> ·
+          <a href="#others">四、从其他 RDP 工具迁移的注意事项</a> ·
+          <a href="#faq">五、常见迁移问题 FAQ</a>
+        </p>
+      </div>
+
+      <div class="mig-prose">
+        <h2 id="overview">迁移概览</h2>
+        <p>EasyRDP 基于 <strong>Rust + Tauri 2 + FreeRDP</strong> 构建，兼容导入 mstsc（Windows 自带「远程桌面连接」）生成的标准 <code>.rdp</code> 文件，也支持把现有连接<strong>导出回 <code>.rdp</code></strong> 与 Windows 自带客户端双向互通。配合 <strong>JSON Profile 导入导出</strong>、<strong>标签页多会话并行</strong>与<strong>剪贴板双向同步（文本 + 文件）</strong>，绝大多数迁移场景无需逐条手工录入。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>原工具</th><th>EasyRDP 导入方式</th><th>凭据是否迁移</th></tr></thead>
+            <tbody>
+              <tr><td>mstsc（Windows 远程桌面）</td><td>直接导入 <code>.rdp</code> 文件（文件选择框 / 拖入 / CLI，字段自动映射）</td><td>主机/端口/用户名/分辨率/重定向开关；<strong>密码不迁移</strong></td></tr>
+              <tr><td>Remmina</td><td>Remmina 连接可逐条对照字段手工新建；若有对应 <code>.rdp</code> 源文件则直接导入</td><td>主机/端口/用户名，密码不迁移</td></tr>
+              <tr><td>Royal TS</td><td>先用 Royal TS 的 .rdp 导出功能导出标准 <code>.rdp</code>，再用 EasyRDP 导入</td><td>主机/端口/用户名，密码不迁移</td></tr>
+              <tr><td>向日葵 / ToDesk 等国内远控</td><td>无 <code>.rdp</code> 可导出，按主机信息在 EasyRDP「新建连接」中录入（目标机需开启 Windows 远程桌面）</td><td>主机/端口/用户名，密码不迁移</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>导入后每条连接即一份 <strong>JSON Profile</strong>（存于本机用户配置目录，可纳入 Git 管理），<code>Ctrl+K</code> 全局搜索可在多台主机间极速切换。首次连接时输入一次密码即可；如需批量搬运连接，还可用 JSON Profile 整体导入导出。</p>
+
+        <h2 id="import">一、.rdp 文件导入（会话/连接配置迁移）</h2>
+        <p>如果你一直在用 mstsc 连接服务器或同事的电脑，那么这些连接大多已保存为 <code>.rdp</code> 文件（mstsc 中「另存为」即可生成，默认保存在「文档」目录）。EasyRDP 提供三种导入方式：</p>
+        <h3>方式 A：图形界面导入（推荐）</h3>
+        <ol>
+          <li><strong>打开导入入口</strong>：启动 EasyRDP，在「新建连接 / 导入」面板中点击<strong>文件选择框</strong>（系统文件选择对话框）。</li>
+          <li><strong>选取 .rdp 文件</strong>：选中 mstsc 导出的 <code>.rdp</code> 文件（可一次选取多个逐个导入）。</li>
+          <li><strong>确认字段映射</strong>：导入时字段自动映射为 EasyRDP 的 JSON Profile（见下方映射表），无需手动输入。</li>
+          <li><strong>补录凭据</strong>：首次连接该主机时输入密码即可开始使用。</li>
+        </ol>
+        <h3>方式 B：拖入连接中心</h3>
+        <p>把 <code>.rdp</code> 文件直接<strong>拖入连接中心窗口</strong>，即完成导入——字段自动映射，与方式 A 等效。</p>
+        <h3>方式 C：命令行批量导入（linkdesk CLI）</h3>
+        <pre><span class="cm"># 单文件导入：将 mstsc .rdp 文件导入为 JSON Profile</span>
+linkdesk import office.rdp
+
+<span class="cm"># 批量导入当前目录全部 .rdp 文件（--overwrite 覆盖同名 Profile）</span>
+linkdesk import ./*.rdp --overwrite
+
+<span class="cm"># 导出 .rdp，交还给 Windows 自带客户端使用</span>
+linkdesk export office-win11 -o office-win11.rdp</pre>
+        <h3>.rdp 字段映射（节选）</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>.rdp 字段</th><th>JSON Profile 字段</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td><code>full address:s</code></td><td><code>host</code> + <code>port</code></td><td>host:port 自动拆分，缺省端口 3389</td></tr>
+              <tr><td><code>username:s</code></td><td><code>auth.username</code></td><td>用户名；密码不随 .rdp 迁移</td></tr>
+              <tr><td><code>desktopwidth / desktopheight</code></td><td><code>session.resolution</code></td><td>初始分辨率</td></tr>
+              <tr><td><code>redirectclipboard:i</code></td><td><code>redirection.clipboard</code></td><td>剪贴板重定向</td></tr>
+              <tr><td><code>drivestoredirect:s</code></td><td><code>redirection.drive</code></td><td>驱动器重定向</td></tr>
+              <tr><td><code>redirectprinters:i</code></td><td><code>redirection.printer</code></td><td>打印机重定向</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">🟢 <strong>双向互通</strong>：导入只是单向的第一步——EasyRDP 也能把现有连接导出为标准 <code>.rdp</code>，同事仍在用 mstsc 时零成本互换。</div>
+        <div class="callout callout-warn">⚠️ <code>.rdp</code> 文件中的 <code>password 51:b:</code> 加密块仅在生成它的 Windows 本机有效，EasyRDP 导入时<strong>不会导入密码</strong>，需在连接时重新输入。</div>
+
+        <h2 id="credentials">二、凭据与安全说明</h2>
+        <ul>
+          <li><strong>密码仅存本机，不上传</strong>：v0.4.0 中密码仅保存在本机用户配置目录，<strong>不上传任何服务器</strong>；后续版本将切换为系统凭据库（DPAPI / Keychain / libsecret）加密存储，Profile 中仅保留加密条目引用（见 <a href="faq.html">FAQ</a>）。</li>
+          <li><strong>JSON Profile 导入导出</strong>：每条连接对应一份 JSON Profile，字段化、可版本化，可纳入 Git 管理与代码评审；团队可共用 Profile 模板批量下发，实现「配置即代码」。规范见 <a href="docs.html#json-profile">文档 · JSON Profile</a>。</li>
+          <li><strong>不要把明文配置带进公开仓库</strong>：Profile 当前以明文保存凭据相关字段（用户名），密码按上述规则仅留本机；把配置目录同步到网盘 / Git 私有仓库前，请先确认其中不含敏感信息。</li>
+          <li><strong>绿色便携、不写注册表</strong>：EasyRDP 为单文件绿色版，不写注册表、不装驱动、不驻留服务端组件，删掉文件即完全卸载——迁移前后的机器环境保持干净。</li>
+          <li><strong>下载校验</strong>：安装包请从<a href="download.html">下载页</a>获取并按 SHA256 校验说明比对哈希后再运行。</li>
+        </ul>
+        <div class="callout">💡 <strong>给从 mstsc 迁移的用户</strong>：mstsc 默认勾选「允许我保存凭据」会把密码交给 Windows 凭据管理器；EasyRDP 的凭据存放位置独立且可随 Profile 审计，切换后请按需清理旧的系统保存凭据。</div>
+
+        <h2 id="scenarios">三、常见迁移场景对照表</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>你原来的用法</th><th>EasyRDP 对应能力</th><th>迁移要点</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>mstsc 连接历史</strong>（「最近使用」里攒了一批主机，逐个重新输入地址）</td>
+                <td>把历史连接另存为 <code>.rdp</code> 后批量导入；<code>Ctrl+K</code> 全局搜索直达任意主机</td>
+                <td>卡片式连接中心集中管理所有主机，一劳永逸</td>
+              </tr>
+              <tr>
+                <td><strong>多会话 / 多窗口</strong>（开多个 mstsc 窗口来回切）</td>
+                <td><strong>标签页多会话并行</strong>：主界面保持可见，多远程桌面窗口并存，活跃会话数显示与逐会话快捷断开</td>
+                <td>不再需要任务栏里翻找多个 mstsc 窗口</td>
+              </tr>
+              <tr>
+                <td><strong>剪贴板复制粘贴</strong>（mstsc 仅文本，文件要走驱动器映射）</td>
+                <td><strong>剪贴板双向同步：文本 + 文件</strong>。本地复制文件远端直接粘贴；远端复制文件自动落地到「下载\EasyRDP-Clipboard\」并写入本地剪贴板</td>
+                <td>单次 ≤128 个文件、单文件 ≤2GiB；远端 rdpclip 未就绪时底部会提示引导重启</td>
+              </tr>
+              <tr>
+                <td><strong>组合键发送</strong>（Ctrl+Alt+Del 在远程桌面里无法直接送达）</td>
+                <td><strong>标题栏 SAS 槽下拉菜单</strong>：发送 Ctrl+Alt+Del（SAS）/ Win 键 / Win+D / Win+E / Win+R / Win+L / Ctrl+Shift+Esc（任务管理器）/ Alt+Tab；也可在本地按 <code>Ctrl+Alt+End</code> 热键发送 SAS；设置中心「⌨ 组合键」支持自定义组合键，对所有会话生效</td>
+                <td>锁屏、改密码、开任务管理器不再需要本地中转</td>
+              </tr>
+              <tr>
+                <td><strong>全屏 / 自适应分辨率</strong>（每次改窗口大小要手动调分辨率）</td>
+                <td><code>desktopwidth / desktopheight</code> 导入为 <code>session.resolution</code>；会话支持多显示器与色彩深度配置，FreeRDP 协议栈按窗口自适应</td>
+                <td>.rdp 里的分辨率偏好原样保留，导入即生效</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="others">四、从其他 RDP 工具迁移的注意事项</h2>
+        <ul>
+          <li><strong>FreeRDP 全静态链接，无需安装服务端组件</strong>：EasyRDP 的 Windows 单文件版为全静态链接构建（无 DLL 依赖），双击即用；客户端侧不安装任何服务、驱动或常驻组件，卸载即删文件夹。</li>
+          <li><strong>仅依赖 WebView2 Runtime</strong>（Win10/11 通常已内置；缺失时运行时会提示自动安装）。</li>
+          <li><strong>协议能力来自标准 RDP</strong>：RDP 8+ 压缩、多显示器、剪贴板与驱动器/打印机重定向均基于 FreeRDP 协议栈实现，与 mstsc 连接同一台目标机无需在服务端做任何额外配置。</li>
+          <li><strong>连接前先测连通</strong>：v0.4.0 支持<strong>连接前 TCP 连通性测试</strong>（一键检测主机可达与端口响应并显示延迟），迁移首批主机时建议逐条测试，快速定位地址或端口写错的情况。</li>
+          <li><strong>从向日葵 / ToDesk 迁移</strong>：国内远控走私有协议，不受 Windows 远程桌面限制；换成 EasyRDP 后走标准 RDP，请确认目标机已开启「远程桌面」（系统设置 → 远程桌面），且账号具备远程登录权限、防火墙放行 3389 端口。</li>
+          <li><strong>网关接入（规划中）</strong>：JSON Profile 已预留 <code>gateway</code> 字段，云网关与策略矩阵（细粒度管控剪贴板/驱动器/USB/打印机重定向）为后续版本路线图，详见 <a href="features.html">功能页</a>。</li>
+        </ul>
+
+        <h2 id="faq">五、常见迁移问题 FAQ</h2>
+        <h3>Q1：导入 .rdp 后为什么要求重新输入密码？</h3>
+        <p><code>.rdp</code> 中 <code>password 51:b:</code> 加密块只在生成它的那台 Windows 本机有效（绑定 DPAPI），EasyRDP 导入时<strong>不会导入密码</strong>，也从不迁移、上传任何密码。首次连接输入一次即可，密码仅存本机。</p>
+        <h3>Q2：导入后连接失败，如何排查？</h3>
+        <p>先在连接上执行「测试连通」做 TCP 握手：不通多半是地址/端口错误、目标机未开启远程桌面或防火墙未放行 3389；通而会话异常则检查账号是否具备远程登录权限。可对照导入的字段映射表确认 host:port 拆分是否正确。</p>
+        <h3>Q3：文件剪贴板传输有没有限制？</h3>
+        <p>单次 ≤128 个文件、单文件 ≤2GiB，目录以空目录语义传递；传输走 CLIPRDR FileContents 标准协议，仅传描述符与内容流（路径不出网线）。远端→本地的文件自动落地到「下载\EasyRDP-Clipboard\」。</p>
+        <h3>Q4：粘贴文件没反应？</h3>
+        <p>远端会话的 rdpclip 剪贴板服务可能停摆——任何客户端此时都会失效。EasyRDP 在连接 10 秒未收到剪贴板就绪信号时会在底部提示「远端剪贴板服务未就绪（rdpclip 未响应）」，按提示重启远端 rdpclip 即可。</p>
+        <h3>Q5：向日葵 / ToDesk 能连的主机，EasyRDP 一定连得上吗？</h3>
+        <p>不一定。国内远控不依赖 Windows 远程桌面，而 EasyRDP 走标准 RDP：目标机必须开启远程桌面并放行 3389。家用版 Windows 通常只允许单会话登录，且远控账号若非本地管理员组成员，需先加入「Remote Desktop Users」。</p>
+        <h3>Q6：怎么把所有连接整体搬去另一台电脑？</h3>
+        <p>用 JSON Profile 导入导出：Profile 为纯 JSON 文件，可直接拷贝配置目录或纳入 Git 同步；批量场景用 <code>linkdesk import / export</code> 脚本化搬运。详见 <a href="docs.html#cli">文档 · CLI 用法</a>。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="migrate.html">迁移指南</a>
+          <a href="compare.html">产品对比</a>
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js?v=23"></script>
+</body>
+</html>
