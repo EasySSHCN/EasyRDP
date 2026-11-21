@@ -1,0 +1,12 @@
+.htaccess
+faq.html
+api/feedback/admin.php
+api/stats/client.php
+assets/data/site-updates.json
+downloads/EasyRDP-0.1.1-win32-x64-portable.zip
+downloads/EasyRDP-0.1.5-win32-x64-portable.zip
+downloads/EasyRDP-0.2.2-win32-x64-portable.zip
+downloads/EasyRDP-0.3.3-portable.exe.enc
+downloads/EasyRDP-Gateway-0.2.0-win-x64.zip
+downloads/EasyRDP-src-0.1.4.tar.gz
+downloads/SHA256SUMS.txt

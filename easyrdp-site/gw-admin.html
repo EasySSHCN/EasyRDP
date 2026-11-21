@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云网关用户服务台 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 云网关用户服务台：注册/登录后查看自己获批的网关资源，自助签发短期 token，并可吊销授权。">
+  <meta name="robots" content="noindex, nofollow">
+  <!--
+    EasyRDP 云网关用户服务台（用户侧，与站长后台 admin.html 完全隔离）
+    后端接口: POST /api/gateway/issue.php  action ∈ register/login/my_resources/issue/revoke
+    响应约定: {ok, message?, resources?/token/expires_in/gateway/resource_id?}
+    鉴权: 会话 cookie；401 = 未登录/过期 → 自动回登录态
+    本页无任何真实密钥；token 仅在签发结果面板中短暂展示，不落 localStorage
+  -->
+  <style>
+    /* ---------- 配色与官网 style.css 保持一致（Dark Tech Theme） ---------- */
+    :root {
+      --bg: #0f1117;
+      --bg-soft: #151823;
+      --bg-card: #1a1e2b;
+      --border: #262c3d;
+      --text: #e5e9f0;
+      --text-dim: #9aa3b5;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --green: #22c55e;
+      --red: #ff6b6b;
+      --radius: 12px;
+      --maxw: 1100px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", -apple-system, sans-serif;
+      line-height: 1.7; font-size: 16px; min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    a { color: var(--accent); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--accent-hover); }
+    .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; width: 100%; }
+
+    /* ---------- 页头（同官网结构） ---------- */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,17,23,.88); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--maxw); margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-size: 1.15rem; letter-spacing: .5px; }
+    .logo svg { flex-shrink: 0; }
+    .logo .ver-badge {
+      font-size: .68rem; font-weight: 500; color: var(--accent);
+      background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.35);
+      border-radius: 20px; padding: 1px 9px; margin-left: 2px;
+    }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a { color: var(--text-dim); padding: 8px 13px; border-radius: 8px; font-size: .93rem; }
+    .nav-links a:hover { color: var(--text); background: var(--bg-card); }
+
+    /* ---------- 提示条 ---------- */
+    #toast {
+      position: fixed; left: 50%; top: 76px; transform: translateX(-50%) translateY(-12px);
+      max-width: 92vw; padding: 10px 20px; border-radius: 10px; font-size: .92rem;
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+      box-shadow: 0 8px 28px rgba(0,0,0,.45); opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s; z-index: 300;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.err { border-color: rgba(255,107,107,.6); color: var(--red); }
+    #toast.ok  { border-color: rgba(34,197,94,.6); color: var(--green); }
+
+    /* ---------- 主体 ---------- */
+    main { flex: 1; padding: 56px 0 72px; }
+    .page-title { font-size: 1.7rem; font-weight: 700; margin-bottom: 6px; }
+    .page-desc { color: var(--text-dim); margin-bottom: 30px; font-size: .95rem; }
+
+    .gw-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 26px; transition: border-color .15s ease;
+    }
+    .gw-card:hover { border-color: rgba(59,130,246,.5); }
+
+    /* ---------- 登录/注册 ---------- */
+    #auth-card { max-width: 420px; margin: 0 auto; }
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+    .auth-tabs button {
+      flex: 1; padding: 9px 0; font-size: .95rem; cursor: pointer;
+      background: transparent; color: var(--text-dim);
+      border: 1px solid var(--border); border-radius: 9px; transition: .2s;
+    }
+    .auth-tabs button:hover { border-color: var(--accent); color: var(--accent); }
+    .auth-tabs button.on { background: rgba(59,130,246,.12); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .gw-card label { display: block; font-size: .88rem; color: var(--text-dim); margin: 14px 0 6px; }
+    .gw-card input {
+      width: 100%; padding: 11px 13px; font-size: .95rem;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 9px; outline: none; transition: border-color .2s;
+    }
+    .gw-card input:focus { border-color: var(--accent); }
+    .form-hint { font-size: .8rem; color: var(--text-dim); margin-top: 5px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 24px; border-radius: 10px; font-size: .95rem; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer; transition: .2s;
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 20px rgba(59,130,246,.35); }
+    .btn-outline { border-color: var(--border); color: var(--text); background: transparent; }
+    .btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { color: var(--red); border-color: rgba(255,107,107,.5); background: transparent; }
+    .btn-danger:hover:not(:disabled) { background: rgba(255,107,107,.1); border-color: var(--red); }
+    .btn-sm { padding: 7px 16px; font-size: .85rem; border-radius: 8px; }
+    #auth-submit { width: 100%; margin-top: 22px; }
+
+    /* ---------- 已登录工具条 ---------- */
+    #user-bar {
+      display: none; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 22px;
+    }
+    #user-bar .who { color: var(--text-dim); font-size: .92rem; }
+    #user-bar .who strong { color: var(--text); }
+
+    /* ---------- 资源列表 ---------- */
+    #res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+    .res-card h3 { font-size: 1.02rem; margin-bottom: 4px; word-break: break-all; }
+    .res-card .rid { font-size: .82rem; color: var(--text-dim); font-family: Consolas, monospace; word-break: break-all; }
+    .res-card .acts { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .res-empty { color: var(--text-dim); padding: 30px 0; text-align: center; }
+
+    /* ---------- 签发结果面板 ---------- */
+    #issue-panel { display: none; margin-top: 30px; }
+    #issue-panel h3 { font-size: 1.05rem; margin-bottom: 14px; color: var(--green); }
+    #issue-panel .token-box {
+      position: relative; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 9px; padding: 12px 92px 12px 13px;
+      font-family: Consolas, monospace; font-size: .82rem; color: var(--accent);
+      word-break: break-all; max-height: 110px; overflow-y: auto;
+    }
+    #issue-panel .token-box .btn-copy {
+      position: absolute; right: 8px; top: 8px;
+    }
+    .cfg-table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 14px; }
+    .cfg-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .cfg-table td:first-child { color: var(--text-dim); white-space: nowrap; width: 130px; }
+    .cfg-table td:last-child { font-family: Consolas, monospace; word-break: break-all; }
+    #issue-hint { font-size: .84rem; color: var(--text-dim); margin-top: 12px; }
+
+    /* ---------- 页脚（同官网结构） ---------- */
+    .site-footer { border-top: 1px solid var(--border); background: var(--bg-soft); padding: 26px 0; }
+    .footer-bottom {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      color: var(--text-dim); font-size: .85rem;
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .footer-bottom { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge">云网关</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="manual/gateway.html">网关接入手册</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="page-title">云网关用户服务台</h1>
+      <p class="page-desc">注册 / 登录后，可查看自己获批的网关资源，一键签发短期 token（有效期约 10 分钟），并可随时吊销授权。</p>
+
+      <!-- 区块一：登录 / 注册 -->
+      <section id="auth-card" class="gw-card">
+        <div class="auth-tabs">
+          <button type="button" id="tab-login" class="on">登录</button>
+          <button type="button" id="tab-register">注册</button>
+        </div>
+        <form id="auth-form" autocomplete="on">
+          <label for="auth-email">邮箱</label>
+          <input type="email" id="auth-email" name="email" required maxlength="254" placeholder="you@example.com">
+          <label for="auth-pass">密码</label>
+          <input type="password" id="auth-pass" name="password" required minlength="10" maxlength="128" placeholder="至少 10 位">
+          <div class="form-hint" id="auth-hint">已有账号？直接登录。</div>
+          <button type="submit" class="btn btn-primary" id="auth-submit">登录</button>
+        </form>
+      </section>
+
+      <!-- 区块二 + 三：已登录区域 -->
+      <div id="user-area" style="display:none;">
+        <div id="user-bar">
+          <span class="who">当前登录：<strong id="who-email">—</strong></span>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-logout">退出登录</button>
+        </div>
+
+        <!-- 区块二：资源列表卡片 -->
+        <h2 style="font-size:1.15rem;margin-bottom:14px;">我的网关资源</h2>
+        <div id="res-grid"></div>
+
+        <!-- 区块三：签发结果面板 -->
+        <section id="issue-panel" class="gw-card">
+          <h3>✓ 签发成功（token 有效期短暂，请立即使用）</h3>
+          <div class="token-box">
+            <span id="issue-token"></span>
+            <button type="button" class="btn btn-outline btn-sm btn-copy" data-copy-target="issue-token">复制</button>
+          </div>
+          <table class="cfg-table">
+            <tr><td>网关地址</td><td id="cfg-host">easyrdp.cn</td></tr>
+            <tr><td>端口</td><td id="cfg-port">443</td></tr>
+            <tr><td>TLS</td><td>启用</td></tr>
+            <tr><td>认证方式</td><td>Token（JWT）</td></tr>
+            <tr><td>资源 ID</td><td id="cfg-resource">—</td></tr>
+            <tr><td>expires_in</td><td id="cfg-expires">—</td></tr>
+          </table>
+          <div id="issue-hint"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline btn-sm btn-copy" data-copy-target="cfg-host">复制网关地址</button>
+            <button type="button" class="btn btn-outline btn-sm btn-copy" data-copy-target="cfg-resource">复制资源 ID</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> EasyRDP Contributors · EasyRDP 云网关用户服务台</span>
+        <span>本页面仅面向网关用户自助服务 · 管理员请走 <a href="admin.html">站长后台</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+    var API = "/api/gateway/issue.php";
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* ---------- 提示条 ---------- */
+    var toastTimer = null;
+    function toast(msg, cls) {
+      var t = $("toast");
+      t.textContent = msg;
+      t.className = "show " + (cls || "");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.className = ""; }, 3600);
+    }
+
+    /* ---------- 接口封装（纯原生 fetch，JSON 收发，cookie 鉴权） ---------- */
+    function api(action, extra) {
+      var body = Object.assign({ action: action }, extra || {});
+      return fetch(API, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      }).then(function (resp) {
+        // 401 = 未登录 / 会话过期 → 统一回登录态
+        if (resp.status === 401) {
+          showLoggedOut();
+          throw { silent: true, message: "未登录或登录已过期，请重新登录" };
+        }
+        return resp.json();
+      }).then(function (j) {
+        if (!j || typeof j.ok !== "boolean") throw { message: "响应格式异常" };
+        return j;
+      }, function () {
+        throw { message: "网络错误或服务暂不可用，请稍后重试" };
+      });
+    }
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    /* ---------- 登录态切换 ---------- */
+    function showLoggedOut() {
+      $("user-area").style.display = "none";
+      $("auth-card").style.display = "";
+    }
+    function showLoggedIn(email) {
+      $("auth-card").style.display = "none";
+      $("user-area").style.display = "";
+      $("who-email").textContent = email || "已登录";
+      hideIssuePanel();
+      loadResources();
+    }
+
+    /* ---------- 登录 / 注册 ---------- */
+    var authMode = "login";
+    function setAuthMode(mode) {
+      authMode = mode;
+      $("tab-login").classList.toggle("on", mode === "login");
+      $("tab-register").classList.toggle("on", mode === "register");
+      $("auth-hint").textContent = mode === "login" ? "已有账号？直接登录。" : "新用户注册（密码至少 10 位）。";
+      $("auth-submit").textContent = mode === "login" ? "登录" : "注册";
+    }
+    $("tab-login").addEventListener("click", function () { setAuthMode("login"); });
+    $("tab-register").addEventListener("click", function () { setAuthMode("register"); });
+
+    $("auth-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = $("auth-email").value.trim();
+      var pass = $("auth-pass").value;
+      if (!email || !pass) { toast("请填写邮箱和密码", "err"); return; }
+      if (authMode === "register" && pass.length < 10) { toast("密码至少 10 位", "err"); return; }
+      var btn = $("auth-submit");
+      btn.disabled = true;
+      api(authMode, { email: email, password: pass }).then(function (j) {
+        if (authMode === "register") {
+          toast(j.message || "注册成功，请登录", "ok");
+          $("auth-pass").value = "";
+          setAuthMode("login");
+        } else {
+          toast("登录成功", "ok");
+          showLoggedIn((j && j.email) || email);
+        }
+      }).catch(function (err) {
+        if (!err.silent) toast(err.message || "操作失败", "err");
+      }).finally(function () { btn.disabled = false; });
+    });
+
+    $("btn-logout").addEventListener("click", function () {
+      // 前端回登录态即可；会话由服务端超时回收（接口无 logout action）
+      showLoggedOut();
+      toast("已退出登录", "ok");
+    });
+
+    /* ---------- 资源列表（my_resources） ---------- */
+    function loadResources() {
+      $("res-grid").innerHTML = '<div class="res-empty">加载中…</div>';
+      api("my_resources").then(function (j) {
+        var list = (j && j.resources) || [];
+        if (!list.length) {
+          $("res-grid").innerHTML =
+            '<div class="res-empty">暂无获批的网关资源，请联系官方开通授权。</div>';
+          return;
+        }
+        $("res-grid").innerHTML = list.map(function (r) {
+          var rid = r.resource_id || "";
+          var label = r.label || rid;
+          return '<div class="gw-card res-card">' +
+            '<h3>' + esc(label) + '</h3>' +
+            '<div class="rid">资源 ID：' + esc(rid) + '</div>' +
+            '<div class="acts">' +
+              '<button type="button" class="btn btn-primary btn-sm" data-act="issue" data-rid="' + esc(rid) + '">签发 token</button>' +
+              '<button type="button" class="btn btn-danger btn-sm" data-act="revoke" data-rid="' + esc(rid) + '">吊销授权</button>' +
+            '</div></div>';
+        }).join("");
+      }).catch(function (err) {
+        if (!err.silent) {
+          $("res-grid").innerHTML = '<div class="res-empty">加载失败：' + esc(err.message || "未知错误") + '</div>';
+        }
+      });
+    }
+
+    /* ---------- 签发 / 吊销（事件委托） ---------- */
+    $("res-grid").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      var rid = btn.getAttribute("data-rid");
+      var act = btn.getAttribute("data-act");
+      if (act === "issue") {
+        btn.disabled = true;
+        btn.textContent = "签发中…";
+        api("issue", { resource_id: rid }).then(function (j) {
+          renderIssue(j, rid);
+          toast("token 签发成功", "ok");
+        }).catch(function (err) {
+          if (!err.silent) toast(err.message || "签发失败", "err");
+        }).finally(function () {
+          btn.disabled = false;
+          btn.textContent = "签发 token";
+        });
+      } else if (act === "revoke") {
+        if (!window.confirm("确认吊销资源「" + rid + "」的授权？吊销后将无法继续签发 token。")) return;
+        btn.disabled = true;
+        api("revoke", { resource_id: rid }).then(function (j) {
+          toast(j.message || "授权已吊销", "ok");
+          hideIssuePanel();
+          loadResources(); // 吊销后刷新列表（已吊销资源不再展示）
+        }).catch(function (err) {
+          if (!err.silent) toast(err.message || "吊销失败", "err");
+          btn.disabled = false;
+        });
+      }
+    });
+
+    /* ---------- 签发结果面板 ---------- */
+    function hideIssuePanel() { $("issue-panel").style.display = "none"; }
+    function renderIssue(j, rid) {
+      var gw = j.gateway || {};
+      $("issue-token").textContent = j.token || "";
+      $("cfg-host").textContent = gw.host || "easyrdp.cn";
+      $("cfg-port").textContent = String(gw.port != null ? gw.port : 443);
+      $("cfg-resource").textContent = j.resource_id || rid;
+      $("cfg-expires").textContent = (j.expires_in != null ? j.expires_in : "600") + " 秒";
+      $("issue-hint").textContent = j.hint ||
+        "在客户端「网关（可选）」中按以上参数填写，认证方式选 Token（JWT）";
+      $("issue-panel").style.display = "";
+      $("issue-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    /* ---------- 复制按钮（clipboard API + 降级） ---------- */
+    function copyText(text, done) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+    function fallbackCopy(text, done) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { toast("复制失败，请手动选择复制", "err"); }
+      document.body.removeChild(ta);
+    }
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest(".btn-copy");
+      if (!btn) return;
+      var target = $(btn.getAttribute("data-copy-target"));
+      if (!target) return;
+      var text = target.id === "issue-token" ? target.textContent : target.textContent;
+      copyText(text, function () { toast("已复制到剪贴板", "ok"); });
+    });
+
+    /* ---------- 初始化 ---------- */
+    $("year").textContent = String(new Date().getFullYear());
+    // 打开页面先探一次登录态：my_resources 401 则停在登录区
+    api("my_resources").then(function (j) {
+      // 无法从该响应拿到邮箱，仅在界面上标注「已登录」
+      showLoggedIn("已登录");
+    }).catch(function () { /* 401 已由 api() 统一处理 */ });
+  })();
+  </script>
+</body>
+</html>

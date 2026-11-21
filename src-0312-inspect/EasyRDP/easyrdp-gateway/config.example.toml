@@ -1,0 +1,114 @@
+# EasyRDP 云网关示例配置
+# 复制为 config.toml 后按环境修改；敏感项（JWT secret、证书私钥）务必走密钥管理，不要提交仓库。
+
+[server]
+# 网关本体监听地址（建议仅绑定内网/回环，由 Nginx 反代终止 TLS 后转发到 8443）
+listen_addr = "0.0.0.0:8443"
+
+[auth]
+# JWT 签名密钥：生产环境请使用 >= 64 字节随机值（如 openssl rand -base64 64）
+jwt_secret = "CHANGE_ME_PLACEHOLDER_DO_NOT_USE_IN_PRODUCTION"
+# 短期 token 有效期（秒），默认 10 分钟，对齐 RD Gateway GatewayEncryptedAuthCookie 的短期语义
+token_ttl_seconds = 600
+# OIDC IdP 配置占位（真实接入后用于校验 code 换 token）
+oidc_issuer = "https://sso.example.com/realms/easyrdp"
+oidc_client_id = "easyrdp-gateway"
+
+[tls]
+# 网关本体 TLS（F4-V1 R-20261118-012）：cert_path 与 key_path **同时**配置
+# 时，网关直接以 HTTPS/WSS 监听（axum-server rustls，客户端勾选 TLS 即
+# wss:// 直连本网关）；任一留空/缺省 = 保持 HTTP（由 Nginx 反代终止 TLS 的
+# 既有部署形态，客户端经反代 wss 接入）。
+# 自签证书生成（一行命令）：
+#   openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -keyout server.key -out server.crt -subj "/CN=gw.example.com" -addext "subjectAltName=DNS:gw.example.com"
+cert_path = "/etc/easyrdp/tls/server.crt"
+key_path = "/etc/easyrdp/tls/server.key"
+
+[audit]
+# 内存环形缓冲容量
+ring_capacity = 4096
+
+[admin]
+# 管理密钥：官网后台 api/gateway/audit.php 以 X-Admin-Key 头调用 GET /admin/audit 拉取审计。
+# 生产环境请使用 >= 32 字节随机值（如 openssl rand -hex 32），绝不提交仓库。
+# 未配置（留空/删掉本段）时 /admin/* 管理端点保持禁用（返回 503）。
+admin_key = "CHANGE_ME_PLACEHOLDER_DO_NOT_USE_IN_PRODUCTION"
+
+# =============================================================
+# TOTP 二次认证（F4-V1 R-20261118-012）：[users.<用户名>] totp_secret
+# （Base32，RFC 4648，如 openssl rand -base64 20 转换或 Authenticator 扫码值）。
+# 配置了 totp_secret 的用户登录（OIDC 占位通过后）必须携带 6 位 TOTP 验证码
+# （30s 步长，±1 窗口容差）；缺失/错误返回 401 otp_required，客户端弹码重试。
+# 也可用环境变量 EASYRDP_TOTP_SECRET_<USER大写> 提供/覆盖（不入盘）。
+# =============================================================
+[users.alice]
+totp_secret = "JBSWY3DPEHPK3PXP"
+
+[users.bob]
+# 不写 totp_secret => bob 登录无需 OTP。
+
+# =============================================================
+# 策略矩阵（F5-V1 R-20261118-011）：资源 × 角色 × 动作的允许矩阵。
+# 角色：admin / user / readonly；动作：connect（建隧道）/ list（资源列表）。
+# 规则按书写顺序匹配，首条命中生效；"*" 通配任一维度。
+# 无规则命中时套默认矩阵：deny by default、admin 全通。
+# 本段支持热加载：修改 config.toml 后 30 秒内自动生效（mtime 轮询）；
+# 热加载解析失败时保留旧策略并记录 policy_reload_failed 审计事件。
+# =============================================================
+[policy]
+
+# 示例 1：所有资源允许 user 角色 connect
+[[policy.rules]]
+resource = "*"
+role = "user"
+action = "connect"
+decision = "allow"
+
+# 示例 2：所有资源允许 readonly 角色 list（只读账号可见资源目录，但不可建隧道）
+[[policy.rules]]
+resource = "*"
+role = "readonly"
+action = "list"
+decision = "allow"
+
+# 示例 3：指定资源对 readonly 显式拒绝 connect（防未来规则放宽后的兜底）
+[[policy.rules]]
+resource = "rdp-win01"
+role = "readonly"
+action = "connect"
+decision = "deny"
+
+# 示例 4：个别资源仅 admin 可 connect（deny 优先于默认 admin 全通，按序命中）
+[[policy.rules]]
+resource = "rdp-core01"
+role = "*"
+action = "connect"
+decision = "deny"
+
+[[policy.rules]]
+resource = "rdp-core01"
+role = "admin"
+action = "connect"
+decision = "allow"
+
+# 注：删除整个 [policy] 段 = 启用默认矩阵（deny by default、admin 全通）。
+
+# 资源注册表：id -> 内网 RDP 后端（隧道按 id 查询后端地址）
+# GET /api/resources 只暴露 id/name，不会返回 backend 与 allowed_roles。
+# allowed_roles（可选）：允许访问该资源的角色列表，与 JWT claims.roles 求交集；
+# 缺省（不写）= 所有角色可用。角色不匹配时隧道请求返回 403 并记录 tunnel_forbidden 审计。
+[[resources]]
+id = "rdp-win01"
+name = "Windows 跳板机"
+backend = "10.0.0.5:3389"
+allowed_roles = ["ops", "admin"]
+
+[[resources]]
+id = "rdp-linux01"
+name = "Linux 桌面"
+backend = "192.168.1.20:3390"
+# 不写 allowed_roles => 所有角色均可访问
+
+# 说明：未注册的 resource_id 只有在本身是显式 "host:port" 且主机位于
+# 私网白名单（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16、localhost/127.0.0.0/8、::1）
+# 时才允许直连——防止 SSRF 任意探测公网/DNS 目标（见 src/resources.rs::is_allowed_backend）。

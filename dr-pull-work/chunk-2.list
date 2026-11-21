@@ -1,0 +1,12 @@
+.user.ini
+features.html
+api/feedback/common.php
+api/stats/common.php
+assets/img/app-screenshot.png
+downloads/EasyRDP-0.1.2-portable.exe
+downloads/EasyRDP-0.2.0-portable.exe
+downloads/EasyRDP-0.3.0-portable.exe
+downloads/EasyRDP-0.3.3-win32-x64-portable.zip
+downloads/EasyRDP-Gateway-0.2.1-win-x64.zip
+downloads/EasyRDP-src-0.1.5.tar.gz
+tools/gen-site-updates.js

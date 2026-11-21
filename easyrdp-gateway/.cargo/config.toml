@@ -1,0 +1,6 @@
+# gateway 构建环境固化：ring/aws-lc-sys 的 cc-rs 在超长 target 路径下触发
+# MSVC cl.exe D8050（命令行无法写入调试记录）。本配置把本 crate 的构建产物
+# 固定到短路径，规避该问题；仅当 cargo 在 easyrdp-gateway 目录内运行时生效，
+# 不影响 workspace 其他 crate 与全局环境。
+[build]
+target-dir = "C:/erdp-tgt"
