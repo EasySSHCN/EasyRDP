@@ -1,0 +1,24 @@
+[package]
+name = "easyrdp-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP core: session profile model, .rdp import/export"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+encoding_rs.workspace = true
+# 模板包完整性校验（F2-V2 R-20261118-014）：.erdp-template sha256
+sha2 = "0.10"
+
+# 密码保护（crates/easyrdp-core/src/secret.rs）：
+# Windows 用 DPAPI（CryptProtectData/CryptUnprotectData）加密后 base64 存储；
+# 非 Windows 暂以 plain: 前缀回退。均为 target 依赖，不影响其他平台构建产物。
+[target.'cfg(windows)'.dependencies]
+base64 = "0.23"
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security_Cryptography",
+] }
