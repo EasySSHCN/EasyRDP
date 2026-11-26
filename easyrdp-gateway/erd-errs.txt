@@ -1,0 +1,131 @@
+
+> warning: unused imports: `AuthMethod` and `Redirect`
+   --> B:\Users\ZhenAn\Documents\deepseek-harness\default-workspace\EasyRDP\easyrdp-client\crates\easyrdp-core\src\rdp_import.rs:7:22
+    |
+  7 | use crate::profile::{AuthMethod, GatewayAuth, GatewayConfig, Redirect, Resolution, SessionProfile};
+    |                      ^^^^^^^^^^                              ^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+> warning: unused imports: `AtomicBool` and `AtomicU32`
+     --> B:\Users\ZhenAn\Documents\deepseek-harness\default-workspace\EasyRDP\easyrdp-client\crates\easyrdp-rdp\src\lib.rs:316:25
+      |
+  316 | use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
+      |                         ^^^^^^^^^^  ^^^^^^^^^
+      |
+      = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+> warning: unused import: `CreateMutexW`
+     --> B:\Users\ZhenAn\Documents\deepseek-harness\default-workspace\EasyRDP\easyrdp-client\crates\easyrdp-rdp\src\lib.rs:317:45
+      |
+  317 | use windows_sys::Win32::System::Threading::{CreateMutexW, ReleaseMutex, WaitForSingleObject};
+      |                                             ^^^^^^^^^^^^
+  System.Management.Automation.RemoteException
+> warning: unused import: `mpsc`
+     --> B:\Users\ZhenAn\Documents\deepseek-harness\default-workspace\EasyRDP\easyrdp-client\crates\easyrdp-rdp\src\lib.rs:318:17
+      |
+  318 | use std::sync::{mpsc, Mutex, OnceLock};
+      |                 ^^^^
+  System.Management.Automation.RemoteException
+> warning: unused import: `std::io::Write as _`
+     --> B:\Users\ZhenAn\Documents\deepseek-harness\default-workspace\EasyRDP\easyrdp-client\crates\easyrdp-rdp\src\lib.rs:363:13
+      |
+  363 |         use std::io::Write as _;
+      |             ^^^^^^^^^^^^^^^^^^^
+  System.Management.Automation.RemoteException
+  warning: variable does not need to be mutable
+> warning: unused import: `self`
+    --> src\auth.rs:10:18
+     |
+  10 |     middleware::{self, Next},
+     |                  ^^^^
+     |
+     = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+> error[E0599]: no method named `tap_req` found for enum `Result<T, E>` in the current scope
+     --> src\tests_e2e.rs:475:14
+      |
+  472 | /             tokio_tungstenite::tungstenite::client::IntoClientRequest::into_client_request(
+  473 | |                 url,
+  474 | |             )
+  475 | |             .tap_req(|mut r| {
+> error[E0308]: mismatched types
+     --> src\tests_e2e.rs:493:30
+      |
+  493 |                     let Some(Ok(Some((frame, consumed)))) = crate::agent::Frame::decode(buf).ok()
+      |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^    ------------------------------------- this expression has type `std::option::Option<std::option::Option<(agent::Frame, usize)>>`
+      |                              |
+      |                              expected `Option<(Frame, usize)>`, found `Result<_, _>`
+> error[E0063]: missing field `agent_sessions` in initializer of `AppState`
+     --> src\audit.rs:670:18
+      |
+  670 |         Arc::new(AppState {
+      |                  ^^^^^^^^ missing `agent_sessions`
+  System.Management.Automation.RemoteException
+> error[E0063]: missing field `agent_sessions` in initializer of `AppState`
+      --> src\auth.rs:1321:30
+       |
+  1321 |         let state = Arc::new(AppState {
+       |                              ^^^^^^^^ missing `agent_sessions`
+  System.Management.Automation.RemoteException
+> error[E0063]: missing field `agent_sessions` in initializer of `AppState`
+      --> src\auth.rs:1592:30
+       |
+  1592 |         let state = Arc::new(AppState {
+       |                              ^^^^^^^^ missing `agent_sessions`
+  System.Management.Automation.RemoteException
+> error[E0063]: missing field `agent_sessions` in initializer of `AppState`
+     --> src\console.rs:589:18
+      |
+  589 |         Arc::new(AppState {
+      |                  ^^^^^^^^ missing `agent_sessions`
+  System.Management.Automation.RemoteException
+> error[E0063]: missing fields `iat` and `iss` in initializer of `auth::Claims`
+     --> src\tunnel.rs:673:9
+      |
+  673 |         Claims {
+      |         ^^^^^^ missing `iat` and `iss`
+  System.Management.Automation.RemoteException
+> error[E0308]: mismatched types
+     --> src\tunnel.rs:731:39
+      |
+  731 |         state.agent_registry.register(conn.clone());
+      |                              -------- ^^^^^^^^^^^^ expected `AgentConnection`, found `Arc<AgentConnection>`
+      |                              |
+      |                              arguments to this method are incorrect
+> error[E0308]: mismatched types
+     --> src\tunnel.rs:787:39
+      |
+  787 |         state.agent_registry.register(conn.clone());
+      |                              -------- ^^^^^^^^^^^^ expected `AgentConnection`, found `Arc<AgentConnection>`
+      |                              |
+      |                              arguments to this method are incorrect
+> error[E0308]: mismatched types
+     --> src\tunnel.rs:822:39
+      |
+  822 |         state.agent_registry.register(conn.clone());
+      |                              -------- ^^^^^^^^^^^^ expected `AgentConnection`, found `Arc<AgentConnection>`
+      |                              |
+      |                              arguments to this method are incorrect
+> error[E0308]: mismatched types
+     --> src\tunnel.rs:853:39
+      |
+  853 |         state.agent_registry.register(conn.clone());
+      |                              -------- ^^^^^^^^^^^^ expected `AgentConnection`, found `Arc<AgentConnection>`
+      |                              |
+      |                              arguments to this method are incorrect
+> warning: unused variable: `upstream`
+     --> src\tunnel.rs:410:9
+      |
+  410 |     let upstream = tokio::spawn(async move {
+      |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_upstream`
+      |
+      = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+> error[E0594]: cannot assign to data in an `Arc`
+     --> src\tests_e2e.rs:550:9
+      |
+  550 |         state.agent_cfg.enabled = true;
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot assign
+      |
+      = help: trait `DerefMut` is required to modify through a dereference, but it is not implemented for `std::sync::Arc<AppState>`
+> error: could not compile `easyrdp-gateway` (bin "easyrdp-gateway" test) due to 12 previous errors; 3 warnings emitted
+
+
+

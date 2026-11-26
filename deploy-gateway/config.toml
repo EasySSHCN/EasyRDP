@@ -1,0 +1,29 @@
+# EasyRDP 云网关生产配置 —— 部署时复制为 config.toml
+# 敏感项（jwt_secret / admin_key）不要提交仓库。
+
+[server]
+# 网关本体监听（仅绑定回环：keys.php 的 gateway_url=127.0.0.1:8443 与之对应；
+# 若官网服务器与网关不同机，改为内网 IP 并同步修改 keys.php）
+listen_addr = "127.0.0.1:8443"
+
+[auth]
+jwt_secret = "e5f1a09c47d8b2f36a91d0c58e27b4a16d93f0a7c2b58e41d6f09a37c4e81b52f8d3a0691c4b7e25a083d1f64c9e7023"
+token_ttl_seconds = 600
+
+[tls]
+# 回环直连 + 官网后台走 HTTP，网关自身可不开 TLS；公网暴露时务必由 Nginx 终止 TLS 后转发
+# cert_path = ""
+# key_path = ""
+
+[audit]
+ring_capacity = 4096
+
+[admin]
+# 与 keys.php 的 gateway_admin_key 一致（audit.php 以 X-Admin-Key 调 GET /admin/audit）
+admin_key = "8d868d36cbe45d0e38da7b7d12e65497691fa81ba90654449011a1b0a781c5bf"
+
+# 资源注册表：按你的真实环境修改 backend
+[[resources]]
+id = "rdp-win01"
+name = "Windows 桌板"
+backend = "192.168.200.26:3389"

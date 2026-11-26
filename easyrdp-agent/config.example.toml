@@ -1,0 +1,26 @@
+# EasyRDP 目标机 Agent 配置（方案 §5 / R-20261122-006 P3）
+# 用法：easyrdp-agent --enroll <ENROLL_TOKEN>  换取 AgentToken 并加密写回本文件
+#       easyrdp-agent --config agent.toml      控制台调试运行
+#       easyrdp-agent --service                Windows 服务运行
+
+[gateway]
+# 网关地址：自动解析 wss 443（https:// → wss://，http:// → ws://）。
+url = "https://easyrdp.cn"
+# AgentToken（站长后台签发或 --enroll 自动写入）。
+# 三种形态：dpapi:<base64>（DPAPI 密文，推荐）、file:<路径>、明文（仅调试）。
+# token = "dpapi:AQAAANCMnd8BFdERnHoY..."
+
+[tunnel]
+# 本 Agent 绑定的资源 ID（AgentToken rid 一致才能接入网关）。
+resource_id = "rdp-office-01"
+# 本地后端：Agent 只 DIAL 此地址（防内网任意端口跳板滥用），默认 127.0.0.1:3389。
+local_backend = "127.0.0.1:3389"
+
+[options]
+# 应用层心跳周期（秒）：Agent 主动 PING + 回应网关 PING；静默 3 周期判死重连。
+heartbeat_secs = 30
+# 本地后端 TCP connect 超时（秒）。
+dial_timeout_secs = 5
+# 断线重连指数退避：起点/封顶毫秒（1s → 2s → ... → 60s 封顶）。
+reconnect_initial_ms = 1000
+reconnect_cap_ms = 60000

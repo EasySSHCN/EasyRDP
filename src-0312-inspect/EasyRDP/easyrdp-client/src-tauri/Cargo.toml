@@ -1,0 +1,67 @@
+[package]
+name = "easyrdp-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP Tauri 2 application shell"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+easyrdp-core = { path = "../crates/easyrdp-core" }
+easyrdp-rdp = { path = "../crates/easyrdp-rdp" }
+serde.workspace = true
+serde_json.workspace = true
+# 会话桥帧编码用（JPEG -> base64），同时也供加密存储单测
+base64 = "0.23"
+# 演示帧（stub）走与 native 相同的 JPEG 编码管线
+jpeg-encoder.workspace = true
+# F1-V2 会话快照：PNG 编码 IDAT 压缩（flate2 已在依赖图中，零新增下载）
+flate2 = "1"
+# 反馈提交链路（EasySSH 同族协议）：AES-256-GCM 信封 + HMAC-SHA256 派生/签名 + rustls HTTP
+aes-gcm = "0.10"
+hmac = "0.12"
+sha2 = "0.10"
+# 在线更新（R-20261116-005，版本与 EasySSH src-tauri 对齐）：
+# AES-256-CTR 加密包流式解密 + HKDF-SHA256 文件密钥派生 + Ed25519 清单验签
+aes = "0.8"
+ctr = "0.9"
+hkdf = "0.12"
+ed25519-dalek = "2"
+# ureq 2.x 快捷方法默认只走 rustls；native-tls 后端必须经 AgentBuilder 显式挂载（schannel）
+native-tls = "0.2"
+ureq = { version = "2", default-features = false, features = ["native-tls", "json"] }
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+
+# 发布构建必须启用 custom-protocol（嵌入前端资源）；
+# 否则 tauri 的 dev = !custom_protocol 会以 dev 模式编译，运行时去连 devUrl(localhost:5173)。
+# 发布构建命令（Windows，含 native FreeRDP 引擎）：
+#   cargo build --release -p easyrdp-app --features custom-protocol,native
+#   （需先设 PKG_CONFIG_PATH / PATH，见 docs/WINDOWS-FREERDP-SETUP.md；
+#    打包脚本 scripts/package-release.ps1 已自动完成全部步骤）
+# 评估记录：不把 native 设为 easyrdp-rdp 的 default feature —— CI/单测环境
+# （无 FreeRDP 开发库）会直接编译失败；native_ready() 只有 native 构建才为 true，
+# 发布包必须用上面的命令显式启用。
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+native = ["easyrdp-rdp/native"]
+
+[target.'cfg(windows)'.dependencies]
+# 键盘 LED 同步读本地 toggle（GetKeyState）
+windows-sys = { version = "0.61", features = [
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Input_Pointer",
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_LibraryLoader",
+    "Win32_System_DataExchange",
+    "Win32_System_Memory",
+] }
+
+# 加密存储单测用（main.rs persisted_password_is_dpapi_encrypted）
+[target.'cfg(windows)'.dev-dependencies]
+base64 = "0.23"
