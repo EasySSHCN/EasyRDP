@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>下载 — EasyRDP</title>
+  <meta name="description" content="下载 EasyRDP v0.5.2：Windows x64 单文件绿色版（当前提供平台，macOS / Linux 规划中），附 SHA256 校验说明、GitHub / Gitee 发布页与源代码获取方式。">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/download.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/download.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/download.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.5.2</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="features.html">功能</a>
+        <a href="download.html">下载</a>
+        <a href="docs.html">文档</a>
+        <a href="manual/index.html">操作手册</a>
+        <a href="migrate.html">迁移指南</a>
+        <a href="compare.html">产品对比</a>
+
+        <a href="changelog.html">更新日志</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">安全</a>
+                <a href="gw-admin.html">云网关用户服务台</a>
+<a class="lang-switch" href="en/download.html" hreflang="en" lang="en" title="Switch to English">EN</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>下载 EasyRDP</h1>
+      <p class="section-desc">当前版本 <strong data-version>v0.6.0</strong>（2026-11-27 发布 v0.6.0）：Windows 单文件绿色版（FreeRDP 全静态链接，双击即用，无 DLL 依赖）。本版为里程碑批次（2026-11-26 官网反馈 8 条全处理）：拖动残影根治、剪贴板重连自愈与大文本优化、会话帧率显示与一键截图、启动黑窗根治、灾备包导出入口。macOS / Linux 版本待 CI 三平台构建接入后提供。构建方法见 <a href="contributing.html">参与贡献</a>。</p>
+    </div>
+  </section>
+
+  <style>
+    /* 下载卡片（FILEDL-CARDS 2026-11-17：对齐 easyssh.cn 卡片式展示；
+       配色全部取自站点 :root 变量，自动适配深浅主题） */
+    .dl-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: 8px 0 18px; }
+    .dl-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; transition: transform .15s ease, box-shadow .15s ease; }
+    .dl-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    .dl-icon { font-size: 30px; line-height: 1; }
+    .dl-card h3 { margin: 2px 0 0; font-size: 16px; color: var(--text); }
+    .dl-file { font-family: var(--mono, Consolas, monospace); font-size: 12.5px; color: var(--text-dim); word-break: break-all; }
+    .dl-meta { font-size: 13px; color: var(--text-dim); }
+    .sha-box { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 8px 10px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; }
+    .sha-box code { font-size: 11px; word-break: break-all; flex: 1; color: var(--text-dim); }
+    .copy-btn { flex-shrink: 0; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
+    .copy-btn:hover { background: var(--bg-card); }
+  </style>
+  <section class="section">
+    <div class="container">
+      <div class="dl-cards" id="dl-cards">
+    <div class="dl-card" id="dl-card-portable">
+      <div class="dl-icon">🪟</div>
+      <h3>Windows 单文件绿色版</h3>
+      <div class="dl-file">EasyRDP-0.5.2-portable.exe</div>
+      <div class="dl-meta">x86_64 · 双击即用，需 WebView2 Runtime（Win10/11 通常已内置）</div>
+      <a class="btn btn-primary" href="#" data-dl="EasyRDP-0.5.2-portable.exe">⬇ 本站下载</a>
+      <div class="sha-box"><code data-sha="EasyRDP-0.5.2-portable.exe">SHA256 加载中…</code><button class="copy-btn" type="button">复制</button></div>
+    </div>
+    <div class="dl-card" id="dl-card-zip">
+      <div class="dl-icon">📦</div>
+      <h3>Windows 便携压缩包</h3>
+      <div class="dl-file">EasyRDP-0.5.2-win32-x64-portable.zip</div>
+      <div class="dl-meta">x86_64 · 解压即用（含 EasyRDP.exe 与便携说明）</div>
+      <a class="btn btn-primary" href="#" data-dl="EasyRDP-0.5.2-win32-x64-portable.zip">⬇ 本站下载</a>
+      <div class="sha-box"><code data-sha="EasyRDP-0.5.2-win32-x64-portable.zip">SHA256 加载中…</code><button class="copy-btn" type="button">复制</button></div>
+    </div>
+    <div class="dl-card" id="dl-card-source">
+      <div class="dl-icon">🧩</div>
+      <h3>源码包（全平台）</h3>
+      <div class="dl-file">EasyRDP-src-0.5.2.tar.gz</div>
+      <div class="dl-meta">完整源码（客户端 + 网关 + 官网），已脱敏</div>
+      <a class="btn btn-primary" href="#" data-dl="EasyRDP-src-0.5.2.tar.gz">⬇ 本站下载</a>
+      <div class="sha-box"><code data-sha="EasyRDP-src-0.5.2.tar.gz">SHA256 加载中…</code><button class="copy-btn" type="button">复制</button></div>
+    </div>
+  </div>
+  <p style="color:var(--text-dim);">🍎 macOS / 🐧 Linux 版本：规划中，当前暂未提供（发布节奏以本页与更新日志为准）。Windows 版可满足绝大多数远程桌面场景。</p>
+  <div class="callout">🟢 <strong>绿色免安装</strong>：所有产物均为单文件或解压即用包——不写注册表、不装驱动、删掉文件夹即完全卸载。
+  </div>
+  <div class="callout callout-warn">
+        ⚠️ Windows 单文件版为全静态链接构建；自动更新通道已上线（v0.2.0 起提供：客户端内设置 → 更新，加密升级包 + 签名校验，本页 downloads 中的 .enc 即升级包）；安装包代码签名将在后续版本提供。
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">SHA256 校验说明</h2>
+      <p class="section-desc">上方卡片中的 SHA256 来自 <code>SHA256SUMS.txt</code>（随每次发布自动更新）。下载后请计算本地文件的 SHA256 并与卡片值比对，一致方可使用。</p>
+      <h3 style="margin-bottom:10px;">Windows（PowerShell）</h3>
+      <pre>Get-FileHash .\EasyRDP-0.4.2-win32-x64-portable.zip -Algorithm SHA256</pre>
+      <h3 style="margin-bottom:10px;">macOS / Linux</h3>
+      <pre>sha256sum EasyRDP-0.5.2-portable.exe
+shasum -a 256 EasyRDP-src-0.4.2.tar.gz   <span class="cm"># macOS</span></pre>
+      <div class="callout">
+        校验值不一致时请勿运行安装包：可能传输不完整或文件被篡改。请重新下载或到 GitHub Releases 反馈。
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">历史版本</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>版本</th><th>日期</th><th>下载（单文件 / zip / 网关 / 源码）</th><th>单文件大小</th><th>zip 大小</th><th>网关大小</th><th>源码大小</th></tr>
+          </thead>
+          <tbody>
+<tr><td>v0.5.2</td><td>2026-11-26</td><td><a href="downloads/EasyRDP-0.5.2-portable.exe">单文件</a> · <a href="downloads/EasyRDP-0.5.2-win32-x64-portable.zip">zip</a> · <a href="downloads/EasyRDP-Gateway-0.5.2-win-x64.zip">网关</a> · <a href="downloads/EasyRDP-src-0.5.2.tar.gz">源码</a></td><td>19.6 MB</td><td>6.7 MB</td><td>3.2 MB</td><td>57.8 MB</td></tr>
+          <tr><td>v0.5.1</td><td>2026-11-23</td><td><a href="downloads/EasyRDP-0.5.2-portable.exe">单文件</a> · <a href="downloads/EasyRDP-0.5.2-win32-x64-portable.zip">zip</a> · <a href="downloads/EasyRDP-Gateway-0.5.2-win-x64.zip">网关</a> · <a href="downloads/EasyRDP-src-0.5.2.tar.gz">源码</a></td><td>19.3 MB</td><td>6.6 MB</td><td>3.2 MB</td><td>57.8 MB</td></tr>
+          <tr><td>v0.5.0</td><td>2026-11-22</td><td><a href="#" data-dl="EasyRDP-0.5.2-portable.exe">单文件</a> · <a href="#" data-dl="EasyRDP-0.5.2-win32-x64-portable.zip">zip</a> · <a href="#" data-dl="EasyRDP-Gateway-0.5.2-win-x64.zip">网关</a> · <a href="#" data-dl="EasyRDP-src-0.5.2.tar.gz">源码</a></td><td>19.3 MB</td><td>6.6 MB</td><td>3.2 MB</td><td>9.2 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color:var(--text-dim);">更多历史版本与构建详情请移步 <a href="https://github.com/EasySSHCN/EasyRDP/releases" target="_blank" rel="noopener">GitHub Releases</a> 或 <a href="https://gitee.com/easyssh/EasyRDP/releases" target="_blank" rel="noopener">Gitee 发行版</a>。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">用户之声 · 反馈精选</h2>
+      <p class="section-desc" style="max-width:none;white-space:nowrap;">来自软件端「反馈」入口的真实用户反馈与官方回复（仅展示用户已同意公开的精选条目）。</p>
+      <div id="fbTop" style="display:flex;flex-direction:column;gap:12px;max-width:860px;margin:0 auto;">
+        <p class="section-desc" id="fbTopLoading">加载中…</p>
+      </div>
+      <style>
+        .fb-item { background: var(--bg-card, #141a24); border: 1px solid var(--border, #2a3242); border-radius: 10px; padding: 14px 18px; }
+      </style>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">源代码</h2>
+      <p class="section-desc">EasyRDP 100% 开源（MIT 协议）。你可以直接克隆源码自行构建，也欢迎提交 Issue 与 PR。本机 git 命令不可用（含 Git 同步提示「未检测到系统 git」）请看<a href="manual/git-sync-no-git.html">排查手册</a>。</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="icon">🐙</div>
+          <h3>GitHub</h3>
+          <p>主仓库与 Release 发布渠道：</p>
+          <p style="margin-top:10px;"><a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">github.com/EasySSHCN/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://github.com/EasySSHCN/EasyRDP/releases/tag/v0.5.2" target="_blank" rel="noopener">v0.5.2 Release（源码包 + SHA256SUMS）↗</a></p>
+          <pre style="margin-top:12px;">git clone https://github.com/EasySSHCN/EasyRDP.git</pre>
+        </div>
+        <div class="card">
+          <div class="icon">🇨🇳</div>
+          <h3>Gitee</h3>
+          <p>国内镜像，访问更稳定：</p>
+          <p style="margin-top:10px;"><a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">gitee.com/easyssh/EasyRDP ↗</a></p>
+          <p style="margin-top:6px;"><a href="https://gitee.com/easyssh/EasyRDP/releases/tag/v0.5.2" target="_blank" rel="noopener">v0.5.2 发行版（源码包附件）↗</a></p>
+          <pre style="margin-top:12px;">git clone https://gitee.com/easyssh/EasyRDP.git</pre>
+        </div>
+        <div class="card">
+          <div class="icon">🔨</div>
+          <h3>自行构建</h3>
+          <p>需要 Rust 稳定工具链与 Node.js（前端资源构建）：</p>
+          <pre style="margin-top:12px;"><span class="cm"># Tauri 构建</span>
+cargo tauri build</pre>
+          <p>详见 <a href="contributing.html">参与贡献</a> 文档。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="index.html">首页</a>
+          <a href="features.html">功能介绍</a>
+          <a href="download.html">下载</a>
+          <a href="changelog.html">更新日志</a>
+          <a href="docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="docs.html">JSON Profile 规范</a>
+          <a href="migrate.html">迁移指南</a>
+          <a href="compare.html">产品对比</a>
+
+          <a href="faq.html">常见问题</a>
+          <a href="security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js?v=30"></script>
+  <script>
+  /* 用户之声 · 反馈精选（读公开接口 top.php，只展示已回复+公开条目；全部转义防 XSS） */
+  (function () {
+    var box = document.getElementById('fbTop');
+    function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+    fetch('api/feedback/top.php', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var items = (j && j.ok && Array.isArray(j.items)) ? j.items : [];
+        if (!items.length) {
+          box.innerHTML = '<p class="section-desc" style="margin:0;">暂无公开反馈。欢迎通过软件端「反馈」入口提交您的建议与问题。</p>';
+          return;
+        }
+        /* 分页:每页条数可自定义输入,默认 5 条 */
+        var fbPage = 1, fbSize = 5;
+        function truncateText(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n) + '…' : s; }
+        function fbItemHtml(it, idx) {
+          return '<div class="fb-item">' +
+            '<strong>' + (idx + 1) + '. [' + esc(it.type || '反馈') + '] ' + esc(truncateText(it.content, 120)) + '</strong>' +
+            '<div style="color:var(--text-dim);font-size:13px;margin-top:4px;">' + esc(it.date || '') + '</div>' +
+            '<div style="margin-top:8px;"><strong>官方回复：</strong>' + esc(it.reply || '') + '</div>' +
+            '</div>';
+        }
+        function fbRender() {
+          var total = items.length;
+          var pages = Math.max(1, Math.ceil(total / fbSize));
+          if (fbPage > pages) fbPage = pages;
+          if (fbPage < 1) fbPage = 1;
+          var start = (fbPage - 1) * fbSize;
+          var slice = items.slice(start, start + fbSize);
+          var html = slice.map(function (it, i) { return fbItemHtml(it, start + i); }).join('');
+          html += '<div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:4px;color:var(--text-dim);font-size:13px;">' +
+            '<span>当前显示第 ' + (total ? start + 1 : 0) + ' - ' + (start + slice.length) + ' 条 · 共 ' + total + ' 条</span>' +
+            '<label style="display:inline-flex;align-items:center;gap:6px;">每页显示' +
+            '<input type="number" id="fbPageSize" min="1" max="100" value="' + fbSize + '" style="width:64px;background:var(--bg,#111827);color:var(--text,#e5e9f0);border:1px solid var(--border,#2a3242);border-radius:6px;padding:2px 6px;"></label>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="fbPrev" ' + (fbPage <= 1 ? 'disabled' : '') + '>‹ 上一页</button>' +
+            '<span>第 ' + fbPage + ' / ' + pages + ' 页</span>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="fbNext" ' + (fbPage >= pages ? 'disabled' : '') + '>下一页 ›</button>' +
+            '</div>';
+          box.innerHTML = html;
+          var sizeInput = document.getElementById('fbPageSize');
+          sizeInput.addEventListener('change', function () {
+            var v = parseInt(sizeInput.value, 10);
+            if (isNaN(v) || v < 1) v = 1;
+            if (v > 100) v = 100;
+            sizeInput.value = v;
+            fbSize = v;
+            fbPage = 1;
+            fbRender();
+          });
+          document.getElementById('fbPrev').addEventListener('click', function () {
+            if (fbPage > 1) { fbPage--; fbRender(); }
+          });
+          document.getElementById('fbNext').addEventListener('click', function () {
+            if (fbPage < Math.ceil(items.length / fbSize)) { fbPage++; fbRender(); }
+          });
+        }
+        fbRender();
+      })
+      .catch(function () { box.innerHTML = '<p class="section-desc" style="margin:0;">反馈列表加载失败，请稍后刷新。</p>'; });
+  })();
+  </script>
+<script>
+/* FILEDL-CARDS：从 SHA256SUMS.txt 填充卡片 SHA256 + 复制按钮 */
+(function () {
+  function fill(sums) {
+    var map = {};
+    sums.split(/\r?\n/).forEach(function (line) {
+      var m = line.match(/^([0-9a-fA-F]{64})\s+\*?(.+)$/);
+      if (m) map[m[2].trim()] = m[1].toLowerCase();
+    });
+    document.querySelectorAll('.sha-box code[data-sha]').forEach(function (el) {
+      var f = el.getAttribute('data-sha');
+      var v = map[f];
+      if (v) {
+        el.textContent = 'SHA256: ' + v;
+        var btn = el.parentElement.querySelector('.copy-btn');
+        if (btn) btn.setAttribute('data-copy', v);
+      } else {
+        el.textContent = 'SHA256: 清单中未包含 ' + f;
+      }
+    });
+  }
+  fetch('downloads/SHA256SUMS.txt', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(fill)
+    .catch(function () {
+      document.querySelectorAll('.sha-box code[data-sha]').forEach(function (el) {
+        el.textContent = 'SHA256: 暂不可用（清单加载失败，可下载 SHA256SUMS.txt 比对）';
+      });
+    });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.copy-btn[data-copy]');
+    if (!btn) return;
+    var v = btn.getAttribute('data-copy');
+    function done() {
+      var old = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      setTimeout(function () { btn.textContent = old; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(v).then(done, done);
+    } else {
+      var t = document.createElement('textarea');
+      t.value = v; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(t); done();
+    }
+  });
+})();
+</script>
+<script>
+/* R-20261119-007 签名 Token 中转下载：页面不再出现真实文件 URL。
+   点击下载 → 1) 请求 api/download/ticket.php 归因票据（沿用 R-20261118-001，zip 注入 ticket.id；
+   失败静默降级为无票据）→ 2) POST api/download/token.php { file, ticket } 换取
+   /api/download?token=... → 3) 跳转 token 下载（服务端 HMAC+滑动窗口+IP 绑定+并发记账，
+   流式转发，不 302 暴露真实 URL）。任何失败仅在按钮上提示，绝不回退直链。 */
+(function () {
+  var links = document.querySelectorAll('a[data-dl]');
+  function fail(a) {
+    var old = a.textContent;
+    a.textContent = '⚠ 获取失败，请稍后再试';
+    a.disabled = true;
+    setTimeout(function () { a.textContent = old; a.disabled = false; }, 2500);
+  }
+  links.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (a.disabled) return;
+      var file = a.getAttribute('data-dl');
+      var doToken = function (ticket) {
+        fetch('api/download/token.php', { method: 'POST', cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: file, ticket: ticket || '' }) })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (j) {
+            if (!j || !j.ok || !j.url || String(j.url).indexOf('/api/download?token=') !== 0) throw new Error('bad token');
+            window.location.href = j.url;
+          })
+          .catch(function () { fail(a); /* token 失败不回退直链（页面无真实 URL） */ });
+      };
+      fetch('api/download/ticket.php', { method: 'POST', cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (j) {
+          if (!j || !j.ok || !j.ticket_id || !/^[0-9a-f]{16,64}$/.test(j.ticket_id)) throw new Error('bad ticket');
+          try { localStorage.setItem('easyrdpTicketId', j.ticket_id); } catch (err) { /* 隐私模式静默 */ }
+          doToken(j.ticket_id);
+        })
+        .catch(function () { doToken(''); /* 票据失败静默降级：无票据 token 下载 */ });
+    });
+  });
+})();
+</script>
+</body>
+</html>

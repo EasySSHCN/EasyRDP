@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>端口敲门 — EasyRDP 用户手册</title>
+  <meta name="description" content="EasyRDP 用户级操作手册：端口敲门（连接前命令钩子 + knockd 序列敲门 + fwknop SPA）的入口、参数说明与典型用法。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/manual/knock.html" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="../index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.4.3</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="../features.html">功能</a>
+        <a href="../download.html">下载</a>
+        <a href="../docs.html">文档</a>
+        <a href="index.html">操作手册</a>
+        <a href="../changelog.html">更新日志</a>
+        <a href="../faq.html">FAQ</a>
+        <a href="../gw-admin.html">云网关用户服务台</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container doc-layout">
+    <aside class="doc-toc">
+      <h4>操作手册目录</h4>
+      <a href="index.html">手册总目录</a>
+      <a href="connections.html">新建连接</a>
+      <a href="gateway.html">网关接入</a>
+      <a href="knock.html">端口敲门</a>
+      <a href="settings.html">设置面板</a>
+      <a href="feedback.html">使用反馈</a>
+      <a href="import-rdp.html">导入 .rdp</a>
+      <a href="groups.html">分组管理</a>
+      <a href="export.html">导出 .rdp</a>
+      <a href="export-json.html">导出 JSON</a>
+      <a href="dr-package.html">灾备包</a>
+      <a href="import-json.html">导入 JSON</a>
+      <a href="templates.html">模板库</a>
+      <a href="fullscreen.html">会话全屏</a>
+      <a href="win-key.html">发送 Win 键</a>
+      <a href="screenshot.html">一键截图</a>
+      <a href="disconnect.html">断开会话</a>
+    </aside>
+    <article class="doc-content">
+      <h1>端口敲门 <span style="font-size:0.7em;color:var(--text-2,#8b90a3)">（v0.5.0 新增 · 仅客户端）</span></h1>
+      <p>
+        服务器用 knockd / fwknop 做「端口敲门」防护时，3389 默认被防火墙关闭，
+        只有先发出正确敲门包 / SPA 包才会临时放行。EasyRDP 在连接前自动完成敲门，
+        无需手工敲完再连。<strong>服务器没开敲门时无需配置本区。</strong>
+      </p>
+      <h2 id="entry">功能入口</h2>
+      <p>「＋ 新建连接」或编辑已有连接 → 弹窗内展开「<strong>高级 / 端口敲门</strong>」折叠区。</p>
+      <h2 id="params">参数说明</h2>
+      <ul>
+        <li><strong>连接前命令（钩子）</strong>：RDP 连接前执行的本机命令（如 <code>rasdial MyVPN</code> 先拨 VPN）。超时 15 秒、退出码非 0 即中止连接并提示；命令原样执行，不做拼接。</li>
+        <li><strong>启用端口敲门</strong>：勾选后 RDP 连接前先敲门，未通过即中止并提示分类原因（敲门未通过 / 密钥无效 / 服务不可达）。</li>
+        <li><strong>敲门类型 · 序列敲门（knockd）</strong>：
+          <ul>
+            <li><em>敲门端口序列</em>：按发送顺序填端口，如 <code>7000,8000,9000</code>（注意与 knockd.conf 中 sequence 的「敲开顺序」相反——conf 里最后一个端口在这里最后发，可直接用导入功能自动还原）；</li>
+            <li><em>序列协议</em>：UDP 包（0~8 字节随机负载）或 TCP SYN 即断；</li>
+            <li><em>序列总时限 / 相邻包间隔</em>：对应 knockd.conf 的 <code>seq_timeout</code> 与发包节奏，默认 10 秒 / 150ms。</li>
+          </ul>
+        </li>
+        <li><strong>敲门类型 · 单包授权 SPA（fwknop）</strong>：
+          <ul>
+            <li><em>SPA 端口（UDP）</em>：fwknopd 监听端口，默认 <code>62201</code>（对应 <code>--udp-server -p</code>）；</li>
+            <li><em>开门有效期 fwTimeout</em>：放行规则保持秒数，默认 30；</li>
+            <li><em>SPA 加密密钥 / HMAC 密钥</em>：fwknop 原生裸密钥语义——服务器 <code>access.conf</code> 的 KEY / HMAC_KEY 填什么明文，这里就填同一明文；「随机生成」产出 32 字节 CSPRNG 密钥，保存后本机加密存储、不回显明文。SPA 包由 fwknop 官方 libfko 库构造（Rijndael-256 + HMAC-SHA256），与原生 fwknopd 逐字节互通。</li>
+          </ul>
+        </li>
+        <li><strong>开门端口</strong>：敲门成功后要放行的端口，默认 <code>tcp/3389</code>，多个逗号分隔（对应 fwknop OPEN_PORTS）。</li>
+        <li><strong>从 knockd.conf 导入</strong>：把服务器 <code>/etc/knockd.conf</code> 内容粘贴进来点「解析并填充」，sequence 倒序还原发送顺序、seq_timeout 自动带入。</li>
+      </ul>
+      <div class="callout"><strong>小贴士</strong>：敲门结果与失败原因会写入客户端 debug 日志（含真实 ws/wss scheme 的回环桥日志同管线）；连接重试不会重复敲门（短时间去重窗口）。SPA 密钥与网关凭据一样受 DPAPI（Windows）/ 密钥文件 + AES-256-GCM（Linux）保护，模板库发布与导出时自动剥离。</div>
+      <h2 id="usage">典型用法（fwknop 为例）</h2>
+      <ol>
+        <li>服务器确认 <code>fwknopd --udp-server -p 62201</code> 运行中，access.conf 配好 KEY / HMAC_KEY 与 <code>OPEN_PORTS tcp/3389</code>；</li>
+        <li>新建连接填好主机 / 端口 / 凭据；</li>
+        <li>展开「高级 / 端口敲门」→ 勾选「启用端口敲门」，类型选「单包授权 SPA」；</li>
+        <li>SPA 端口填 62201，密钥粘贴 / 随机生成后同步写入服务器 access.conf；</li>
+        <li>点连接：客户端先发 SPA 包 → 防火墙临时放行 3389 → RDP 直连目标机；</li>
+        <li>若提示「敲门未通过 / 密钥无效 / 服务不可达」，按分类核对端口、密钥与 fwknopd 状态。</li>
+      </ol>
+      <p>相关页面：<a href="index.html">操作手册总目录</a> · <a href="connections.html">新建连接</a> · <a href="gateway.html">网关接入</a> · <a href="../faq.html">FAQ</a></p>
+    </article>
+  </div>
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="../index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="../index.html">首页</a>
+          <a href="../features.html">功能介绍</a>
+          <a href="../download.html">下载</a>
+          <a href="../changelog.html">更新日志</a>
+          <a href="../docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="../gw-admin.html">云网关用户服务台</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="../docs.html">JSON Profile 规范</a>
+          <a href="../migrate.html">迁移指南</a>
+          <a href="../compare.html">产品对比</a>
+          <a href="../faq.html">常见问题</a>
+          <a href="../security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="../contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="../license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+  <script src="../assets/js/main.js?v=25"></script>
+</body>
+</html>
