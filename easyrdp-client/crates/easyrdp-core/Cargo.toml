@@ -1,0 +1,41 @@
+[package]
+name = "easyrdp-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "EasyRDP core: session profile model, .rdp import/export"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+encoding_rs.workspace = true
+# 模板包完整性校验（F2-V2 R-20261118-014）：.erdp-template sha256
+sha2 = "0.10"
+
+# 端口敲门（knockd 序列敲门 / fwknop SPA 单包授权）客户端支持。
+# R-20261122-SPA：SPA 包构造已切换为 fwknop 官方 C 库 libfko（vendor
+# vendor/libfko-2.6.10，来源 fwknop 2.6.10，WSL /tmp/fwknop-2.6.10 与
+# Debian 上游同源），经 build.rs + cc 直接编入二进制；Rust 侧仅做最小
+# FFI 绑定（src/fko.rs），与原生 fwknopd 逐字节互通。旧的纯 Rust AES
+# 自实现已随自研 SPA 格式一并移除（该格式与 fwknop 不互通，见 knock.rs
+# 模块注释的历史说明）。随机数由 libfko 内部生成。
+base64 = "0.23"
+rand = "0.8"
+
+[build-dependencies]
+# vendor libfko 2.6.10 的 C 编译（见 build.rs）。
+cc = "1"
+
+# 密码保护（crates/easyrdp-core/src/secret.rs）：
+# Windows 用 DPAPI（CryptProtectData/CryptUnprotectData）加密后 base64 存储；
+# 非 Windows 用本机 0600 密钥文件 + AES-256-GCM 加密后 base64 存储（enc: 前缀）。
+[target.'cfg(windows)'.dependencies]
+base64 = "0.23"
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security_Cryptography",
+] }
+
+[target.'cfg(not(windows))'.dependencies]
+aes-gcm = { version = "0.10", default-features = false, features = ["aes", "alloc"] }

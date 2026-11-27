@@ -1,0 +1,10 @@
+secrets-vault/
+signing/
+reqpool/
+*.enc
+target/
+dist/
+
+# R-网关审计：管理密钥文件绝不入库
+deploy-gateway/keys.php
+deploy-gateway/easyrdp-gateway.exe
