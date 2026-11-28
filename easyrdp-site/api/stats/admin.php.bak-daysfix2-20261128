@@ -1,0 +1,372 @@
+<?php
+/**
+ * POST /api/stats/admin.php —— 客户端统计后台管理接口（EasyRDP · 📊客户端统计标签页）
+ * （对齐 EasySSH api/stats/admin.php 动作集；鉴权复用 api/feedback 的 admin token）
+ *
+ * 数据源 = api/stats/common.php 的 st_rows_merged()：
+ *   遥测设备（client-db.json）+ 反馈系统信息伪设备（"fb:<反馈id>"，只读聚合）。
+ *
+ * 动作（JSON body）：
+ *   { action:"summary", user, token }                    → { ok, summary:{...看板聚合...} }
+ *   { action:"list",    user, token, page?, pageSize? }  → { ok, rows:[...], total }
+ *   { action:"log",     user, token, page?, pageSize? }  → { ok, rows:[{t,id,v,os,cpu,...}], total } 最近提交动态
+ *   { action:"active_list", user, token, window, page?, pageSize? } → { ok, rows, total } 顶部卡片明细
+ *   { action:"bucket_list", user, token, bucket, value, page?, pageSize? } → { ok, rows, total } 分布维度明细
+ *   { action:"device",  user, token, anonId }            → { ok, row } 单台设备详细记录
+ *   { action:"device_log", user, token, anonId, page?, pageSize? } → { ok, rows:[{t,v}], total } 单台上报流水
+ *   { action:"devices_by_ip",  user, token, ip }         → { ok, rows, total } 掩码 IP 前缀检索
+ *   { action:"devices_by_region", user, token, region }  → { ok, rows, total } 归属地/掩码检索
+ *   { action:"devices_by_time", user, token, ts }        → { ok, rows:[{t,v,id,device}], total } 同秒动态
+ *   { action:"visit_link", user, token, visitId }        → { ok, row } 该次访客访问详情（联查 visit-db）
+ *   { action:"delete",  user, token, anonId | anonIds:[...] } → { ok, deleted } 删除遥测设备记录（fb: 伪设备不可删）
+ *   { action:"update",  user, token, anonId, fields:{...} }  → { ok } 编辑遥测设备统计字段（白名单内）
+ *   { action:"purge",   user, token }                    → { ok } 清空遥测库（反馈聚合不受影响）
+ */
+require __DIR__ . '/common.php';
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') st_fail('仅支持 POST', 405);
+$in = json_decode(file_get_contents('php://input'), true);
+if (!is_array($in)) st_fail('请求体必须是 JSON');
+$action = (string)($in['action'] ?? '');
+$user = (string)($in['user'] ?? '');
+$token = (string)($in['token'] ?? '');
+
+if (!fb_check_token($user, $token)) st_fail('未登录或登录已过期，请重新登录', 401);
+
+$db = st_db_load(ST_CLIENT_DB, 'client');
+$rows = st_rows_merged(); // 合并视图（已按 lastSeen 倒序）
+
+/** 为一行补齐展示用完整字段 */
+function st_row_full($db, array $r) {
+  if (($r['src'] ?? '') === 'feedback') {
+    $r['activity'] = ['days30' => ((int)$r['lastSeen'] > st_now_ms() - 30 * 24 * 3600 * 1000) ? 1 : 0,
+      'streak' => 0, 'total' => 1];
+    $r['readonly'] = true; // 反馈聚合伪设备：只读（不可删/不可编辑）
+    return $r;
+  }
+  $r['activity'] = st_activity_of($db, (string)$r['anonId']);
+  return $r;
+}
+
+/** 提交流水（倒序分页，联查设备档案补充展示字段；并入反馈系统信息提交，EasyRDP 扩展） */
+function st_log_recent($db, $rows, $page, $pageSize) {
+  $log = [];
+  foreach (array_reverse(is_array($db['log'] ?? null) ? $db['log'] : []) as $r) {
+    if (!is_array($r)) continue;
+    $id = (string)($r['id'] ?? '');
+    $row = null;
+    foreach ($rows as $x) { if ((string)$x['anonId'] === $id) { $row = $x; break; } }
+    $f = is_array($row) ? $row : [];
+    $log[] = array_merge($r, [
+      'os' => (string)($f['操作系统'] ?? ''),
+      'arch' => (string)($f['系统架构'] ?? ''),
+      'cpu' => (string)($f['CPU'] ?? ''),
+      'mem' => (string)($f['内存'] ?? ''),
+      'disk' => (string)($f['磁盘容量'] ?? ''),
+      'gpu' => (string)($f['显卡'] ?? ''),
+      'lang' => (string)($f['系统语言代码'] ?? ''),
+      'region' => (string)($f['地域'] ?? ''),
+      'clientType' => (string)($f['客户端类型'] ?? ''),
+      'reports' => $row ? (int)($row['reports'] ?? 1) : 0,
+      'lastSeen' => $row ? (int)($row['lastSeen'] ?? 0) : 0,
+      'activityTotal' => $row ? (int)(st_activity_of($db, $id)['total'] ?? 0) : 0,
+      'origin' => $row ? (is_array($row['origin'] ?? null) ? $row['origin'] : null) : null, // R-20261121-001 提交动态联查设备来源归因（含回溯归因）
+      'src' => 'telemetry',
+    ]);
+  }
+  // 反馈系统信息提交流水（并入展示，标注来源；遥测流水无此记录）
+  $fb = fb_db_load();
+  foreach ($fb['items'] as $it) {
+    if (!is_array($it) || !is_array($it['systemInfo'] ?? null) || !count($it['systemInfo'])) continue;
+    $f = $it['systemInfo'];
+    $log[] = ['t' => (int)($it['ts'] ?? 0), 'id' => 'fb:' . (string)($it['id'] ?? ''),
+      'v' => (string)($it['appVersion'] ?? ''), 'src' => 'feedback',
+      'os' => (string)($f['操作系统'] ?? ''), 'arch' => (string)($f['系统架构'] ?? ''),
+      'cpu' => (string)($f['CPU'] ?? ''), 'mem' => (string)($f['内存'] ?? ''),
+      'disk' => (string)($f['磁盘容量'] ?? ''), 'gpu' => (string)($f['显卡'] ?? ''),
+      'lang' => (string)($f['系统语言代码'] ?? ''), 'region' => (string)($f['地域'] ?? ''),
+      'clientType' => (string)($f['客户端类型'] ?? ''), 'reports' => 1,
+      'lastSeen' => (int)($it['ts'] ?? 0), 'activityTotal' => 1, 'origin' => null];
+  }
+  usort($log, function ($a, $b) { return (int)($b['t'] ?? 0) <=> (int)($a['t'] ?? 0); });
+  $total = count($log);
+  return ['rows' => array_slice($log, ($page - 1) * $pageSize, $pageSize), 'total' => $total];
+}
+
+/** 看板聚合（EasySSH st_summary 同构，基于合并行）：卡片 + TOP5 分布 + 全量桶 + 30 天趋势 */
+function st_summary_data($db, $rows) {
+  $now = st_now_ms();
+  $weekAgo = $now - 7 * 24 * 3600 * 1000;
+  $dayAgo  = $now - 24 * 3600 * 1000;
+  $total = 0; $week = 0; $day = 0;
+  $byVer = []; $byOs = []; $byCpu = []; $byMem = []; $byDisk = []; $byGpu = []; $byLang = []; $byRegion = []; $bySrc = [];
+  foreach ($rows as $r) {
+    $total++;
+    $last = (int)($r['lastSeen'] ?? 0);
+    if ($last > $weekAgo) $week++;
+    if ($last > $dayAgo) $day++;
+    $inc = function (array &$bucket, $key) { if ($key !== '') $bucket[$key] = ($bucket[$key] ?? 0) + 1; };
+    $os = trim((string)($r['操作系统'] ?? ''));
+    $inc($byOs, preg_replace('/\(Build [^)]*\)/', '', $os));
+    $inc($byVer, trim((string)($r['软件版本'] ?? '')));
+    $inc($byCpu, trim((string)($r['CPU'] ?? '')));
+    $inc($byMem, trim((string)($r['内存'] ?? '')));
+    $inc($byDisk, trim((string)($r['磁盘容量'] ?? '')));
+    $inc($byGpu, trim((string)($r['显卡'] ?? '')));
+    $inc($byLang, trim((string)($r['系统语言代码'] ?? '')));
+    $inc($byRegion, trim((string)($r['地域'] ?? '')) ?: '未知');
+    // 来源分布：EasyRDP 设备档案暂无 origin 归因数据，全部计入 unknown（挂接点已保留）
+    $inc($bySrc, (string)(is_array($r['origin'] ?? null) ? ($r['origin']['src'] ?? 'unknown') : 'unknown'));
+  }
+  $top = function ($bucket, $n = 5) {
+    arsort($bucket);
+    return array_slice($bucket, 0, $n, true);
+  };
+  $sortFull = function ($bucket) { arsort($bucket); return $bucket; };
+  // 30 天趋势：遥测按 activity 每日去重设备数（排除孤儿流水）；反馈按每日提交条数
+  $dailyDevices = [];
+  foreach (($db['activity'] ?? []) as $anonId => $dates) {
+    if (!is_array($dates)) continue;
+    $known = false;
+    foreach ($rows as $x) { if ((string)$x['anonId'] === (string)$anonId) { $known = true; break; } }
+    if (!$known) continue; // 排除孤儿活跃流水
+    foreach ($dates as $k => $v) {
+      if (strtotime((string)$k) !== false) $dailyDevices[(string)$k] = ($dailyDevices[(string)$k] ?? 0) + 1;
+    }
+  }
+  foreach ($rows as $r) {
+    if (($r['src'] ?? '') !== 'feedback') continue;
+    $d = date('Y-m-d', (int)((int)$r['lastSeen'] / 1000));
+    $dailyDevices[$d] = ($dailyDevices[$d] ?? 0) + 1;
+  }
+  $trend = [];
+  // TOP5-DAYS 2026-11-28：累计活跃天数维度（每设备上报历史去重日期数，TOP5 卡 + 全量桶）
+  $daysMap = st_active_days_map($db, $rows);
+  for ($i = 29; $i >= 0; $i--) {
+    $d = date('Y-m-d', (int)(($now - $i * 24 * 3600 * 1000) / 1000));
+    $trend[] = ['date' => $d, 'count' => (int)($dailyDevices[$d] ?? 0)];
+  }
+  return [
+    'total' => $total, 'weekActive' => $week, 'dayActive' => $day,
+    'byVersion' => $top($byVer), 'byOs' => $top($byOs), 'byCpu' => $top($byCpu),
+    'byMem' => $top($byMem), 'byDisk' => $top($byDisk), 'byGpu' => $top($byGpu), 'byLang' => $top($byLang),
+    'byRegion' => $top($byRegion), 'bySrc' => $top($bySrc), 'byActiveDays' => $top($daysMap), 'trend' => $trend,
+    // 全量桶（供后台卡片点击弹出的详细列表使用，卡片本身只展示 TOP5）
+    'full' => [
+      'byVersion' => $sortFull($byVer), 'byOs' => $sortFull($byOs), 'byCpu' => $sortFull($byCpu),
+      'byMem' => $sortFull($byMem), 'byDisk' => $sortFull($byDisk), 'byGpu' => $sortFull($byGpu), 'byLang' => $sortFull($byLang),
+      'byRegion' => $sortFull($byRegion), 'bySrc' => $sortFull($bySrc), 'byActiveDays' => $sortFull($daysMap),
+    ],
+  ];
+}
+
+switch ($action) {
+  case 'summary':
+    st_json_out(['ok' => true, 'summary' => st_summary_data($db, $rows)]);
+
+  case 'list': {
+    $page = max(1, (int)($in['page'] ?? 1));
+    $pageSize = min(200, max(1, (int)($in['pageSize'] ?? 20)));
+    $total = count($rows);
+    $slice = array_slice($rows, ($page - 1) * $pageSize, $pageSize);
+    $out = [];
+    foreach ($slice as $r) $out[] = st_row_full($db, $r);
+    st_json_out(['ok' => true, 'rows' => $out, 'total' => $total]);
+  }
+
+  case 'log': {
+    $page = max(1, (int)($in['page'] ?? 1));
+    $pageSize = min(200, max(1, (int)($in['pageSize'] ?? 20)));
+    $r = st_log_recent($db, $rows, $page, $pageSize);
+    st_json_out(['ok' => true, 'rows' => $r['rows'], 'total' => $r['total']]);
+  }
+
+  case 'active_list': {
+    // 顶部统计卡片明细——window=all 累计设备/week 近7天/day 近24小时，倒序分页
+    $window = (string)($in['window'] ?? 'all');
+    if (!in_array($window, ['all', 'week', 'day'], true)) st_fail('窗口非法');
+    $page = max(1, (int)($in['page'] ?? 1));
+    $pageSize = min(200, max(1, (int)($in['pageSize'] ?? 10)));
+    $spans = ['week' => 7 * 24 * 3600 * 1000, 'day' => 24 * 3600 * 1000];
+    $cut = isset($spans[$window]) ? st_now_ms() - $spans[$window] : 0;
+    $hits = [];
+    foreach ($rows as $r) {
+      if ((int)($r['lastSeen'] ?? 0) < $cut) continue;
+      $hits[] = st_row_full($db, $r);
+    }
+    usort($hits, function ($a, $b) { return (int)$b['lastSeen'] <=> (int)$a['lastSeen']; });
+    $total = count($hits);
+    st_json_out(['ok' => true, 'rows' => array_slice($hits, ($page - 1) * $pageSize, $pageSize), 'total' => $total]);
+  }
+
+  case 'bucket_list': {
+    // 分布维度 → 统计字段映射（与 summary 聚合口径一致）
+    $fieldMap = [
+      'byVersion' => '软件版本', 'byOs' => '操作系统', 'byCpu' => 'CPU',
+      'byMem' => '内存', 'byDisk' => '磁盘容量', 'byGpu' => '显卡', 'byLang' => '系统语言代码', 'byRegion' => '地域',
+    ];
+    $bucket = (string)($in['bucket'] ?? '');
+    if ($bucket !== 'bySrc' && $bucket !== 'byActiveDays' && !isset($fieldMap[$bucket])) st_fail('维度非法');
+    $value = trim((string)($in['value'] ?? ''));
+    if ($value === '') st_fail('取值非法');
+    $page = max(1, (int)($in['page'] ?? 1));
+    $pageSize = min(200, max(1, (int)($in['pageSize'] ?? 10)));
+    $hits = [];
+    foreach ($rows as $r) {
+      if ($bucket === 'byActiveDays') {
+        // TOP5-DAYS：value = anonId，返回该设备明细（累计活跃天数卡片行点击联查）
+        if ((string)$r['anonId'] !== $value) continue;
+        $v = $value;
+      } elseif ($bucket === 'bySrc') {
+        $v = (string)(is_array($r['origin'] ?? null) ? ($r['origin']['src'] ?? 'unknown') : 'unknown');
+      } else {
+        $v = trim((string)($r[$fieldMap[$bucket]] ?? ''));
+        if ($bucket === 'byOs') $v = preg_replace('/\(Build [^)]*\)/', '', $v);
+        if ($bucket === 'byRegion' && $v === '') $v = '未知';
+      }
+      if ($v !== $value) continue;
+      $hits[] = st_row_full($db, $r);
+    }
+    usort($hits, function ($a, $b) { return (int)$b['lastSeen'] <=> (int)$a['lastSeen']; });
+    $total = count($hits);
+    st_json_out(['ok' => true, 'rows' => array_slice($hits, ($page - 1) * $pageSize, $pageSize), 'total' => $total]);
+  }
+
+  case 'device': {
+    // 单台设备详细记录（fb: 伪设备从反馈库取）
+    $id = (string)($in['anonId'] ?? '');
+    if ($id === '') st_fail('缺少 anonId');
+    foreach ($rows as $r) {
+      if ((string)$r['anonId'] !== $id) continue;
+      st_json_out(['ok' => true, 'row' => st_row_full($db, $r)]);
+    }
+    st_fail('记录不存在', 404);
+  }
+
+  case 'device_log': {
+    // 单台遥测设备的上报明细流水（来自全局提交流水，倒序分页；流水仅保留最新 ST_LOG_MAX 条）
+    $id = (string)($in['anonId'] ?? '');
+    if ($id === '') st_fail('缺少 anonId');
+    $page = max(1, (int)($in['page'] ?? 1));
+    $pageSize = min(200, max(1, (int)($in['pageSize'] ?? 20)));
+    $hits = array_reverse(array_values(array_filter($db['log'] ?? [], function ($e) use ($id) {
+      return is_array($e) && (($e['id'] ?? $e['anonId'] ?? '') === $id);
+    })));
+    $total = count($hits);
+    st_json_out(['ok' => true, 'rows' => array_slice($hits, ($page - 1) * $pageSize, $pageSize), 'total' => $total]);
+  }
+
+  case 'devices_by_ip': {
+    // 按掩码 IP 前缀（如 "183.164.x.x"）检索设备记录：匹配 fields['地域'] 中包含该前缀的所有设备
+    $ip = trim((string)($in['ip'] ?? ''));
+    if ($ip === '' || !preg_match('/^(\d{1,3}\.\d{1,3}\.x\.x|[0-9a-f:]+::\/32)$/', $ip)) st_fail('IP 前缀非法');
+    $hits = [];
+    foreach ($rows as $r) {
+      $region = trim((string)($r['地域'] ?? ''));
+      if ($region === '' || strpos($region, $ip) === false) continue;
+      $hits[] = st_row_full($db, $r);
+    }
+    usort($hits, function ($a, $b) { return (int)$b['lastSeen'] <=> (int)$a['lastSeen']; });
+    st_json_out(['ok' => true, 'rows' => $hits, 'total' => count($hits)]);
+  }
+
+  case 'devices_by_region': {
+    // 按地域标签检索：地域字段 = "掩码IP前缀"（EasyRDP 无归属地中文名，前缀即标签；前缀匹配兼容中文名形态）
+    $region = trim((string)($in['region'] ?? ''));
+    if ($region === '' || mb_strlen($region) > 100) st_fail('地域非法');
+    $hits = [];
+    foreach ($rows as $r) {
+      $v = trim((string)($r['地域'] ?? ''));
+      if ($v === '') continue;
+      // 形态1：地域以前缀开头（"中文名 掩码" 形态取中文名段）；形态2：地域整体/开头即为掩码
+      if ($v !== $region && strpos($v, $region . ' ') !== 0 && strpos($region, $v) !== 0) continue;
+      $hits[] = st_row_full($db, $r);
+    }
+    usort($hits, function ($a, $b) { return (int)$b['lastSeen'] <=> (int)$a['lastSeen']; });
+    st_json_out(['ok' => true, 'rows' => $hits, 'total' => count($hits)]);
+  }
+
+  case 'devices_by_time': {
+    // 按时间检索动态记录：同一秒内可能有多台上报，逐条返回 {t,v,id,device(完整记录,可能为null)}
+    $ts = (int)($in['ts'] ?? 0);
+    if ($ts <= 0) st_fail('时间戳非法');
+    $hits = [];
+    foreach (array_reverse($db['log'] ?? []) as $e) {
+      if (!is_array($e) || abs((int)($e['t'] ?? 0) - $ts) >= 1000) continue; // 同一秒内视为相同时间
+      $id = (string)($e['id'] ?? $e['anonId'] ?? '');
+      $device = null;
+      foreach ($rows as $r) {
+        if ((string)$r['anonId'] === $id) { $device = st_row_full($db, $r); break; }
+      }
+      $hits[] = ['t' => (int)($e['t'] ?? 0), 'v' => (string)($e['v'] ?? ''), 'anonId' => $id, 'device' => $device];
+    }
+    st_json_out(['ok' => true, 'rows' => $hits, 'total' => count($hits)]);
+  }
+
+  case 'visit_link': {
+    // 按访客流水 ID 查询该次访问详情（来源归因联查；EasyRDP 当前无 origin 数据，挂接点保留）
+    $vid = trim((string)($in['visitId'] ?? ''));
+    $fallbackIp = trim((string)($in['ip'] ?? ''));
+    $fallbackTs = (int)($in['ts'] ?? 0);
+    if ($vid === '' && ($fallbackIp === '' || $fallbackTs <= 0)) st_fail('缺少 visitId');
+    $vdb = st_db_load(ST_VISIT_DB, 'visit');
+    $row = null;
+    foreach ($vdb['recent'] as $r) {
+      if (!is_array($r)) continue;
+      if ($vid !== '' && (string)($r['id'] ?? '') === $vid) { $row = $r; break; }
+      if ($vid === '' && (string)($r['f'] ?? '') === $fallbackIp
+        && abs((int)($r['t'] ?? 0) - $fallbackTs) <= 10 * 60 * 1000) { $row = $r; break; }
+    }
+    if ($row === null) st_fail('访客记录不存在（流水仅保留最新 1000 条）', 404);
+    $row['region'] = st_region((string)($row['f'] ?? $row['ip'] ?? ''));
+    st_json_out(['ok' => true, 'row' => $row]);
+  }
+
+  case 'delete': {
+    // 支持单删（anonId）与批量删（anonIds 数组）；仅遥测设备可删（fb: 反馈聚合伪设备只读）
+    $ids = isset($in['anonIds']) && is_array($in['anonIds'])
+      ? array_values(array_filter(array_map('strval', $in['anonIds']), 'strlen'))
+      : [(string)($in['anonId'] ?? '')];
+    if (!count($ids)) st_fail('缺少 anonId');
+    $clients = is_array($db['clients'] ?? null) ? $db['clients'] : [];
+    foreach ($ids as $id) {
+      if (strpos($id, 'fb:') === 0) st_fail('反馈聚合记录为只读，不可删除: ' . $id, 403);
+      if (!isset($clients[$id])) st_fail('记录不存在: ' . $id, 404);
+    }
+    foreach ($ids as $id) {
+      unset($db['clients'][$id]);
+      unset($db['activity'][$id]); // 活跃流水随档案一并清理
+    }
+    st_db_save(ST_CLIENT_DB, $db);
+    st_json_out(['ok' => true, 'deleted' => count($ids)]);
+  }
+
+  case 'update': {
+    // 编辑遥测设备统计字段：仅允许白名单字段，值截断与上报入库同规则（fb: 伪设备只读）
+    $id = (string)($in['anonId'] ?? '');
+    if (strpos($id, 'fb:') === 0) st_fail('反馈聚合记录为只读，不可编辑', 403);
+    if (!isset($db['clients'][$id])) st_fail('记录不存在', 404);
+    $fields = (isset($in['fields']) && is_array($in['fields'])) ? $in['fields'] : [];
+    if (!count($fields)) st_fail('没有需要修改的字段');
+    $allowed = st_allowed_fields();
+    $cur = is_array($db['clients'][$id]['fields'] ?? null) ? $db['clients'][$id]['fields'] : [];
+    foreach ($fields as $k => $v) {
+      if (!in_array((string)$k, $allowed, true)) continue; // 白名单外字段忽略
+      $val = trim((string)$v);
+      if ($val === '') { unset($cur[(string)$k]); continue; } // 留空 = 清除该字段
+      if (mb_strlen($val) > ST_MAX_VALUE) continue;
+      $cur[(string)$k] = mb_substr($val, 0, ST_MAX_VALUE);
+    }
+    $db['clients'][$id]['fields'] = $cur;
+    st_db_save(ST_CLIENT_DB, $db);
+    st_json_out(['ok' => true]);
+  }
+
+  case 'purge':
+    // 清空遥测库（反馈系统信息聚合不受影响）
+    st_db_save(ST_CLIENT_DB, st_db_default('client'));
+    st_json_out(['ok' => true]);
+
+  default:
+    st_fail('未知动作');
+}

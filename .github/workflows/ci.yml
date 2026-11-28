@@ -1,0 +1,74 @@
+# EasyRDP CI workflow
+# 触发：push / PR 到 main 分支
+# 三平台矩阵：cargo test --workspace + 发布模式构建（不发布产物）。
+# 构建命令使用显式的
+#   cargo build --release -p easyrdp-app --features custom-protocol
+# custom-protocol 必须启用：否则 tauri 以 dev 模式编译，运行时会连 localhost:5173 白屏。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CLIENT_DIR: easyrdp-client
+  CARGO_TERM_COLOR: always
+  # Windows: MSVC 对 /Fo 传参有 D8050 命令行长度限制，vendor libfko 源经
+  # cc crate 落在仓库深路径时超出上限导致构建失败。约定统一使用短
+  # CARGO_TARGET_DIR（本地构建请用 C:\er-target），见 reqpool R-20261122-004。
+  CARGO_TARGET_DIR_WINDOWS: C:\er-target
+
+jobs:
+  test-and-build:
+    name: Test & Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-22.04]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use short CARGO_TARGET_DIR on Windows (MSVC D8050)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Add-Content $env:GITHUB_ENV "CARGO_TARGET_DIR=$env:CARGO_TARGET_DIR_WINDOWS"
+
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ env.CLIENT_DIR }}
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Run tests (workspace)
+        # --workspace 覆盖 easyrdp-core：其 build.rs 经 cc crate 用 gcc/cc
+        # 静态编译 vendor libfko-2.6.10（Linux 路径已由 WSL Ubuntu-22.04 验证）。
+        run: cargo test --workspace
+        working-directory: ${{ env.CLIENT_DIR }}
+
+      - name: Build release (custom-protocol enabled)
+        run: cargo build --release -p easyrdp-app --features custom-protocol
+        working-directory: ${{ env.CLIENT_DIR }}
