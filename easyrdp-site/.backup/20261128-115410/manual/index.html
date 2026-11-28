@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户操作手册总目录 — EasyRDP</title>
+  <meta name="description" content="EasyRDP 全部功能的用户级操作手册总目录：每个功能一页，含入口、参数、典型用法与界面示意。">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="canonical" href="https://easyrdp.cn/manual/index.html" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="../index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.4.3</span>
+      </a>
+      <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="../features.html">功能</a>
+        <a href="../download.html">下载</a>
+        <a href="../docs.html">文档</a>
+        <a href="index.html">操作手册</a>
+        <a href="../changelog.html">更新日志</a>
+        <a href="../faq.html">FAQ</a>
+        <a href="../gw-admin.html">云网关用户服务台</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container doc-layout">
+    <aside class="doc-toc">
+      <h4>操作手册目录</h4>
+      <a href="#toc">总目录</a>
+      <a href="#howto">怎么用本手册</a>
+    </aside>
+    <article class="doc-content">
+      <h1>用户操作手册</h1>
+      <p>
+        EasyRDP 客户端内每个功能按钮的悬停说明尾部都带有「详细手册 ↗」链接，
+        点击即用系统默认浏览器打开本目录下对应的手册页（URL 与客户端
+        <code>ui/tooltip.js</code> 的 MANUAL_LINKS 映射一一对应）。
+      </p>
+      <h2 id="toc">总目录</h2>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--border,#2a2e3d)">功能</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--border,#2a2e3d)">手册页</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--border,#2a2e3d)">客户端按钮</th></tr>
+        <tr><td style="padding:6px">新建连接 / 连接中心</td><td style="padding:6px"><a href="connections.html">connections.html</a></td><td style="padding:6px">＋ 新建连接</td></tr>
+        <tr><td style="padding:6px">网关接入（云网关中转）</td><td style="padding:6px"><a href="gateway.html">gateway.html</a></td><td style="padding:6px">新建连接 → 网关（可选）</td></tr>
+        <tr><td style="padding:6px">端口敲门（knockd/fwknop）</td><td style="padding:6px"><a href="knock.html">knock.html</a></td><td style="padding:6px">新建连接 → 高级 / 端口敲门</td></tr>
+        <tr><td style="padding:6px">设置面板</td><td style="padding:6px"><a href="settings.html">settings.html</a></td><td style="padding:6px">⚙ 设置</td></tr>
+        <tr><td style="padding:6px">使用反馈</td><td style="padding:6px"><a href="feedback.html">feedback.html</a></td><td style="padding:6px">反馈</td></tr>
+        <tr><td style="padding:6px">导入 .rdp</td><td style="padding:6px"><a href="import-rdp.html">import-rdp.html</a></td><td style="padding:6px">导入 .rdp</td></tr>
+        <tr><td style="padding:6px">分组管理</td><td style="padding:6px"><a href="groups.html">groups.html</a></td><td style="padding:6px">新建分组</td></tr>
+        <tr><td style="padding:6px">导出 .rdp</td><td style="padding:6px"><a href="export.html">export.html</a></td><td style="padding:6px">导出</td></tr>
+        <tr><td style="padding:6px">导出 JSON</td><td style="padding:6px"><a href="export-json.html">export-json.html</a></td><td style="padding:6px">导出</td></tr>
+        <tr><td style="padding:6px">导入 JSON</td><td style="padding:6px"><a href="import-json.html">import-json.html</a></td><td style="padding:6px">导入JSON</td></tr>
+        <tr><td style="padding:6px">灾备包</td><td style="padding:6px"><a href="dr-package.html">dr-package.html</a></td><td style="padding:6px">灾备包</td></tr>
+        <tr><td style="padding:6px">模板库</td><td style="padding:6px"><a href="templates.html">templates.html</a></td><td style="padding:6px">模板库</td></tr>
+        <tr><td style="padding:6px">会话全屏</td><td style="padding:6px"><a href="fullscreen.html">fullscreen.html</a></td><td style="padding:6px">全屏</td></tr>
+        <tr><td style="padding:6px">发送 Win 键</td><td style="padding:6px"><a href="win-key.html">win-key.html</a></td><td style="padding:6px">⊞ Win</td></tr>
+        <tr><td style="padding:6px">一键截图</td><td style="padding:6px"><a href="screenshot.html">screenshot.html</a></td><td style="padding:6px">截图</td></tr>
+        <tr><td style="padding:6px">断开会话</td><td style="padding:6px"><a href="disconnect.html">disconnect.html</a></td><td style="padding:6px">断开</td></tr>
+        <tr><td style="padding:6px">Git 同步排查（未检测到系统 git）</td><td style="padding:6px"><a href="git-sync-no-git.html">git-sync-no-git.html</a></td><td style="padding:6px">设置 → Git 同步</td></tr>
+      </table>
+      <h2 id="howto">怎么用本手册</h2>
+      <p>
+        每页固定四段：<strong>功能入口</strong>（按钮在界面的位置）、<strong>参数说明</strong>、
+        <strong>典型用法</strong>（分步操作）、<strong>界面示意</strong>（截图占位，逐步补齐）。
+        快速入门请先看 <a href="../docs.html#quickstart">使用文档 · 快速开始</a>。
+      </p>
+      <p>相关页面：<a href="../docs.html">使用文档</a> · <a href="../features.html">功能一览</a> · <a href="../faq.html">FAQ</a></p>
+    </article>
+  </div>
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="../index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>跨平台开源远程桌面客户端。Rust + Tauri 2 + FreeRDP，MIT 协议，让每一次远程连接都安全可控。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="../index.html">首页</a>
+          <a href="../features.html">功能介绍</a>
+          <a href="../download.html">下载</a>
+          <a href="../changelog.html">更新日志</a>
+          <a href="../docs.html">使用文档</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee 镜像</a>
+          <a href="../docs.html">JSON Profile 规范</a>
+          <a href="../migrate.html">迁移指南</a>
+          <a href="../compare.html">产品对比</a>
+
+          <a href="../faq.html">常见问题</a>
+          <a href="../security.html">安全策略</a>
+        </div>
+        <div class="footer-col">
+          <h4>社区</h4>
+          <a href="../contributing.html">参与贡献</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">讨论区</a>
+          <a href="../license.html">MIT 协议</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · 基于 MIT 协议开源</span>
+        <span>备案号占位：京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+  <script src="../assets/js/main.js?v=25"></script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration Guide: Moving from mstsc / Remmina / Royal TS / Sunlogin &amp; ToDesk to EasyRDP — EasyRDP</title>
+  <meta name="description" content="EasyRDP migration guide: import mstsc .rdp files (GUI, drag-and-drop, or CLI), local-only credentials, JSON Profiles, and migration scenario comparisons.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <meta property="og:title" content="Migration Guide: Moving from mstsc / Remmina / Royal TS / Sunlogin &amp; ToDesk to EasyRDP — EasyRDP">
+  <meta property="og:description" content="EasyRDP migration guide: one-click .rdp file import, credentials stay on your machine, versioned JSON Profiles, parallel sessions and bidirectional clipboard sync for a seamless switch.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://easyrdp.cn/en/migrate.html">
+  <meta property="og:site_name" content="EasyRDP">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Migration Guide: Moving from mstsc / Remmina / Royal TS / Sunlogin &amp; ToDesk to EasyRDP — EasyRDP">
+  <meta name="twitter:description" content="EasyRDP migration guide: one-click .rdp file import, credentials stay on your machine, versioned JSON Profiles, parallel sessions and bidirectional clipboard sync for a seamless switch.">
+  <style>
+    /* Migration guide body typography (MIGRATE-PAGE 20.6.21-18): uses only site :root variables
+       and existing classes; the content container narrows automatically on small screens,
+       code blocks / tables reuse the site's pre, table and .table-wrap styles */
+    .mig-wrap { max-width: 880px; margin: 0 auto; }
+    .mig-toc { margin-bottom: 40px; }
+    .mig-toc a { color: var(--accent); }
+    .mig-toc p { line-height: 2; }
+    .mig-prose h2 { font-size: 1.5rem; margin: 44px 0 16px; padding-top: 8px; }
+    .mig-prose h3 { font-size: 1.15rem; margin: 28px 0 12px; }
+    .mig-prose p, .mig-prose li { color: var(--text-dim); font-size: .95rem; line-height: 1.85; }
+    .mig-prose strong { color: var(--text); }
+    .mig-prose a { color: var(--accent); }
+    .mig-prose ul, .mig-prose ol { padding-left: 22px; margin: 12px 0; }
+    .mig-prose li { margin: 6px 0; }
+    .mig-prose table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .9rem; }
+    .mig-prose th, .mig-prose td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+    .mig-prose th { background: var(--bg-soft); color: var(--text); white-space: nowrap; }
+    .mig-prose td { color: var(--text-dim); }
+    .mig-prose code { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-family: var(--mono, Consolas, monospace); font-size: .86em; color: var(--text); }
+  </style>
+  <link rel="canonical" href="https://easyrdp.cn/migrate.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://easyrdp.cn/migrate.html" />
+  <link rel="alternate" hreflang="en" href="https://easyrdp.cn/en/migrate.html" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="logo" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+          <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+          <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        EasyRDP <span class="ver-badge" data-version>v0.4.2</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="download.html">Download</a>
+        <a href="docs.html">Docs</a>
+        <a href="migrate.html" class="active">Migration Guide</a>
+        <a href="compare.html">Compare</a>
+        <a href="changelog.html">Changelog</a>
+        <a href="faq.html">FAQ</a>
+        <a href="security.html">Security</a>
+                <a href="../gw-admin.html">Cloud Gateway Portal</a>
+<a class="lang-switch" href="../migrate.html" hreflang="zh-CN" lang="zh-CN" title="切换到中文">中文</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Migration Guide</h1>
+      <p class="section-desc">Move from mstsc / Remmina / Royal TS / Sunlogin · ToDesk to EasyRDP · importing a <code>.rdp</code> file carries your connection setup over, and passwords always stay on your machine only</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container mig-wrap">
+
+      <div class="card mig-toc">
+        <h3>Contents</h3>
+        <p>
+          <a href="#overview">Migration Overview</a> ·
+          <a href="#import">1. Importing .rdp Files (Session / Connection Setup Migration)</a> ·
+          <a href="#credentials">2. Credentials and Security Notes</a> ·
+          <a href="#scenarios">3. Common Migration Scenarios Side by Side</a> ·
+          <a href="#others">4. Notes on Migrating from Other RDP Tools</a> ·
+          <a href="#faq">5. Migration FAQ</a>
+        </p>
+      </div>
+
+      <div class="mig-prose">
+        <h2 id="overview">Migration Overview</h2>
+        <p>EasyRDP is built on <strong>Rust + Tauri 2 + FreeRDP</strong> and imports the standard <code>.rdp</code> files generated by mstsc (Windows' built-in Remote Desktop Connection) out of the box. It can also <strong>export existing connections back to <code>.rdp</code></strong> for full two-way interop with the Windows built-in client. Combined with <strong>JSON Profile import/export</strong>, <strong>tabbed parallel sessions</strong> and <strong>bidirectional clipboard sync (text + files)</strong>, most migration scenarios require no manual re-entry at all.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Original tool</th><th>How EasyRDP imports it</th><th>Are credentials migrated?</th></tr></thead>
+            <tbody>
+              <tr><td>mstsc (Windows Remote Desktop)</td><td>Import <code>.rdp</code> files directly (file picker / drag-and-drop / CLI, fields mapped automatically)</td><td>Host / port / username / resolution / redirection toggles; <strong>passwords are not migrated</strong></td></tr>
+              <tr><td>Remmina</td><td>Recreate Remmina connections one by one by matching fields; if a matching <code>.rdp</code> source file exists, import it directly</td><td>Host / port / username; passwords are not migrated</td></tr>
+              <tr><td>Royal TS</td><td>First use Royal TS's .rdp export feature to produce standard <code>.rdp</code> files, then import them into EasyRDP</td><td>Host / port / username; passwords are not migrated</td></tr>
+              <tr><td>Sunlogin / ToDesk and other China remote-control tools</td><td>No <code>.rdp</code> to export — enter host details in EasyRDP's "New Connection" dialog (the target machine must have Windows Remote Desktop enabled)</td><td>Host / port / username; passwords are not migrated</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>After import, each connection is a <strong>JSON Profile</strong> (stored in the local user config directory, so it can be versioned in Git), and <code>Ctrl+K</code> global search lets you switch between hosts at lightning speed. Enter the password once on first connection; to move connections in bulk, use JSON Profile import/export.</p>
+
+        <h2 id="import">1. Importing .rdp Files (Session / Connection Setup Migration)</h2>
+        <p>If you have been connecting to servers or colleagues' machines with mstsc, most of those connections are probably already saved as <code>.rdp</code> files (use "Save As" in mstsc to create one; they default to your Documents folder). EasyRDP offers three ways to import them:</p>
+        <h3>Method A: Import via the GUI (recommended)</h3>
+        <ol>
+          <li><strong>Open the import entry point</strong>: launch EasyRDP and click the <strong>file picker</strong> (system file dialog) in the "New Connection / Import" panel.</li>
+          <li><strong>Select the .rdp files</strong>: pick the <code>.rdp</code> files exported from mstsc (you can select multiple and import them one by one).</li>
+          <li><strong>Confirm the field mapping</strong>: on import, fields are mapped automatically into EasyRDP's JSON Profile (see the mapping table below) — no manual input needed.</li>
+          <li><strong>Add the credentials</strong>: enter the password when you first connect to that host and you're ready to go.</li>
+        </ol>
+        <h3>Method B: Drag into the connection hub</h3>
+        <p>Drag the <code>.rdp</code> file straight <strong>into the connection hub window</strong> and the import is done — fields are mapped automatically, exactly equivalent to Method A.</p>
+        <h3>Method C: Bulk import from the command line (linkdesk CLI)</h3>
+        <pre><span class="cm"># Single-file import: turn an mstsc .rdp file into a JSON Profile</span>
+linkdesk import office.rdp
+
+<span class="cm"># Bulk import every .rdp file in the current directory (--overwrite replaces same-name Profiles)</span>
+linkdesk import ./*.rdp --overwrite
+
+<span class="cm"># Export back to .rdp for use with the Windows built-in client</span>
+linkdesk export office-win11 -o office-win11.rdp</pre>
+        <h3>.rdp field mapping (excerpt)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>.rdp field</th><th>JSON Profile field</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>full address:s</code></td><td><code>host</code> + <code>port</code></td><td>host:port split automatically, default port 3389</td></tr>
+              <tr><td><code>username:s</code></td><td><code>auth.username</code></td><td>Username; the password does not travel with the .rdp file</td></tr>
+              <tr><td><code>desktopwidth / desktopheight</code></td><td><code>session.resolution</code></td><td>Initial resolution</td></tr>
+              <tr><td><code>redirectclipboard:i</code></td><td><code>redirection.clipboard</code></td><td>Clipboard redirection</td></tr>
+              <tr><td><code>drivestoredirect:s</code></td><td><code>redirection.drive</code></td><td>Drive redirection</td></tr>
+              <tr><td><code>redirectprinters:i</code></td><td><code>redirection.printer</code></td><td>Printer redirection</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">🟢 <strong>Two-way interop</strong>: importing is only the first step in one direction — EasyRDP can also export existing connections as standard <code>.rdp</code> files, so you can swap freely with colleagues who still use mstsc at zero cost.</div>
+        <div class="callout callout-warn">⚠️ The <code>password 51:b:</code> encrypted block in a <code>.rdp</code> file is only valid on the Windows machine that generated it (DPAPI-bound). EasyRDP <strong>does not import the password</strong> on import; you re-enter it at connection time.</div>
+
+        <h2 id="credentials">2. Credentials and Security Notes</h2>
+        <ul>
+          <li><strong>Passwords stay on your machine, never uploaded</strong>: in v0.3.4 passwords are saved only in the local user config directory and are <strong>never sent to any server</strong>; future versions will switch to system credential storage (DPAPI / Keychain / libsecret) with the Profile keeping only an encrypted reference (see the <a href="faq.html">FAQ</a>).</li>
+          <li><strong>JSON Profile import/export</strong>: every connection is a JSON Profile — field-based, versionable, ready for Git and code review; teams can share Profile templates and roll them out in bulk, making "configuration as code" real. Spec: <a href="docs.html#json-profile">Docs · JSON Profile</a>.</li>
+          <li><strong>Never bring plaintext config into a public repository</strong>: Profiles currently store credential-related fields (the username) in plaintext, while passwords stay on your machine only per the rules above. Before syncing the config directory to a cloud drive / private Git repo, make sure it contains nothing sensitive.</li>
+          <li><strong>Portable, registry-free</strong>: EasyRDP is a single-file portable build — no registry writes, no drivers, no resident server-side components. Delete the file and it is fully uninstalled, keeping the machine clean before and after migration.</li>
+          <li><strong>Verify your download</strong>: get installers from the <a href="download.html">download page</a> and compare hashes using the SHA256 verification instructions before running them.</li>
+        </ul>
+        <div class="callout">💡 <strong>For users migrating from mstsc</strong>: mstsc's default "Allow me to save credentials" hands your password to Windows Credential Manager. EasyRDP stores credentials in its own location that can be audited alongside Profiles — after switching, clean up the old system-saved credentials as needed.</div>
+
+        <h2 id="scenarios">3. Common Migration Scenarios Side by Side</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>What you did before</th><th>The EasyRDP equivalent</th><th>Migration notes</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>mstsc connection history</strong> (a pile of hosts in "Recent", addresses re-typed one by one)</td>
+                <td>Save historical connections as <code>.rdp</code> files and import them in bulk; <code>Ctrl+K</code> global search jumps straight to any host</td>
+                <td>The card-style connection hub manages all your hosts in one place, once and for all</td>
+              </tr>
+              <tr>
+                <td><strong>Multiple sessions / windows</strong> (juggling several mstsc windows)</td>
+                <td><strong>Tabbed parallel sessions</strong>: the main window stays visible, multiple remote desktops coexist, with active session counts and per-session quick disconnects</td>
+                <td>No more digging through the taskbar for scattered mstsc windows</td>
+              </tr>
+              <tr>
+                <td><strong>Clipboard copy &amp; paste</strong> (mstsc does text only; files must go through drive mapping)</td>
+                <td><strong>Bidirectional clipboard sync: text + files</strong>. Copy a file locally and paste it on the remote side directly; files copied remotely land in "Downloads\EasyRDP-Clipboard\" and are placed on your local clipboard automatically</td>
+                <td>≤128 files per transfer, ≤2GiB per file; if the remote rdpclip service isn't ready, a bottom-bar prompt walks you through restarting it</td>
+              </tr>
+              <tr>
+                <td><strong>Sending key combos</strong> (Ctrl+Alt+Del never reaches the remote desktop directly)</td>
+                <td><strong>Title-bar SAS dropdown menu</strong>: send Ctrl+Alt+Del (SAS) / Win / Win+D / Win+E / Win+R / Win+L / Ctrl+Shift+Esc (Task Manager) / Alt+Tab; you can also press the local <code>Ctrl+Alt+End</code> hotkey to send SAS; Settings' "⌨ Key Combos" supports custom combos that apply to all sessions</td>
+                <td>Locking the screen, changing passwords, opening Task Manager — no local relay needed</td>
+              </tr>
+              <tr>
+                <td><strong>Fullscreen / adaptive resolution</strong> (manually adjusting resolution on every window resize)</td>
+                <td><code>desktopwidth / desktopheight</code> imports as <code>session.resolution</code>; sessions support multi-monitor and color-depth configuration, with the FreeRDP stack adapting to the window</td>
+                <td>Resolution preferences from the .rdp file are preserved as-is and take effect on import</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="others">4. Notes on Migrating from Other RDP Tools</h2>
+        <ul>
+          <li><strong>Fully static FreeRDP linking — no server-side components to install</strong>: EasyRDP's Windows single-file build is fully statically linked (no DLL dependencies); just double-click to run. Nothing — services, drivers, resident components — is installed on the client side, and uninstalling means deleting the folder.</li>
+          <li><strong>Only the WebView2 Runtime is required</strong> (usually preinstalled on Win10/11; if missing, the runtime offers to install it automatically).</li>
+          <li><strong>Protocol capabilities come from standard RDP</strong>: RDP 8+ compression, multi-monitor, clipboard and drive/printer redirection are all provided by the FreeRDP stack — connecting to the same target machine as mstsc requires no extra server-side configuration.</li>
+          <li><strong>Test connectivity before connecting</strong>: v0.3.4 supports a <strong>pre-connection TCP reachability test</strong> (one click checks host reachability and port response and shows latency). When migrating your first batch of hosts, test them one by one to quickly catch mistyped addresses or ports.</li>
+          <li><strong>Migrating from Sunlogin / ToDesk</strong>: China remote-control tools use proprietary protocols and are not bound by Windows Remote Desktop rules. Once you switch to EasyRDP you use standard RDP, so confirm the target machine has "Remote Desktop" enabled (Settings → Remote Desktop), the account has remote logon rights, and the firewall allows port 3389.</li>
+          <li><strong>Gateway access (planned)</strong>: the JSON Profile already reserves a <code>gateway</code> field; the cloud gateway and policy matrix (fine-grained control of clipboard/drive/USB/printer redirection) are on the roadmap for future releases — see the <a href="features.html">Features page</a>.</li>
+        </ul>
+
+        <h2 id="faq">5. Migration FAQ</h2>
+        <h3>Q1: Why am I asked to re-enter the password after importing a .rdp file?</h3>
+        <p>The <code>password 51:b:</code> encrypted block inside a <code>.rdp</code> file is only valid on the Windows machine that generated it (DPAPI-bound). EasyRDP <strong>never imports the password</strong> and never migrates or uploads any password. Enter it once on first connection; it stays on your machine only.</p>
+        <h3>Q2: The imported connection fails — how do I troubleshoot?</h3>
+        <p>First run "Test Connection" on it for a TCP handshake: if it fails, the address/port is probably wrong, Remote Desktop isn't enabled on the target, or the firewall isn't allowing port 3389; if it succeeds but the session misbehaves, check whether the account has remote logon rights. You can also cross-check the imported field-mapping table to confirm the host:port split is correct.</p>
+        <h3>Q3: Are there limits on file clipboard transfers?</h3>
+        <p>≤128 files per transfer and ≤2GiB per file; directories are conveyed as empty-directory placeholders. Transfers use the standard CLIPRDR FileContents protocol and move only descriptors and content streams (paths never leave the wire). Remote→local files land automatically in "Downloads\EasyRDP-Clipboard\".</p>
+        <h3>Q4: Pasting a file does nothing?</h3>
+        <p>The remote session's rdpclip clipboard service may have stalled — every client fails in that state. EasyRDP shows a bottom-bar notice "remote clipboard service not ready (rdpclip not responding)" when no clipboard-ready signal arrives within 10 seconds of connecting; follow the prompt to restart the remote rdpclip.</p>
+        <h3>Q5: Can EasyRDP always reach hosts that Sunlogin / ToDesk can?</h3>
+        <p>Not necessarily. China remote-control tools don't rely on Windows Remote Desktop, while EasyRDP uses standard RDP: the target machine must have Remote Desktop enabled and port 3389 open. Home editions of Windows typically allow only a single concurrent session, and if the account isn't in the local Administrators group it must first be added to "Remote Desktop Users".</p>
+        <h3>Q6: How do I move all my connections to another computer?</h3>
+        <p>Use JSON Profile import/export: Profiles are plain JSON files, so you can copy the config directory directly or sync it via Git; for bulk scenarios, script the move with <code>linkdesk import / export</code>. See <a href="docs.html#cli">Docs · CLI Usage</a>.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="index.html">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="7" fill="#3b82f6"/>
+              <rect x="5" y="7" width="22" height="14" rx="2" stroke="#fff" stroke-width="2"/>
+              <path d="M16 14l6-4M16 14l-4-2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 25h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            EasyRDP
+          </a>
+          <p>A cross-platform open-source remote desktop client. Rust + Tauri 2 + FreeRDP, MIT licensed — making every remote connection safe and under your control.</p>
+          <p class="footer-lang">中文版: <a href="../migrate.html" hreflang="zh-CN" lang="zh-CN">简体中文</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="download.html">Download</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="docs.html">Documentation</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/EasySSHCN/EasyRDP" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://gitee.com/easyssh/EasyRDP" target="_blank" rel="noopener">Gitee Mirror</a>
+          <a href="docs.html">JSON Profile Spec</a>
+          <a href="migrate.html">Migration Guide</a>
+          <a href="compare.html">Compare</a>
+          <a href="faq.html">FAQ</a>
+          <a href="security.html">Security Policy</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="contributing.html">Contributing</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/issues" target="_blank" rel="noopener">Issue Tracker</a>
+          <a href="https://github.com/EasySSHCN/EasyRDP/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="license.html">MIT License</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> EasyRDP Contributors · Open source under the MIT License</span>
+        <span>ICP placeholder: 京ICP备XXXXXXXX号</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js?v=12"></script>
+  <script>(function(){try{var page='en/migrate';var payload=JSON.stringify({page:page,ref:document.referrer||'',ts:Date.now()});var url=new URL('../api/stats/visit.php',location.href).href;try{if(navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([payload],{type:'application/json'})))return;}catch(e){}try{fetch(url,{method:'POST',keepalive:true,body:payload,headers:{'Content-Type':'application/json'}}).catch(function(){});return;}catch(e){}try{var img=new Image();img.src=url+'?p='+encodeURIComponent(page)+'&r='+encodeURIComponent(document.referrer||'')+'&t='+Date.now();}catch(e){}}catch(e){}})();</script>
+</body>
+</html>
